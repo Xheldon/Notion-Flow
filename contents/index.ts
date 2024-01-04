@@ -1,7 +1,5 @@
 import { getPort } from "@plasmohq/messaging/port"
 
-import { EventBus } from '$utils';
-
 const AIGC_BLOCKS = [
     'header',
     'sub_header',
@@ -16,7 +14,7 @@ const AIGC_BLOCKS = [
 ];
 
 
-
+// Note: 接受来自 sidePanel 的消息
 chrome.runtime.onConnect.addListener(function (port) {
     port.onMessage.addListener(function (msg) {
         console.log('content 收到:', msg);
@@ -50,7 +48,7 @@ window.addEventListener('load', () => {
                         // TODO: 通知内容给 bg，bg 发送给 sidePanel
                         // cb(content);
                         var port = chrome.runtime.connect({name: "toc"});
-                        port.postMessage({type: "toc"});
+                        port.postMessage({type: "toc", content});
                     }
                 }
             } else {
@@ -58,9 +56,6 @@ window.addEventListener('load', () => {
                 // cb(window.getSelection()?.toString());
                 var port = chrome.runtime.connect({name: "toc"});
                 port.postMessage({type: 'toc', content: window.getSelection()?.toString()});
-                port.onMessage.addListener(function(msg) {
-                    console.log('牛逼，我不服');
-                });
             }
         }, 200);
     };

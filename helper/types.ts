@@ -51,7 +51,7 @@ export type AigcModel = 'ChatGPT' | 'Claude' | string;
 //     key?: string;
 // } | undefined>;
 
-export interface Aigc {
+export interface AigcData {
     key: {
         [k in AigcModel]: string;
     },
@@ -63,7 +63,7 @@ export interface Aigc {
 }
 
 export interface AigcState {
-    data: Aigc;
+    data: AigcData;
 }
 
 export interface Meta {

@@ -2,7 +2,7 @@
  * 工具函数，不要导入任何环境相关的依赖如 electron，因为它会被 main 和 render 同时使用
  */
 import reduxStore, { setConfig, setAigc } from '$store';
-import type { Config, TocItem, Meta, AigcState, Aigc } from '$types';
+import type { Config, TocItem, Meta, AigcState, AigcData } from '$types';
 
 // Note: callout/blockquote 颜色映射，其实 list 也能（其他可能也能？）设置颜色，但是没必要
 
@@ -63,7 +63,9 @@ const logToRenderer = (..._msgs: any[]) => {
 };
 
 const getConfig = async () => {
-    const config: Config = await window._toMain('config-get');
+    // const config: Config = await window._toMain('config-get');
+    // TODO: 从持久化存储中获取
+    const config = null;
     logToRenderer('get config:', config);
     if (!config || !config.notion) {
         const _config = {
@@ -90,10 +92,12 @@ const getConfig = async () => {
 };
 
 const getAigc = async () => {
-    const aigc: Aigc = await window._toMain('aigc-get');
+    // const aigc: Aigc = await window._toMain('aigc-get');
+    // TODO: 从持久化存储中获取
+    const aigc = null;
     logToRenderer('get aigc:', aigc);
     if (!aigc || (!aigc.model)) {
-        const _aigc: Aigc = {
+        const _aigc: AigcData = {
             key: {
                 ChatGPT: '',
             },
@@ -129,7 +133,7 @@ const notionGetToc = (cb: (type: 'toc' | 'selection', toc: TocItem[] | string) =
         return;
     }
     if (main) {
-        const container: Element[] = [...main.children];
+        const container: Element[] = Array.from(main.children);
         const getItem = (level: number, ele: Element) => {
             return {
                 level,
@@ -196,7 +200,7 @@ const notionSelectionChange = (cb: (content: string) => void) => {
         timer = setTimeout(() => {
             if (window.getSelection()?.type === 'None') {
                 // Note: 此时判断是否为块级选中
-                const selectBlock = [...document.querySelectorAll('.notion-selectable-halo')];
+                const selectBlock = Array.from(document.querySelectorAll('.notion-selectable-halo'));
                 if (selectBlock.length) {                        
                     // console.log('selectBlock:', selectBlock, target);
                     if (selectBlock.every(ele => {
@@ -508,22 +512,6 @@ const getISODateTime = (time: Date): string => {
 }
 
 
-const EventBus = {
-    types: [],
-    on: (type, cb) => {
-        console.log('来了:', type);
-        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-            if (message.type === type) {
-                // 处理消息
-                cb(message.data);
-            }
-        });
-    },
-    emit: (type, data) => {
-        console.log('走了:', type);
-        chrome.runtime.sendMessage({ type, data });
-    }
-};
 
 export {
     getConfig,
@@ -539,5 +527,4 @@ export {
     logToRenderer,
     getISODateTime,
     notionSelectionChange,
-    EventBus,
 }

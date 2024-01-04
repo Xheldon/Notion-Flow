@@ -22,6 +22,7 @@
     "plasmo": "0.84.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-redux": "^9.0.4",
     "react-sticky-box": "^2.0.5",
     "sharp": "^0.33.1",
     "tencentcloud-sdk-nodejs": "^4.0.773"
