@@ -3,9 +3,10 @@ import StickyBox from 'react-sticky-box';
 import { Provider } from 'react-redux';
 import { ConfigProvider } from 'antd';
 import type { State } from '$types';
-import { getConfig, getAigc, logToRenderer } from '$utils';
+import { getPublisherConfig, getAigcConfig, logToRenderer } from '$utils';
+import { Storage } from "@plasmohq/storage"
 
-import store from '$store';
+import store, { setToc } from '$store';
 import Toc from "$components/toc"
 import { Button, Collapse, Layout, Tabs, theme, Tooltip } from "antd"
 import React, { useCallback, useEffect } from "react"
@@ -15,20 +16,29 @@ import Publisher from '$components/publisher';
 import Aigc from '$components/aigc';
 
 import "./styles.css"
-
-// import { logToRenderer } from '$utils';
-
+ 
+const storage = new Storage()
+ 
+/* await storage.set("key", "value")
+const data = await storage.get("key") // "value"
+ 
+await storage.set("capt", { color: "red" })
+const data2 = await storage.get("capt") // { color: "red" }
+ */
 class IO {
     constructor() {
         let prevConfigStateJson = '';
         let prevAigcStateJson = '';
-        store.subscribe(() => {
+        store.subscribe(async () => {
             const currState = store.getState() as State;
             // Note: Pulisher 配置持久化
-            const currConfigStateJson = JSON.stringify(currState.config);
+            const currConfigStateJson = JSON.stringify(currState.publisher);
             if (prevConfigStateJson !== currConfigStateJson) {
                 logToRenderer('tree State:', prevConfigStateJson, currConfigStateJson);
                 // window._toMain('config-set', currState.config.data);
+                // Note: 持久化
+                // FIXME: 后面需要改成 Secure Storage，下同
+                await storage.set("publisher-config", currState.publisher.data)
                 prevConfigStateJson = currConfigStateJson;
             }
             // Note: aigc 配置持久化
@@ -36,39 +46,48 @@ class IO {
             if (prevAigcStateJson !== currAigcStateJson) {
                 logToRenderer('aigc State:', prevAigcStateJson, currAigcStateJson);
                 // window._toMain('aigc-set', currState.aigc.data);
+                // Note: 持久化
+                await storage.set("aigc-config", currState.aigc.data)
                 prevAigcStateJson = currAigcStateJson;
             }
             // TODO: 面板展开、收起状态持久化
         });
-        getConfig();
-        getAigc();
+        // Note: 初始化
+        getPublisherConfig(storage);
+        getAigcConfig(storage);
     }
 }
 
 new IO();
 
-// export default new IO();
-
-chrome.runtime.onConnect.addListener(function (port) {
-    port.onMessage.addListener(function (msg) {
-        console.log('sidePanel 收到:', msg);
-        port.postMessage({ type: 'toc', content: 'sidePanel 知道了'});
-    });
-});
-
 function App() {
-    console.log("这里是 sidePanel!!!!!!:")
-    // useEffect(() => {
-    //     // Note: 接受通用通知
-    //     window._fromMain('notify', (_, props) => {
-    //         logToRenderer('通知来啦:', props);
-    //     });
-    // }, []);
     const {
         token: { colorBgContainer }
-    } = theme.useToken()
+    } = theme.useToken();
 
     useEffect(() => {
+        const cb = (port) => {
+            port.onMessage.addListener(function (msg) {
+                console.log('sidePanel 收到消息:', msg);
+                const {name, data} = msg;
+                // port.postMessage({ type: 'toc', content: 'sidePanel 知道了'});
+                switch (name) {
+                    case 'toc-update': {
+                        store.dispatch(setToc(data));
+                        break;
+                    }
+                }
+            });
+        };
+        // Note: 接受来自 content 的通知
+        chrome.runtime.onConnect.addListener(cb);
+        return () => {
+            chrome.runtime.onConnect.removeListener(cb);
+        }
+    }, []);
+
+
+   /*  useEffect(() => {
         document.body.addEventListener('click', () => {
             chrome.tabs.query({active: true, lastFocusedWindow: true}, ([tab]) => {
                 const port = chrome.tabs.connect(tab.id, {name: 'toc'});
@@ -78,7 +97,7 @@ function App() {
                 });
             })
         });
-    }, []);
+    }, []); */
 
     // const backToTop = useCallback(() => {
     //     window._toMain('notion-page-backtop');

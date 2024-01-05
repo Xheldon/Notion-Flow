@@ -1,4 +1,11 @@
-import { getPort } from "@plasmohq/messaging/port"
+import type { PlasmoCSConfig } from 'plasmo';
+import { _toSidePanel, logToRenderer } from '$utils';
+import type { Config, TocItem, Meta, AigcState, AigcData } from '$types';
+
+export const config: PlasmoCSConfig = {
+    matches: ['https://www.notion.so/*'],
+    all_frames: true,
+};
 
 const AIGC_BLOCKS = [
     'header',
@@ -13,22 +20,134 @@ const AIGC_BLOCKS = [
     'text',
 ];
 
+// Note: 此函数限定在 content 中调用，就不放到 helper 中了
+function getNotionToc() {
+    const toc: TocItem[] = []
+    const main = document.querySelector('.notion-page-content');
+    if (!main) {
+        _toSidePanel('toc-update', toc);
+        return;
+    }
+    if (main) {
+        const container: Element[] = Array.from(main.children);
+        const getItem = (level: number, ele: Element) => {
+            return {
+                level,
+                key: ele.getAttribute('data-block-id'),
+                title: ele.textContent,
+            }
+        };
+        container.forEach((ele, k) => {
+            if (!ele || !ele.classList) {
+                return;
+            }
+            if (ele && ele.classList.contains('notion-header-block')) {
+                const item = getItem(1, ele);
+                toc.push(item);
+            }
+            if (ele && ele.classList.contains('notion-sub_header-block')) {
+                const item = getItem(2, ele);
+                toc.push(item);
+            }
+            if (ele && ele.classList.contains('notion-sub_sub_header-block')) {
+                const item = getItem(3, ele);
+                toc.push(item);
+            }
+        });
+        _toSidePanel('toc-update', toc);
+    }
+}
 
 // Note: 接受来自 sidePanel 的消息
 chrome.runtime.onConnect.addListener(function (port) {
     port.onMessage.addListener(function (msg) {
         console.log('content 收到:', msg);
-        if (Math.random() > 0.5) {
-            port.postMessage({ type: 'toc', content: '收到后再通知 sidePanel 哈'});
+        const {name, data} = msg;
+        // TODO: 滚动页面等
+        switch (name) {
+            case 'toc-update': { // Note: sidePanel 主动要求更新 toc
+                getNotionToc();
+                break;
+            }
+            case 'toc-locate': { // Note: sidePanel 主动要求定位到某个 heading
+                try {
+                    document.querySelector('.notion-page-content')?.querySelector(`[data-block-id="${data}"]`)?.scrollIntoView({behavior: 'smooth'});
+                } catch (e) {
+                    console.error('toc-locate fail:', e);
+                }
+                break;
+            }
+            case 'notion-block-id-get': { // Note: 获取当前 Notion 页面的 id
+                const _url = location.href;
+                const url = new URL(_url);
+                try {
+                    const path = url.pathname.split('/');
+                    const raw = path[path.length - 1].split('-');
+                    const rawId = raw[raw.length - 1].split('');
+                    const pos = [8, 13, 18, 23];
+                    pos.forEach(p => {
+                        rawId.splice(p, 0, '-');
+                    });
+                    logToRenderer(`rawId:${rawId.join('')}`);
+                    // FIXME: conect 是即时的，所以不用区分 name 了？
+                    port.postMessage(rawId.join(''));
+                    // return rawId.join('');
+                } catch (e) {
+                    port.postMessage(null);
+                }
+            }
+            case 'notion-meta-get': {
+
+                break;
+            }
+            case 'reload' : { // Note: sidePanel 主动要求刷新页面
+                break;
+            }
+            case 'back-to-top': { // Note: sidePanel 主动要求回到顶部
+                break;
+            }
+            default: {
+                break;
+            }
         }
-        // port.postMessage({ type: 'toc', content: 'sidePanel 知道了'});
     });
 });
+
 window.addEventListener('load', () => {
-    // toc.onMessage.addListener((msg) => {
-    //     console.log('来自 msg 的广播 toc:', msg);
-    // });
-    console.log('div 数量:', document.querySelectorAll('div').length);
+    console.log('here');
+    // Note: load 后短期内执行一次，不跟着 mouseup 或者 selectionchange 触发，以立即生成 toc
+    getNotionToc();
+    // Note: Notion 页面内导航是在 .notion-frame 中（也可能是 #notion-app 如数据表页面）
+    //  因此需要监听该 dom 变化
+    const frame = document.querySelector('#notion-app');
+    if (frame) {
+        let timer: NodeJS.Timeout;
+        const mutationCb = (list: MutationRecord[]) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if (list.some(muta => {
+                    const target = muta.target as Element;
+                    return (
+                        target.closest
+                            && target.closest('.notion-frame') // Note: page 和 database 等的共同父级是 notion-frame，不能直接用富文本的
+                            && !target.querySelector('.dragHandle') // Note: 鼠标移入移出 block 的时候出现/消失拖拽按钮
+                            && !document.querySelector('[data-overlay="true"]') // Note: 在 block 右键的时候会触发
+                    );
+                })) {
+                    getNotionToc();
+                }
+            }, 200);
+        };
+        const observer = new MutationObserver(mutationCb);
+        observer.observe(frame, {
+            childList: true,
+            subtree: true,
+        });
+    } else {
+        _toSidePanel('toc-update', []);
+    }
+
+    // Note: selection change 的时候需要更新 aigc tab 的选区状态
     let timer: NodeJS.Timeout;
     const eventCb = (e) => {
         clearTimeout(timer);
@@ -45,17 +164,11 @@ window.addEventListener('load', () => {
                         const content = selectBlock.reduce((prev, curr) => {
                             return prev + curr?.parentElement?.textContent + '\n';
                         }, '');
-                        // TODO: 通知内容给 bg，bg 发送给 sidePanel
-                        // cb(content);
-                        var port = chrome.runtime.connect({name: "toc"});
-                        port.postMessage({type: "toc", content});
+                        _toSidePanel('aigc-select-content', content);
                     }
                 }
             } else {
-                // TODO: 通知内容给 bg，bg 发送给 sidePanel
-                // cb(window.getSelection()?.toString());
-                var port = chrome.runtime.connect({name: "toc"});
-                port.postMessage({type: 'toc', content: window.getSelection()?.toString()});
+                _toSidePanel('aigc-select-content', window.getSelection()?.toString());
             }
         }, 200);
     };

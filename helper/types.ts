@@ -7,15 +7,15 @@
 //     }
 // }
 export interface State {
-    config: ConfigState;
+    publisher: PublisherConfigState;
     toc: TocState;
     aigc: AigcState;
 }
-export interface ConfigState {
-    data: Config;
+export interface PublisherConfigState {
+    data: PublisherConfig;
 }
 
-export interface Config {
+export interface PublisherConfig {
     github: {
         token: string;
         branch: string;
@@ -30,6 +30,11 @@ export interface Config {
     },
     notion: {
         token: string;
+    },
+    status: {
+        configFold: boolean;
+        functionFold: boolean;
+        logFold: boolean;
     }
 }
 export interface TocState {

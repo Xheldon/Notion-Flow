@@ -1,0 +1,27 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  
+  :root.dark, body.dark {
+    filter: invert(0.92);
+  }
+  :root, body {
+    margin: 0;
+    background-color: rgb(251, 251, 250);
+  }
+  
+  
+  .ant-layout {
+    background-color: transparent;
+  }
+  
+  .toc-item {
+    cursor: pointer;
+  }
+  .toc-item:hover {
+    /* 色值从官网抄来的 --theme-color-link-hover-from-inherited : --color-blue-500 */
+    color: #0a85d1;
+    text-decoration: underline;
+  }
+  

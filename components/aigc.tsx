@@ -4,9 +4,9 @@ import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
 
-import reduxStore, { setAigc, setConfig } from '$store';
-import type { State, Config, AigcPrompt, AigcData } from '$types';
-import { notion2markdown, notionMeta2string, logToRenderer, getConfig, getAigc } from '$utils';
+import reduxStore, { setAigc, setPublisher } from '$store';
+import type { State, PublisherConfig, AigcPrompt, AigcData } from '$types';
+import { notion2markdown, notionMeta2string, logToRenderer, getPublisherConfig, getAigcConfig } from '$utils';
 
 const { Panel } = Collapse;
 const { Paragraph, Text } = Typography;
@@ -87,12 +87,21 @@ const Aigc = (props: any) => {
     const [selectContent, setSelectContent] = useState('');
     const [result, setResult] = useState('');
 
-    const onItemClick = useCallback((itemName: 'Config' | 'Param' | 'Action') => {
+    const onItemClick = useCallback((itemName: 'Config' | 'Action') => {
         return () => {
             if (loading) {
                 return;
             }
-            eval(`setActive${itemName}(!active${itemName})`)
+            switch (itemName) {
+                case 'Config': {
+                    setActiveConfig(!activeConfig);
+                    break;
+                }
+                case 'Action': {
+                    setActiveAction(!activeAction);
+                    break;
+                }
+            }
         }
     }, [activeConfig, activeAction, loading]);
 

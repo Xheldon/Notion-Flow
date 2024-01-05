@@ -4,7 +4,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
 import type { State, TocItem } from '$types';
-import { getToc, locateHeading } from '$utils';
+import { _toContent } from '$utils';
 import store, { setToc } from '$store';
 
 const { Panel } = Collapse;
@@ -15,10 +15,11 @@ const Toc = (props: any) => {
 
   const _locateHeading = useCallback((key: string) => {
     return () => {
-      locateHeading(key);
+      _toContent('toc-locate', key);
     };
   }, []);
 
+  // Note: 「基本」 tab 下，当前只有「目录」一个功能，所以暂时始终展示，后面如果添加更多功能了再持久化状态
   const onItemClick = useCallback(() => {
     setActive(!active);
   }, [active]);
@@ -26,14 +27,15 @@ const Toc = (props: any) => {
   const getExtra = useCallback(() => {
     return (
       <ReloadOutlined
-        // onClick={(e) => {
-        //   e.stopPropagation();
-        //   getToc();
-        // }}
+        onClick={(e) => {
+          e.stopPropagation();
+          _toContent('toc-update');
+        }}
       />
     );
   }, []);
 
+  // TODO: 自定义 heading 展示样式
   const _Toc = useMemo(() => {
     if (toc?.length) {
       return toc.map((t) => {
@@ -50,12 +52,10 @@ const Toc = (props: any) => {
     return <Empty />;
   }, [toc]);
 
-//   useEffect(() => {
-//     window._fromMain('toc-update', (_, toc: TocItem[]) => {
-//       store.dispatch(setToc(toc));
-//     });
-//     getToc();
-//   }, []);
+  useEffect(() => {
+    // Noote: 组件加载后立即获取一次
+    _toContent('toc-update');
+  }, []);
 
   return (
     <Panel

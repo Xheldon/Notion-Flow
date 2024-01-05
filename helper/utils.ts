@@ -1,8 +1,8 @@
 /**
  * 工具函数，不要导入任何环境相关的依赖如 electron，因为它会被 main 和 render 同时使用
  */
-import reduxStore, { setConfig, setAigc } from '$store';
-import type { Config, TocItem, Meta, AigcState, AigcData } from '$types';
+import reduxStore, { setPublisher, setAigc } from '$store';
+import type { PublisherConfig, TocItem, Meta, AigcState, AigcData } from '$types';
 
 // Note: callout/blockquote 颜色映射，其实 list 也能（其他可能也能？）设置颜色，但是没必要
 
@@ -56,16 +56,16 @@ const logToRenderer = (..._msgs: any[]) => {
                 return ` [[log err: ${err.message}]] `;
             }
         }).join('');
-        viewRef.customView.webContents.send('dev-logs', msgs);
+        // viewRef.customView.webContents.send('dev-logs', msgs);
     } else {
-        window._toMain('dev-logs', ..._msgs);
+        console.log('log:', _msgs);
+        // window._toMain('dev-logs', ..._msgs);
     }
 };
 
-const getConfig = async () => {
+const getPublisherConfig = async (storage) => {
     // const config: Config = await window._toMain('config-get');
-    // TODO: 从持久化存储中获取
-    const config = null;
+    const config: PublisherConfig = await storage.get('publisher-config');
     logToRenderer('get config:', config);
     if (!config || !config.notion) {
         const _config = {
@@ -83,18 +83,23 @@ const getConfig = async () => {
             },
             notion: {
                 token: '',
+            },
+            status: {
+                configFold: false, // Note: 配置面板是否折叠
+                functionFold: false, // Note: 功能面板是否折叠
+                logFold: false, // Note: 日志面板是否折叠
             }
         };
-        reduxStore.dispatch(setConfig(_config));
+        reduxStore.dispatch(setPublisher(_config));
     } else {
-        reduxStore.dispatch(setConfig(config));
+        reduxStore.dispatch(setPublisher(config));
     }
 };
 
-const getAigc = async () => {
+const getAigcConfig = async (storage) => {
     // const aigc: Aigc = await window._toMain('aigc-get');
+    const aigc: AigcData = await storage.get('aigc-config');
     // TODO: 从持久化存储中获取
-    const aigc = null;
     logToRenderer('get aigc:', aigc);
     if (!aigc || (!aigc.model)) {
         const _aigc: AigcData = {
@@ -113,16 +118,35 @@ const getAigc = async () => {
     }
 }
 
-const getToc = () => {
-    // Note: 仅触发通知
-    window._toMain('toc-get');
+// Note: contnet -> sidePanel
+const _toSidePanel = (name, data?, cb?) => {
+    var port = chrome.runtime.connect({name});
+    port.postMessage({name, data});
+    port.onMessage.addListener(cb);
 };
 
-const locateHeading = (key: string) => {
-    window._toMain('toc-locate', {
-        key,
-        shouldNoti: true,
+const _toContent = (name, data?, cb?) => {
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, ([tab]) => {
+        const port = chrome.tabs.connect(tab.id, {name});
+        port.postMessage({name, data});
+        port.onMessage.addListener(cb);
     });
+};
+
+// Note: sidePanel -> content 要求更新 toc
+const getToc = () => {
+    // Note: 仅触发通知
+    // window._toMain('toc-get');
+    // _toContent('toc-update');
+};
+
+// Note: sidePanel -> content 要求定位到给定 heading
+const locateHeading = (key: string) => {
+    // _toContent('toc-locate', key);
+    // window._toMain('toc-locate', {
+    //     key,
+    //     shouldNoti: true,
+    // });
 };
 
 const notionGetToc = (cb: (type: 'toc' | 'selection', toc: TocItem[] | string) => void) => {
@@ -299,10 +323,10 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                 }
                 case 'bookmark': {
                     // FIXME: API 接口本身不含 bookmark 的图片信息，所以需要调用 api 直接查询 notion 的 dom
-                    await window._toMain('notion-bookmark-desc-get', item.id);
+                    // await window._toMain('notion-bookmark-desc-get', item.id);
                     // Note: 接收来自 main 的通知
                     return await new Promise((res) => {
-                        window._fromMainOnce(`send-bookmark-desc-${item.id}`, (_, props) => {
+                        /* window._fromMainOnce(`send-bookmark-desc-${item.id}`, (_, props) => {
                             const {content: {title = '', desc = '', img = ''}} = props;
                             if (title || desc || img) {
                                 res(`{% render_bookmark url="${block.url}" title="${title}" img="${img}" yid="" bid="" %}\n${desc}\n{% endrender_bookmark %}\n`);
@@ -310,14 +334,15 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 // Note: 从 notion 获取 bookmark 信息失败，直接使用链接
                                 res(`${block.url}\n`);
                             }
-                        });
+                        }); */
                     });
                 }
                 case 'image': {
                     // Note: unsplash 图片是 block.external，自己上传的是 block.file
                     const url = block[block.type]?.url;
                     if (url) {
-                        const ossUrl = await window._toMain('notion-image-upload', {url, meta, id: item.id, debug});
+                        // const ossUrl = await window._toMain('notion-image-upload', {url, meta, id: item.id, debug});
+                        const ossUrl = await api.uploadNotionImageToOSS('notion-image-upload', {url, meta, id: item.id, debug});
                         const caption = _inline(block.caption);
                         return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                     }
@@ -334,7 +359,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                 }
                 case 'table': {
                     // FIXME: 需要递归查找 table 元素内容 table_row
-                    const tableRows = await window._toMain('notion-content-get', item.id);
+                    // const tableRows = await window._toMain('notion-content-get', item.id);
                     // Note: 构建一个表格
                     return tableRows.reduce((prev: any, curr: any, index: number) => {
                         const cells = curr[curr.type].cells;
@@ -357,7 +382,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let children = [];
                     let _indent = indent;
                     if (item.has_children) {
-                        children = await window._toMain('notion-content-get', item.id);
+                        // children = await window._toMain('notion-content-get', item.id);
                     }
                     const isChecked = block.checked;
                     return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown(children, meta, ++_indent, debug)).join('')}`;
@@ -366,7 +391,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let children = [];
                     let _indent = indent;
                     if (item.has_children) {
-                        children = await window._toMain('notion-content-get', item.id);
+                        // children = await window._toMain('notion-content-get', item.id);
                     }
                     return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown(children, meta, ++_indent, debug)).join('')}`;
                 }
@@ -374,7 +399,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let children = [];
                     let _indent = indent;
                     if (item.has_children) {
-                        children = await window._toMain('notion-content-get', item.id);
+                        // children = await window._toMain('notion-content-get', item.id);
                     }
                     return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown(children, meta, ++_indent, debug)).join('')}`;
                 }
@@ -407,7 +432,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     if (_url) {
                         if (block.type === 'file') {
                             // Note: 获取文件后缀
-                            const _ossUrl = await window._toMain('notion-image-upload', {url: _url, meta, id: item.id, debug});
+                            // const _ossUrl = await window._toMain('notion-image-upload', {url: _url, meta, id: item.id, debug});
                             let suffix = '';
                             const ossUrl = new URL(_ossUrl);
                             const arr = ossUrl.pathname.split('.');
@@ -514,9 +539,9 @@ const getISODateTime = (time: Date): string => {
 
 
 export {
-    getConfig,
+    getPublisherConfig,
     getToc,
-    getAigc,
+    getAigcConfig,
     locateHeading,
     notionGetToc,
     _inline,
@@ -527,4 +552,6 @@ export {
     logToRenderer,
     getISODateTime,
     notionSelectionChange,
+    _toSidePanel,
+    _toContent,
 }
