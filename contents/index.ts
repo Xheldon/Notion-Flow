@@ -79,6 +79,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             }
             case 'notion-block-id-get': { // Note: 获取当前 Notion 页面的 id
                 const _url = location.href;
+                console.log('_url:', _url);
                 const url = new URL(_url);
                 try {
                     const path = url.pathname.split('/');
@@ -96,10 +97,12 @@ chrome.runtime.onConnect.addListener(function (port) {
                     port.postMessage(null);
                 }
             }
-            case 'notion-meta-get': {
-
+            /* case 'notion-meta-get': {
+                const {debug, blockId} = data;
+                const meta: Meta = api.getNotionMeta(blockId, debug);
+                port.postMessage(meta);
                 break;
-            }
+            } */
             case 'reload' : { // Note: sidePanel 主动要求刷新页面
                 break;
             }

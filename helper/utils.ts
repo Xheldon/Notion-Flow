@@ -322,7 +322,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     const url = block[block.type]?.url;
                     if (url) {
                         // const ossUrl = await window._toMain('notion-image-upload', {url, meta, id: item.id, debug});
-                        const ossUrl = await api.uploadNotionImageToOSS('notion-image-upload', {url, meta, id: item.id, debug});
+                        const ossUrl = await this.uploadNotionImageToOSS('notion-image-upload', {url, meta, id: item.id, debug});
                         const caption = _inline(block.caption);
                         return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                     }

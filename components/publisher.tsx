@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Row, Collapse, notification } from "antd";
+import { Button, Row, Collapse, notification, message } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
 import { Storage } from "@plasmohq/storage"
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
-import type { PublisherOptions, State } from '$types';
+import type { PublisherOptions, State, Meta } from '$types';
 import { notion2markdown, notionMeta2string, logToRenderer, _toContent } from '$utils';
+import Req from '$api';
 
 const { Panel } = Collapse;
 
@@ -15,13 +16,17 @@ const storage = new Storage();
 
 let _publisherOptions = null;
 
+let req = null;
 (async () => {
     const _: PublisherOptions = await storage.get('options');
-    _publisherOptions = {
-        github: _.publisher.github,
-        notion: _.publisher.notion,
-        oss: _.oss[_.oss.name],
-    };
+    if (_) {
+        _publisherOptions = {
+            github: _.publisher.github,
+            notion: _.publisher.notion,
+            oss: _.oss[_.oss.name],
+        };
+        req = new Req(_publisherOptions);
+    }
 })();
 
 const Publisher = (props: any) => {
@@ -33,6 +38,7 @@ const Publisher = (props: any) => {
     const [loading, setLoading] = useState(false);
     const [noti, contextHolder] = notification.useNotification();
     const [publisherOptions, setPublisherOptions] = useState(_publisherOptions);
+    const [messageApi, contextHolder2] = message.useMessage();
     // const [logs, setLogs] = useState(_logs);
 
 
@@ -68,27 +74,45 @@ const Publisher = (props: any) => {
             }
             setLoading(true);
             // const blockId = await window._toMain('notion-block-id-get');
-            _toContent('notion-block-id-get', (blockId) => {
+            _toContent('notion-block-id-get', null, (blockId) => {
                 console.log('获取当前 block id:', blockId);
                 if (blockId) {
                     try {
                         // Note: meta 信息中可以拿到 cover 信息，对应 header-img 属性
                         // const meta = await window._toMain('notion-meta-get', blockId, debug);
-                        const meta = _toContent('notion-meta-get', {blockId, debug});
-                        logToRenderer('获取 meta 信息:', meta);
-                        return;
-                        const blocks = await window._toMain('notion-content-get', blockId);
-                        // Note: 其值转 markdown 放到 main 也可以，放 render 只是为了方便调试
-                        const metaString = notionMeta2string(meta);
-                        const markdown = await notion2markdown(blocks, meta, 0, debug);
-                        logToRenderer('blocks:', metaString + markdown.join('\n'));
-                        console.log(metaString + markdown.join('\n'));
-                        const result = await window._toMain('github-update-content', {meta, content: metaString + markdown.join('\n'), debug});
-                        // Note: 如果更新成功，则更新该 page 的 lastUpdateTime 属性
-                        const updateMetaResult = await window._toMain('notion-meta-update', {blockId, debug});
-                        logToRenderer('更新 Notion meta 结果:', updateMetaResult);
-                        logToRenderer('更新到 github 结果:', result);
-                        setLoading(false);
+                        req.getNotionMeta(blockId, debug).then((meta: Meta) => {
+                            logToRenderer('获取 meta 信息:', meta);
+                            if (!meta) {
+                                messageApi.open({
+                                    type: 'error',
+                                    content: '获取 Notion Meta 信息失败',
+                                });
+                                setLoading(false);
+                                return;
+                            }
+                            req.getNotionContent(blockId).then((blocks) => {
+                                if (!blocks) {
+                                    messageApi.open({
+                                        type: 'error',
+                                        content: '获取 Notion 模块信息失败',
+                                    });
+                                    setLoading(false);
+                                    return;
+                                }
+                                const metaString = notionMeta2string(meta);
+                                notion2markdown(blocks, meta, 0, debug).then(markdown => {
+                                    logToRenderer('blocks:', metaString + markdown.join('\n'));
+                                    console.log(metaString + markdown.join('\n'));
+                                    req.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
+                                        req.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
+                                            logToRenderer('更新 Notion meta 结果:', updateMetaResult);
+                                            logToRenderer('更新到 github 结果:', result);
+                                            setLoading(false);
+                                        });
+                                    });
+                                });
+                            });
+                        });
                     } catch (e) {
                         setLoading(false);
                         noti.error({
@@ -138,6 +162,7 @@ const Publisher = (props: any) => {
     return (
         <>
             {contextHolder}
+            {contextHolder2}
             <Panel {...props} isActive={activeFunc} onItemClick={onItemClick('Func')} header="功能" key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>
                     <Button disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>日志</Button>

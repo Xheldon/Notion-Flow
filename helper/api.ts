@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import type { PublisherConfig, Meta } from '$types';
+import type { PublisherRequestConfig, PublisherOptions, Meta } from '$types';
 import { Client, collectPaginatedAPI } from '@notionhq/client';
-// import Store from 'electron-store';
-import COS from 'cos-nodejs-sdk-v5';
-// import { dialog } from 'electron';
+import { Storage } from "@plasmohq/storage"
+import COS from 'cos-js-sdk-v5';
 import axios from 'axios';
-import sharp from 'sharp';
+// import sharp from 'sharp';
 import { _inline, logToRenderer, getISODateTime } from '$utils';
 import { Octokit } from 'octokit';
 import * as tencentcloud from 'tencentcloud-sdk-nodejs';
@@ -34,6 +33,17 @@ const imgSuffix = [
     'ogg',
 ];
 
+const storage = new Storage();
+
+async function updateConfigDeco (that: Req) {
+    const _: PublisherOptions = await storage.get('options');
+    this.updateConfig({
+        github: _.publisher.github,
+        notion: _.publisher.notion,
+        oss: _.oss[_.oss.name],
+    });
+}
+
 // const store = new Store<{'config': Config}>();
 export default class Req {
     notion: Client | any;
@@ -50,14 +60,19 @@ export default class Req {
         Region: string;
     };
     ossDirCache: COS.CosObject[]; // Note: 第一次获取资源目录后缓存起来
-    config: PublisherConfig;
-    constructor(props: PublisherConfig) {
+    config: PublisherRequestConfig;
+    constructor(props: PublisherRequestConfig) {
+        console.log('ppprops:', props);
         this.updateConfig(props);
     }
 
-    @Req.updateConfigDeco
     async getNotionContent(block_id: string) {
         try {
+            await updateConfigDeco.bind(this);
+            if (!this.notion) {
+                logToRenderer('getNotionContent Notion Token 未配置');
+                return Promise.resolve(null);
+            }
             return new Promise((res, rej) => {
                 setTimeout(() => {
                     res(collectPaginatedAPI<{[key: string]: string}, any>(this.notion.blocks.children.list, {
@@ -74,13 +89,17 @@ export default class Req {
     }
 
     // FIXME: 腾讯云限制每秒 20 个请求，节流一下.
-    @Req.updateConfigDeco
     async uploadNotionImageToOSS(props: {url: string; meta: Meta; id: string; debug: boolean; uuid?: string;}): Promise<string> {
         // Note: uuid 的作用是对于头图来说可能会变，但是 id 不变，所以需要唯一识别 用 last_edited_time 即可
         // FIXMED: 因为存在同步更新 github 后写入 publish 为 true 的逻辑（即使之前已经是 true 了），导致 last_edited_time 会变，结果就是每更新一次，头图的地址都
         //  会变化一次...先不管了
         // Note: 上层 fix 了 uuid 问题，取 url 的 pathname 作为 uuid 而不是 last_edited_time
         try {
+            await updateConfigDeco.bind(this);
+            if (!this.oss) {
+                logToRenderer('uploadNotionImageToOSS 错误，OSS 未配置');
+                return Promise.resolve(null);
+            }
             const {url, meta: {cos}, id, debug, uuid = ''} = props;
             const pathname = new URL(url).pathname;
             const suffixArr = pathname.split('.');
@@ -109,7 +128,8 @@ export default class Req {
                     if (res.status === 200) {
                         let buffer: Buffer = res.data;
                         if (!hasSuffix) {
-                            buffer = await sharp(res.data)
+                            console.log('什么鬼');
+                            /* buffer = await sharp(res.data)
                             .withMetadata({
                                 exif: {
                                     IFD0: {
@@ -123,7 +143,7 @@ export default class Req {
                             .toBuffer({resolveWithObject: true})
                             .then(({data}) => {
                                 return data;
-                            });
+                            }); */
                         }
                         try {
                             logToRenderer('准备上传', key);
@@ -169,9 +189,13 @@ export default class Req {
         }
     }
 
-    @Req.updateConfigDeco
     async getNotionMeta(blockId: string, debug: boolean): Promise<Meta> {
         try {
+            await updateConfigDeco.bind(this);
+            if (!this.notion) {
+                logToRenderer('getNotionMeta 错误，Notion Token 未配置');
+                return Promise.resolve(null);
+            }
             const response = await this.notion.pages.retrieve({ page_id: blockId });
             const {
                 tags,
@@ -226,8 +250,12 @@ export default class Req {
         }
     }
 
-    @Req.updateConfigDeco
     async updateNotionLastUpdateTime(props: {blockId: string; debug: boolean}): Promise<boolean> {
+        await updateConfigDeco.bind(this);
+        if (!this.notion) {
+            logToRenderer('updateNotionLastUpdateTime 错误， Notion Token 未配置');
+            return Promise.resolve(null);
+        }
         const { blockId, debug } = props;
         const date = getISODateTime(new Date());
         if (debug) {
@@ -249,8 +277,12 @@ export default class Req {
         }
     }
 
-    @Req.updateConfigDeco
     async send2Github(props: {meta: Meta, content: string, debug: boolean}):Promise<any> {
+        await updateConfigDeco.bind(this);
+        if (!this.github) {
+            logToRenderer('send2Github 错误， Github Token 未配置');
+            return Promise.resolve(null);
+        }
         const {meta, content, debug} = props;
         // Note: 
         const getContentConfig = {
@@ -306,21 +338,23 @@ export default class Req {
         }
     }
     // Note: 动态修改配置
-    updateConfig(props: Config) {
+    updateConfig(props: PublisherRequestConfig) {
         if (props) {
             const {
-                notion: {token: notionToken},
-                oss: {
-                    region: ossRegion,
-                    bucket: ossBucket,
-                    secretId: ossSecretId,
-                    secretKey: ossSecretKey,
+                notion: {
+                    token: notionToken
                 },
                 github: {
                     owner: githubOwner,
                     repo: githubRepo,
                     branch: githubBranch,
                     token: githubToken,
+                },
+                oss: {
+                    region: ossRegion,
+                    bucket: ossBucket,
+                    secretId: ossSecretId,
+                    secretKey: ossSecretKey,
                 }
             } = props || {};
             if (notionToken) {
@@ -362,12 +396,5 @@ export default class Req {
     
     // Note: 这个装饰器用法怎么跟官网的 https://www.tslang.cn/docs/handbook/decorators.html 方法装饰器不一样啊？
     //  第一个指向原型，第二个是属性名，第三个是描述符
-    static updateConfigDeco (_: Req, __: string, desc: PropertyDescriptor) {
-        const value = desc.value;
-        desc.value = function(...args: any[]) {
-            // const config = store.get('config');
-            // this.updateConfig(config);
-            return value.call(this, ...args);
-        };
-    }
+    
 }

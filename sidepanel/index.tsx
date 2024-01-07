@@ -5,7 +5,7 @@ import { ConfigProvider } from 'antd';
 import { Storage } from "@plasmohq/storage"
 import { Button, Collapse, Layout, Tabs, theme, Tooltip, Segmented } from "antd"
 
-import type { State } from '$types';
+import type { State, PublisherOptions } from '$types';
 import { getPublisherConfig, getAigcConfig } from '$utils';
 import store, { setToc, setLogs } from '$store';
 import Toc from "$components/toc"
@@ -18,6 +18,18 @@ import Aigc from '$components/aigc';
 import "./styles.css"
  
 const storage = new Storage();
+
+let enabledTabs: any = null;
+
+(async () => {
+    const options: PublisherOptions = await storage.get('options');
+    enabledTabs = {
+        basic: true,
+        publisher: !!options?.publisher?.enable && !!options?.oss?.enable,
+        aigc: !!options?.aigc?.enable,
+        plugin: false,
+    };
+})();
 
 class IO {
     constructor() {
@@ -55,10 +67,47 @@ class IO {
 
 new IO();
 
+const tabList = [
+    {
+        key: "basic",
+        label: "基本",
+        children: (
+            <Collapse size="small" activeKey={["basic"]}>
+                <Toc />
+            </Collapse>
+        )
+    },
+    {
+        key: 'publisher',
+        label: '发布',
+        children: (
+            <Collapse size="small">
+                <Publisher />
+            </Collapse>
+        ),
+    },
+    {
+        key: 'ai',
+        label: 'AIGC',
+        children: (
+            <Collapse size="small">
+                <Aigc />
+            </Collapse>
+        ),
+    },
+    {
+        key: "plugin",
+        label: "插件",
+        children: <div>插件列表</div>
+    }
+];
+
 function App() {
     const {
         token: { colorBgContainer }
     } = theme.useToken();
+
+    const [tabs, setTabs] = React.useState(Object.keys(enabledTabs).filter((key) => enabledTabs[key]));
 
     useEffect(() => {
         const cb = (port) => {
@@ -79,6 +128,21 @@ function App() {
         return () => {
             chrome.runtime.onConnect.removeListener(cb);
         }
+    }, []);
+    
+    useEffect(() => {
+        storage.watch({
+            options: (opt) => {
+                const {newValue: {publisher, oss, aigc, plugin}} = opt;
+                const enabledTabs = {
+                    basic: true,
+                    aigc: !!aigc?.enable,
+                    publisher: !!publisher?.enable  && !!oss?.enable,
+                    plugin: !!plugin?.enable,
+                };
+                setTabs(Object.keys(enabledTabs).filter((key) => enabledTabs[key]));
+            }
+        });
     }, []);
 
     // const backToTop = useCallback(() => {
@@ -133,40 +197,11 @@ function App() {
                                 </StickyBox>
                             );
                         }}
-                        items={[
-                            {
-                                key: "basic",
-                                label: "基本",
-                                children: (
-                                    <Collapse size="small" activeKey={["basic"]}>
-                                        <Toc />
-                                    </Collapse>
-                                )
-                            },
-                            {
-                                key: 'publisher',
-                                label: '发布',
-                                children: (
-                                    <Collapse size="small">
-                                        <Publisher />
-                                    </Collapse>
-                                ),
-                            },
-                            {
-                                key: 'ai',
-                                label: 'AIGC',
-                                children: (
-                                    <Collapse size="small">
-                                        <Aigc />
-                                    </Collapse>
-                                ),
-                            },
-                            {
-                                key: "plugin",
-                                label: "插件",
-                                children: <div>插件列表</div>
+                        items={tabList.map(tab => {
+                            if (tabs.includes(tab.key)) {
+                                return tab;
                             }
-                        ]}
+                        }).filter(Boolean)}
                     />
                 </Layout>
             </Provider>

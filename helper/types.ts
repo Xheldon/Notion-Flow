@@ -33,6 +33,13 @@ export interface OssConfig {
     bucket: string;
     region: string;
 }
+
+export interface PublisherRequestConfig {
+    github: GithubConfig;
+    notion: NotionConfig;
+    oss: OssConfig;
+}
+
 export interface PublisherConfig {
     configFold?: boolean;
     functionFold?: boolean;
@@ -40,7 +47,12 @@ export interface PublisherConfig {
 }
 
 export interface PublisherOptions {
-    aigc: boolean;
+    aigc: {
+        enable: boolean;
+    };
+    plugin: {
+        enable: boolean;
+    };
     'heading-style': string;
     oss: {
         enable: boolean;
