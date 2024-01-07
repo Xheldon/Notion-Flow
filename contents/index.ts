@@ -1,6 +1,6 @@
 import type { PlasmoCSConfig } from 'plasmo';
-import { _toSidePanel, logToRenderer } from '$utils';
-import type { Config, TocItem, Meta, AigcState, AigcData } from '$types';
+import { _toSidePanel } from '$utils';
+import type { PublisherConfig, TocItem, Meta, AigcState, AigcData } from '$types';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://www.notion.so/*'],
@@ -88,7 +88,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                     pos.forEach(p => {
                         rawId.splice(p, 0, '-');
                     });
-                    logToRenderer(`rawId:${rawId.join('')}`);
+                    // logToRenderer(`rawId:${rawId.join('')}`);
                     // FIXME: conect 是即时的，所以不用区分 name 了？
                     port.postMessage(rawId.join(''));
                     // return rawId.join('');

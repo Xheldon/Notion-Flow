@@ -1,8 +1,10 @@
 /**
  * 工具函数，不要导入任何环境相关的依赖如 electron，因为它会被 main 和 render 同时使用
  */
-import reduxStore, { setPublisher, setAigc } from '$store';
+import reduxStore, { setPublisher, setAigc, setLogs } from '$store';
 import type { PublisherConfig, TocItem, Meta, AigcState, AigcData } from '$types';
+
+// import api from '$api';
 
 // Note: callout/blockquote 颜色映射，其实 list 也能（其他可能也能？）设置颜色，但是没必要
 
@@ -42,55 +44,33 @@ const AIGC_BLOCKS = [
 
 // Note: 为了保持 main 和 render 接口一致
 const logToRenderer = (..._msgs: any[]) => {
-    if (process?.type === 'browser') {
-        // console.log('_msgs::', _msgs);
-        const msgs = _msgs.filter(Boolean).map(msg => {
-            try {
-                if (msg.toString() === '[object Object]') {
-                    return JSON.stringify(msg);
-                }
-                // return JSON.stringify(msg);
-                return msg.toString();
-            } catch (err) {
-                console.log('log error:', err);
-                return ` [[log err: ${err.message}]] `;
+    // console.log('_msgs::', _msgs);
+    const msgs = _msgs.filter(Boolean).map(msg => {
+        try {
+            if (msg.toString() === '[object Object]') {
+                return JSON.stringify(msg);
             }
-        }).join('');
-        // viewRef.customView.webContents.send('dev-logs', msgs);
-    } else {
-        console.log('log:', _msgs);
-        // window._toMain('dev-logs', ..._msgs);
-    }
+            // return JSON.stringify(msg);
+            return msg.toString();
+        } catch (err) {
+            console.log('log error:', err);
+            return ` [[log err: ${err.message}]] `;
+        }
+    }).join('');
+    reduxStore.dispatch(setLogs(msgs));
 };
 
 const getPublisherConfig = async (storage) => {
-    // const config: Config = await window._toMain('config-get');
     const config: PublisherConfig = await storage.get('publisher-config');
     logToRenderer('get config:', config);
-    if (!config || !config.notion) {
+    if (!config) {
         const _config = {
-            github: {
-                token: '',
-                branch: '',
-                repo: '',
-                owner: '',
-            },
-            oss: {
-                secretId: '',
-                secretKey: '',
-                bucket: '',
-                region: '',
-            },
-            notion: {
-                token: '',
-            },
-            status: {
-                configFold: false, // Note: 配置面板是否折叠
-                functionFold: false, // Note: 功能面板是否折叠
-                logFold: false, // Note: 日志面板是否折叠
-            }
+            configFold: false, // Note: 配置面板是否折叠
+            functionFold: false, // Note: 功能面板是否折叠
+            logFold: false, // Note: 日志面板是否折叠
         };
         reduxStore.dispatch(setPublisher(_config));
+
     } else {
         reduxStore.dispatch(setPublisher(config));
     }
@@ -101,7 +81,7 @@ const getAigcConfig = async (storage) => {
     const aigc: AigcData = await storage.get('aigc-config');
     // TODO: 从持久化存储中获取
     logToRenderer('get aigc:', aigc);
-    if (!aigc || (!aigc.model)) {
+    if (!aigc || !aigc.model) {
         const _aigc: AigcData = {
             key: {
                 ChatGPT: '',

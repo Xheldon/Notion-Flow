@@ -7,34 +7,50 @@
 //     }
 // }
 export interface State {
-    publisher: PublisherConfigState;
+    publisher: PublisherState;
     toc: TocState;
     aigc: AigcState;
+    logs: LogsState;
 }
-export interface PublisherConfigState {
+export interface PublisherState {
     data: PublisherConfig;
 }
 
+export interface GithubConfig {
+    token: string;
+    branch: string;
+    repo: string;
+    owner: string;
+}
+
+export interface NotionConfig {
+    token: string;
+}
+
+export interface OssConfig {
+    secretId: string;
+    secretKey: string;
+    bucket: string;
+    region: string;
+}
 export interface PublisherConfig {
-    github: {
-        token: string;
-        branch: string;
-        repo: string;
-        owner: string;
-    }
+    configFold?: boolean;
+    functionFold?: boolean;
+    logFold?: boolean;
+}
+
+export interface PublisherOptions {
+    aigc: boolean;
+    'heading-style': string;
     oss: {
-        secretId: string;
-        secretKey: string;
-        bucket: string;
-        region: string;
-    },
-    notion: {
-        token: string;
-    },
-    status: {
-        configFold: boolean;
-        functionFold: boolean;
-        logFold: boolean;
+        enable: boolean;
+        name: 'tx' | 'ali';
+        tx: OssConfig;
+    };
+    publisher: {
+        enable: boolean;
+        github: GithubConfig;
+        notion: NotionConfig;
     }
 }
 export interface TocState {
@@ -69,6 +85,10 @@ export interface AigcData {
 
 export interface AigcState {
     data: AigcData;
+}
+
+export interface LogsState {
+    data: string[];
 }
 
 export interface Meta {

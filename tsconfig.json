@@ -19,6 +19,7 @@
       "$types": ["helper/types.ts"],
       "$store": ["helper/store.ts"],
       "$utils": ["helper/utils.ts"],
+      "$api": ["helper/api.ts"],
       "$components/*": ["components/*"],
     },
     "baseUrl": "."

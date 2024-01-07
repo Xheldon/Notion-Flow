@@ -1,15 +1,15 @@
-import { ReloadOutlined, VerticalAlignTopOutlined } from "@ant-design/icons"
+import { ReloadOutlined, VerticalAlignTopOutlined, BarsOutlined, AppstoreOutlined } from "@ant-design/icons"
 import StickyBox from 'react-sticky-box';
 import { Provider } from 'react-redux';
 import { ConfigProvider } from 'antd';
-import type { State } from '$types';
-import { getPublisherConfig, getAigcConfig, logToRenderer } from '$utils';
 import { Storage } from "@plasmohq/storage"
+import { Button, Collapse, Layout, Tabs, theme, Tooltip, Segmented } from "antd"
 
-import store, { setToc } from '$store';
+import type { State } from '$types';
+import { getPublisherConfig, getAigcConfig } from '$utils';
+import store, { setToc, setLogs } from '$store';
 import Toc from "$components/toc"
-import { Button, Collapse, Layout, Tabs, theme, Tooltip } from "antd"
-import React, { useCallback, useEffect } from "react"
+import React, { useEffect } from "react"
 
 
 import Publisher from '$components/publisher';
@@ -17,14 +17,8 @@ import Aigc from '$components/aigc';
 
 import "./styles.css"
  
-const storage = new Storage()
- 
-/* await storage.set("key", "value")
-const data = await storage.get("key") // "value"
- 
-await storage.set("capt", { color: "red" })
-const data2 = await storage.get("capt") // { color: "red" }
- */
+const storage = new Storage();
+
 class IO {
     constructor() {
         let prevConfigStateJson = '';
@@ -34,7 +28,7 @@ class IO {
             // Note: Pulisher 配置持久化
             const currConfigStateJson = JSON.stringify(currState.publisher);
             if (prevConfigStateJson !== currConfigStateJson) {
-                logToRenderer('tree State:', prevConfigStateJson, currConfigStateJson);
+                // logToRenderer('tree State:', prevConfigStateJson, currConfigStateJson);
                 // window._toMain('config-set', currState.config.data);
                 // Note: 持久化
                 // FIXME: 后面需要改成 Secure Storage，下同
@@ -44,7 +38,7 @@ class IO {
             // Note: aigc 配置持久化
             const currAigcStateJson = JSON.stringify(currState.aigc);
             if (prevAigcStateJson !== currAigcStateJson) {
-                logToRenderer('aigc State:', prevAigcStateJson, currAigcStateJson);
+                // logToRenderer('aigc State:', prevAigcStateJson, currAigcStateJson);
                 // window._toMain('aigc-set', currState.aigc.data);
                 // Note: 持久化
                 await storage.set("aigc-config", currState.aigc.data)
@@ -55,6 +49,7 @@ class IO {
         // Note: 初始化
         getPublisherConfig(storage);
         getAigcConfig(storage);
+        store.dispatch(setLogs([]));
     }
 }
 
@@ -86,19 +81,6 @@ function App() {
         }
     }, []);
 
-
-   /*  useEffect(() => {
-        document.body.addEventListener('click', () => {
-            chrome.tabs.query({active: true, lastFocusedWindow: true}, ([tab]) => {
-                const port = chrome.tabs.connect(tab.id, {name: 'toc'});
-                port.postMessage({type: 'toc', content: 'sidePanel 要你定位！'});
-                port.onMessage.addListener(function(msg) {
-                    console.log('牛逼，我服了');
-                });
-            })
-        });
-    }, []); */
-
     // const backToTop = useCallback(() => {
     //     window._toMain('notion-page-backtop');
     // }, []);
@@ -115,78 +97,78 @@ function App() {
           }}>
             <Provider store={store}>
                 <Layout style={{ padding: 10 }}>
-                <Tabs
-                    size={"small"}
-                    type={"card"}
-                    defaultActiveKey={"basic"}
-                    tabBarExtraContent={{
-                        right: (
-                            <>
-                                <Tooltip title={"Notion 返回顶部"}>
-                                    <Button type={"link"} size={"small"} /* onClick={backToTop} */>
-                                        <VerticalAlignTopOutlined />
-                                    </Button>
-                                </Tooltip>
-                                <Tooltip title={"Notion 刷新页面"}>
-                                    <Button
-                                        type={"link"}
-                                        size={"small"} /* onClick={refreshNotionPage} */
-                                    >
-                                        <ReloadOutlined />
-                                    </Button>
-                                </Tooltip>
-                            </>
-                        )
-                    }}
-                    renderTabBar={(props, DefaultBar) => {
-                        return (
-                            <StickyBox offsetTop={0} style={{zIndex: 1}}>
-                                <DefaultBar
-                                    {...props}
-                                    style={{
-                                        backgroundColor: colorBgContainer,
-                                        paddingTop: 10
-                                    }}
-                                />
-                            </StickyBox>
-                        );
-                    }}
-                    items={[
-                        {
-                            key: "basic",
-                            label: "基本",
-                            children: (
-                                <Collapse size="small" activeKey={["basic"]}>
-                                    <Toc />
-                                </Collapse>
+                    <Tabs
+                        size={"small"}
+                        type={"card"}
+                        defaultActiveKey={"basic"}
+                        tabBarExtraContent={{
+                            right: (
+                                <>
+                                    <Tooltip title={"Notion 返回顶部"}>
+                                        <Button type={"link"} size={"small"}>
+                                            <VerticalAlignTopOutlined />
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip title={"Notion 刷新页面"}>
+                                        <Button
+                                            type={"link"}
+                                            size={"small"}
+                                        >
+                                            <ReloadOutlined />
+                                        </Button>
+                                    </Tooltip>
+                                </>
                             )
-                        },
-                        {
-                            key: 'publisher',
-                            label: '发布',
-                            children: (
-                                <Collapse size="small">
-                                    <Publisher />
-                                </Collapse>
-                            ),
-                        },
-                        {
-                            key: 'ai',
-                            label: 'AIGC',
-                            children: (
-                                <Collapse size="small">
-                                    <Aigc />
-                                </Collapse>
-                            ),
-                        },
-                        {
-                            key: "plugin",
-                            label: "插件",
-                            children: <div>插件列表</div>
-                        }
-                    ]}
-                />
-            </Layout>
+                        }}
+                        renderTabBar={(props, DefaultBar) => {
+                            return (
+                                <StickyBox offsetTop={0} style={{zIndex: 1}}>
+                                    <DefaultBar
+                                        {...props}
+                                        style={{
+                                            backgroundColor: colorBgContainer,
+                                            paddingTop: 10
+                                        }}
+                                    />
+                                </StickyBox>
+                            );
+                        }}
+                        items={[
+                            {
+                                key: "basic",
+                                label: "基本",
+                                children: (
+                                    <Collapse size="small" activeKey={["basic"]}>
+                                        <Toc />
+                                    </Collapse>
+                                )
+                            },
+                            {
+                                key: 'publisher',
+                                label: '发布',
+                                children: (
+                                    <Collapse size="small">
+                                        <Publisher />
+                                    </Collapse>
+                                ),
+                            },
+                            {
+                                key: 'ai',
+                                label: 'AIGC',
+                                children: (
+                                    <Collapse size="small">
+                                        <Aigc />
+                                    </Collapse>
+                                ),
+                            },
+                            {
+                                key: "plugin",
+                                label: "插件",
+                                children: <div>插件列表</div>
+                            }
+                        ]}
+                    />
+                </Layout>
             </Provider>
           </ConfigProvider>
     );
