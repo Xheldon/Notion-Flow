@@ -75,7 +75,7 @@ const itemList = [
     },
 ];
 
-const Aigc = (props: any) => {
+const Aigc = (props: any = {}) => {
     const aigc = useSelector((state: State) => state.aigc.data);
     const [form] = Form.useForm();
     const [activeConfig, setActiveConfig] = useState(true);

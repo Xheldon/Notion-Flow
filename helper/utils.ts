@@ -100,13 +100,20 @@ const getAigcConfig = async (storage) => {
 
 // Note: contnet -> sidePanel
 const _toSidePanel = (name, data?, cb?) => {
+    console.log('_toSidePanel:', name, data);
     var port = chrome.runtime.connect({name});
     port.postMessage({name, data});
     port.onMessage.addListener(cb);
 };
 
 const _toContent = (name, data?, cb?) => {
-    chrome.tabs.query({active: true, lastFocusedWindow: true}, ([tab]) => {
+    console.log('_toContent:', name, data);
+    chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
+        console.log('tab:', tab);
+        // if (!tab) {
+        //     console.log('tab 不存在');
+        //     return
+        // };
         const port = chrome.tabs.connect(tab.id, {name});
         port.postMessage({name, data});
         port.onMessage.addListener(cb);
@@ -137,7 +144,7 @@ const notionGetToc = (cb: (type: 'toc' | 'selection', toc: TocItem[] | string) =
         return;
     }
     if (main) {
-        const container: Element[] = Array.from(main.children);
+        const container: Element[] = [...main.children];
         const getItem = (level: number, ele: Element) => {
             return {
                 level,
@@ -204,7 +211,7 @@ const notionSelectionChange = (cb: (content: string) => void) => {
         timer = setTimeout(() => {
             if (window.getSelection()?.type === 'None') {
                 // Note: 此时判断是否为块级选中
-                const selectBlock = Array.from(document.querySelectorAll('.notion-selectable-halo'));
+                const selectBlock = [...document.querySelectorAll('.notion-selectable-halo')];
                 if (selectBlock.length) {                        
                     // console.log('selectBlock:', selectBlock, target);
                     if (selectBlock.every(ele => {
@@ -281,11 +288,12 @@ const _inline = (list: any): string => {
     }, '');
 };
 
+// TODO: 引入插件系统，支持用户自定义 notion block 转换函数处理 markdown；增强健壮性。
 // Note: indent 表示子元素缩进层级
 const notion2markdown = async function (list: any, meta: Meta, indent: number, debug: boolean,) {
     if (!Array.isArray(list)) {
-        logToRenderer('notion2markdown参数不是数组');
-        throw new Error('params is not array!');
+        logToRenderer('notion2markdown 第一个参数不是 block 数组！');
+        return Promise.resolve(null);
     }
     /* if (!list.length) {
         return Promise.resolve('');
@@ -304,24 +312,23 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                 case 'bookmark': {
                     // FIXME: API 接口本身不含 bookmark 的图片信息，所以需要调用 api 直接查询 notion 的 dom
                     // await window._toMain('notion-bookmark-desc-get', item.id);
-                    // Note: 接收来自 main 的通知
-                    return await new Promise((res) => {
-                        /* window._fromMainOnce(`send-bookmark-desc-${item.id}`, (_, props) => {
-                            const {content: {title = '', desc = '', img = ''}} = props;
+                    
+                    return new Promise((res) => {
+                        _toContent('notion-bookmark-desc-get', item.id, (props) => {
+                            const {title = '', desc = '', img = ''} = props;
                             if (title || desc || img) {
                                 res(`{% render_bookmark url="${block.url}" title="${title}" img="${img}" yid="" bid="" %}\n${desc}\n{% endrender_bookmark %}\n`);
                             } else {
                                 // Note: 从 notion 获取 bookmark 信息失败，直接使用链接
                                 res(`${block.url}\n`);
                             }
-                        }); */
+                        });
                     });
                 }
                 case 'image': {
                     // Note: unsplash 图片是 block.external，自己上传的是 block.file
                     const url = block[block.type]?.url;
                     if (url) {
-                        // const ossUrl = await window._toMain('notion-image-upload', {url, meta, id: item.id, debug});
                         const ossUrl = await this.uploadNotionImageToOSS({url, meta, id: item.id, debug});
                         const caption = _inline(block.caption);
                         return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
@@ -339,7 +346,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                 }
                 case 'table': {
                     // FIXME: 需要递归查找 table 元素内容 table_row
-                    // const tableRows = await window._toMain('notion-content-get', item.id);
+                    const tableRows = await this.getNotionContent(item.id);
                     // Note: 构建一个表格
                     return tableRows.reduce((prev: any, curr: any, index: number) => {
                         const cells = curr[curr.type].cells;
@@ -362,7 +369,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let children = [];
                     let _indent = indent;
                     if (item.has_children) {
-                        // children = await window._toMain('notion-content-get', item.id);
+                        children = await this.getNotionContent(item.id);
                     }
                     const isChecked = block.checked;
                     return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
@@ -371,7 +378,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let children = [];
                     let _indent = indent;
                     if (item.has_children) {
-                        // children = await window._toMain('notion-content-get', item.id);
+                        children = await this.getNotionContent(item.id);
                     }
                     return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                 }
@@ -379,7 +386,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let children = [];
                     let _indent = indent;
                     if (item.has_children) {
-                        // children = await window._toMain('notion-content-get', item.id);
+                        children = await this.getNotionContent(item.id);
                     }
                     return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                 }
@@ -412,7 +419,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     if (_url) {
                         if (block.type === 'file') {
                             // Note: 获取文件后缀
-                            // const _ossUrl = await window._toMain('notion-image-upload', {url: _url, meta, id: item.id, debug});
+                            const _ossUrl = await this.uploadNotionImageToOSS({url: _url, meta, id: item.id, debug});
                             let suffix = '';
                             const ossUrl = new URL(_ossUrl);
                             const arr = ossUrl.pathname.split('.');
@@ -443,7 +450,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     return `\`\`\`${block.language}\n${_inline(block.rich_text)}\n\`\`\`\n`;
                 }
                 case 'embed': {
-                    // FIXME: 使用 jekyll 支持一下也不是不行
+                    // TODO: 使用 jekyll 支持一下也不是不行
                     return '嵌入音乐暂不支持\n';
                 }
                 default: {

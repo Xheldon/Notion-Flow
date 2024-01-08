@@ -2,15 +2,21 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Col, Collapse, Empty } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
+import { Storage } from "@plasmohq/storage"
 
 import type { State, TocItem } from '$types';
 import { _toContent } from '$utils';
-import store, { setToc } from '$store';
 
 const { Panel } = Collapse;
 
+const tocStyleMap = {
+  text: ['H1', 'H2', 'H3'],
+  number: ['1.', '2.', '3.'],
+  none: ['', '', ''],
+};
+
 const Toc = (props: any) => {
-  const toc = useSelector((state: State) => state.toc.data);
+  const toc: TocItem[] = useSelector((state: State) => state.toc.data);
   const [active, setActive] = useState(true);
 
   const _locateHeading = useCallback((key: string) => {
@@ -45,12 +51,12 @@ const Toc = (props: any) => {
             offset={t.level - 1}
             className={'toc-item'}
             key={t.key}
-          >{`H${t.level} ${t.title}`}</Col>
+          >{`${tocStyleMap[props.tocstyle][t.level - 1]} ${t.title}`}</Col>
         );
       });
     }
     return <Empty />;
-  }, [toc]);
+  }, [toc, props.tocstyle]);
 
   useEffect(() => {
     // Noote: 组件加载后立即获取一次

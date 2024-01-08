@@ -150,7 +150,7 @@ function OptionsIndex() {
             }
         },
         oss: {
-            enable: true,
+            // enable: true,
             name: 'tx',
             tx: {
                 secretId: '',
@@ -169,7 +169,7 @@ function OptionsIndex() {
     };
 
     const enablePublisher = Form.useWatch(['publisher', 'enable'], form);
-    const enableOss = Form.useWatch(['oss', 'enable'], form);
+    // const enableOss = Form.useWatch(['oss', 'enable'], form);
     const ossName = Form.useWatch(['oss', 'name'], form);
 
     const tooltips = useCallback((tooltip: { link: string; text: string }) => {
@@ -246,7 +246,7 @@ function OptionsIndex() {
                                 );
                             })}
                         </div>
-                        <div style={{ display: enablePublisher ? 'block' : 'none' }}>
+                        {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Divider />
                             <Form.Item
                                 name={['oss', 'enable']}
@@ -256,12 +256,18 @@ function OptionsIndex() {
                                 }>
                                 <Switch />
                             </Form.Item>
-                        </div>
-                        <div style={{ display: (enablePublisher && enableOss) ? 'block' : 'none' }}>
-                            <Form.Item label='OSS 提供商' name={['oss', 'name']} labelAlign='right'>
-                                <Radio.Group>
-                                    {Object.keys(ossFormItems).map(key => <Radio.Button value={key}>{ossNameMap[key]}</Radio.Button>)}
-                                </Radio.Group>
+                        </div> */}
+                        <div style={{ display: enablePublisher ? 'block' : 'none' }}>
+                            <Form.Item
+                                label='OSS 提供商'
+                                name={['oss', 'name']}
+                                labelAlign='right'
+                                extra={
+                                    <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，强烈建议配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
+                                }>
+                                    <Radio.Group>
+                                        {Object.keys(ossFormItems).map(key => <Radio.Button value={key}>{ossNameMap[key]}</Radio.Button>)}
+                                    </Radio.Group>
                             </Form.Item>
                             <div style={{ display: (ossName && ossFormItems[ossName]) ? 'block' : 'none' }}>
                                 {ossName && ossFormItems[ossName].map((item, key) => {
@@ -283,7 +289,6 @@ function OptionsIndex() {
                                     );
                                 })}
                             </div>
-
                         </div>
                         <Divider />
                         <Form.Item

@@ -100,6 +100,12 @@ export default class Req {
                 logToRenderer('uploadNotionImageToOSS 错误，OSS 未配置');
                 return Promise.resolve(null);
             }
+            const options = await storage.get('options') as PublisherOptions;
+            const cdn = options.oss[options.oss.name].cdn;
+            if (!cdn) {
+                logToRenderer('uploadNotionImageToOSS 错误，CDN 未配置');
+                return Promise.resolve(null);
+            }
             const {url, meta: {cos}, id, debug, uuid = ''} = props;
             const pathname = new URL(url).pathname;
             const suffixArr = pathname.split('.');
@@ -117,7 +123,7 @@ export default class Req {
                 });
                 logToRenderer(`资源 ${key} 已存在`);
                 // FIXME: 设置自定义 cdn 参数
-                return `https://static.xheldon.cn/${key}`;
+                return `${cdn}/${key}`;
             } catch (err) {
                 if (err.statusCode === 404) {
                     const res = await axios({
@@ -147,7 +153,7 @@ export default class Req {
                         }
                         try {
                             logToRenderer('准备上传', key);
-                            const uri = `https://static.xheldon.cn/${key}`;
+                            const uri = `${cdn}/${key}`;
                             if (!debug) {
                                 // Note: 不搞那么复杂，加个随机的延时就行
                                 await new Promise((res) => {
@@ -159,12 +165,12 @@ export default class Req {
                                         }));
                                     }, 1000 * Math.random());
                                 });
-                                logToRenderer(`上传 ${key} 成功！，准备刷新缓存！`);
+                                logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
                                 // FIXME: 先获取其中图片总数，然后在最后一次性刷新，而不是上传一次刷新一次
-                                const res = await this.cdn.PurgeUrlsCache({
+                                /* const res = await this.cdn.PurgeUrlsCache({
                                     Urls: [uri]
                                 });
-                                logToRenderer(`刷新 ${key} 结果:`, res);
+                                logToRenderer(`刷新 ${key} 结果:`, res); */
                             } else {
                                 logToRenderer(`[debug] 上传 ${key} 成功！，准备刷新缓存！`);
                                 logToRenderer(`[debug] 刷新 ${key} 结果:`, '成功');
@@ -184,7 +190,7 @@ export default class Req {
                 }
             }
         } catch (err) {
-            logToRenderer(`image err: ${err}`);
+            logToRenderer(`upload image err: ${err}`);
             throw new Error(err);
         }
     }
@@ -292,13 +298,16 @@ export default class Req {
         const contentBase64 = Buffer.from(content).toString('base64');
         try {
             const res = await this.github.rest.repos.getContent(getContentConfig);
-            logToRenderer('获取信息成功:', res);
+            logToRenderer('get info success:', res);
             
             const createOrUpdateConfig = {
                 ...this.githubCommon,
                 path: meta.path,
                 message: `更新 ${meta.title} !`,
-                sha: res.data?.sha,
+                // Note: 显然这是一个 octokit 的 bug，它的类型定义里面 data 只能是数组（目录），但实际还可以是对象
+                //  见：https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
+                //  和：https://octokit.github.io/rest.js/v20 （搜索 getContent)
+                sha: !Array.isArray(res.data) && res.data?.sha,
                 content: contentBase64,
             };
             try {
@@ -365,7 +374,8 @@ export default class Req {
                     SecretId: ossSecretId,
                     SecretKey: ossSecretKey,
                 });
-                this.cdn = new tencentcloud.cdn.v20180606.Client({
+                // Note: 用于刷新 cdn 缓存，但是这个接口不支持浏览器环境，所以暂时不用
+                /* this.cdn = new tencentcloud.cdn.v20180606.Client({
                     credential: {
                         secretId: ossSecretId,
                         secretKey: ossSecretKey,
@@ -376,7 +386,7 @@ export default class Req {
                             endpoint: 'cdn.tencentcloudapi.com',
                         }
                     }
-                });
+                }); */
                 this.ossCommon = {
                     Bucket: ossBucket,
                     Region: ossRegion,

@@ -1,35 +1,80 @@
+import React, { useEffect, useRef, useState } from "react"
 import { ReloadOutlined, VerticalAlignTopOutlined, BarsOutlined, AppstoreOutlined } from "@ant-design/icons"
 import StickyBox from 'react-sticky-box';
+import type { PlasmoCSConfig } from 'plasmo';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
-import { Storage } from "@plasmohq/storage"
-import { Button, Collapse, Layout, Tabs, theme, Tooltip, Segmented } from "antd"
+import { Storage, } from "@plasmohq/storage"
+import { Button, Collapse, Layout, Tabs, theme, Tooltip, Segmented, ConfigProvider } from "antd"
 
 import type { State, PublisherOptions } from '$types';
 import { getPublisherConfig, getAigcConfig } from '$utils';
 import store, { setToc, setLogs } from '$store';
 import Toc from "$components/toc"
-import React, { useEffect } from "react"
-
-
 import Publisher from '$components/publisher';
 import Aigc from '$components/aigc';
+import Req from '$api';
 
 import "./styles.css"
  
 const storage = new Storage();
 
-let enabledTabs: any = null;
+// export const config: PlasmoCSConfig = {
+//     matches: ['https://www.notion.so/*'],
+//     all_frames: true,
+// };
 
-(async () => {
-    const options: PublisherOptions = await storage.get('options');
-    enabledTabs = {
-        basic: true,
-        publisher: !!options?.publisher?.enable && !!options?.oss?.enable,
-        aigc: !!options?.aigc?.enable,
-        plugin: false,
+let enabledTabs: any = {};
+
+// Note：点击图标时，打开 sidepanel
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
+
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    console.log('activeInfo:', activeInfo);
+    const tabId = activeInfo.tabId;
+    const tab = await chrome.tabs.get(tabId);
+    console.log('tab:', tab);
+    if (!tab.url) {
+        await chrome.sidePanel.setOptions({
+            tabId,
+            enabled: false
+          });
+          return;
     };
-})();
+    const url = new URL(tab.url);
+    if (url.origin === 'https://www.notion.so') {
+      await chrome.sidePanel.setOptions({
+        tabId,
+        path: 'sidepanel.html',
+        enabled: true
+      });
+    } else {
+      // Disables the side panel on all other sites
+      await chrome.sidePanel.setOptions({
+        tabId,
+        enabled: false
+      });
+    }
+  });
+chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+    console.log('holy:', tabId, info ,tab);
+    if (!tab.url) return;
+    const url = new URL(tab.url);
+    if (url.origin === 'https://www.notion.so') {
+      await chrome.sidePanel.setOptions({
+        tabId,
+        path: 'sidepanel.html',
+        enabled: true
+      });
+    } else {
+      // Disables the side panel on all other sites
+      await chrome.sidePanel.setOptions({
+        tabId,
+        enabled: false
+      });
+    }
+  });
 
 class IO {
     constructor() {
@@ -70,35 +115,55 @@ new IO();
 const tabList = [
     {
         key: "basic",
-        label: "基本",
-        children: (
-            <Collapse size="small" activeKey={["basic"]}>
-                <Toc />
-            </Collapse>
-        )
+        content: (props) => {
+            return {
+                key: 'basic',
+                label: "基本",
+                children: (
+                    <Collapse size="small" activeKey={["basic"]}>
+                        <Toc {...props} />
+                    </Collapse>
+                )
+            };
+        },
     },
     {
         key: 'publisher',
-        label: '发布',
-        children: (
-            <Collapse size="small">
-                <Publisher />
-            </Collapse>
-        ),
+        content: (props) => {
+            return {
+                key: 'publisher',
+                label: '发布',
+                children: (
+                    <Collapse size="small">
+                        <Publisher {...props} />
+                    </Collapse>
+                ),
+            };
+        }
     },
     {
-        key: 'ai',
-        label: 'AIGC',
-        children: (
-            <Collapse size="small">
-                <Aigc />
-            </Collapse>
-        ),
+        key: 'aigc',
+        content: (props) => {
+            return {
+                key: 'aigc',
+                label: 'AIGC',
+                children: (
+                    <Collapse size="small">
+                        <Aigc {...props} />
+                    </Collapse>
+                ),
+            };
+        }
     },
     {
         key: "plugin",
-        label: "插件",
-        children: <div>插件列表</div>
+        content: (props) => {
+            return {
+                key: "plugin",
+                label: "插件",
+                children: <div>插件列表</div>
+            };
+        }
     }
 ];
 
@@ -107,9 +172,30 @@ function App() {
         token: { colorBgContainer }
     } = theme.useToken();
 
-    const [tabs, setTabs] = React.useState(Object.keys(enabledTabs).filter((key) => enabledTabs[key]));
+    const [tabs, setTabs] = useState([]);
+    const [tocstyle, setTocStyle] = useState("text");
+    const req = useRef(null);
 
     useEffect(() => {
+        (async () => {
+            const options: PublisherOptions = await storage.get('options');
+            enabledTabs = {
+                basic: true,
+                publisher: !!options?.publisher?.enable,
+                aigc: !!options?.aigc?.enable,
+                plugin: false,
+            };
+            if (options) {
+                const _publisherOptions = {
+                    github: options.publisher.github,
+                    notion: options.publisher.notion,
+                    oss: options.oss[options.oss.name],
+                };
+                req.current = new Req(_publisherOptions);
+            }
+            setTabs(Object.keys(enabledTabs).filter((key) => enabledTabs[key]));
+            setTocStyle(options?.['heading-style'] || 'text');
+        })();
         const cb = (port) => {
             port.onMessage.addListener(function (msg) {
                 console.log('sidePanel 收到消息:', msg);
@@ -133,14 +219,23 @@ function App() {
     useEffect(() => {
         storage.watch({
             options: (opt) => {
-                const {newValue: {publisher, oss, aigc, plugin}} = opt;
+                const {newValue: {'heading-style': headingStyle, publisher, oss, aigc, plugin}} = opt;
                 const enabledTabs = {
                     basic: true,
+                    publisher: !!publisher?.enable,
                     aigc: !!aigc?.enable,
-                    publisher: !!publisher?.enable  && !!oss?.enable,
                     plugin: !!plugin?.enable,
                 };
+                if (publisher.enable) {
+                    const _publisherOptions = {
+                        github: publisher?.github,
+                        notion: publisher?.notion,
+                        oss: oss?.[oss?.name],
+                    };
+                    req.current = new Req(_publisherOptions);
+                }
                 setTabs(Object.keys(enabledTabs).filter((key) => enabledTabs[key]));
+                setTocStyle(headingStyle);
             }
         });
     }, []);
@@ -178,7 +273,14 @@ function App() {
                                             type={"link"}
                                             size={"small"}
                                         >
-                                            <ReloadOutlined />
+                                            <ReloadOutlined onClick={() => {
+                                                chrome.sidePanel.getOptions({}, (options) => {
+                                                    console.log('getOptions:', options);
+                                                });
+                                                chrome.sidePanel.getPanelBehavior((options) => {
+                                                    console.log('getOptions:', options);
+                                                })
+                                            }} />
                                         </Button>
                                     </Tooltip>
                                 </>
@@ -199,7 +301,7 @@ function App() {
                         }}
                         items={tabList.map(tab => {
                             if (tabs.includes(tab.key)) {
-                                return tab;
+                                return tab.content({tocstyle, req});
                             }
                         }).filter(Boolean)}
                     />

@@ -10,7 +10,7 @@
   ],
   "compilerOptions": {
     "jsx": "react",
-    "target": "ES5",
+    "target": "ES2015",
     "allowJs": true,
     "paths": {
       "~*": [

@@ -1,5 +1,5 @@
 {
-  "name": "Notion-Flow",
+  "name": "notion-flow",
   "displayName": "Notion flow",
   "version": "0.0.1",
   "description": "Publish your Notion article to your Github Jekyll blog, and upload the blog images to an OSS service.",
@@ -38,7 +38,7 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "https://www.notion.so/*"
     ]
   }
 }

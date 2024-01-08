@@ -29,7 +29,7 @@ function getNotionToc() {
         return;
     }
     if (main) {
-        const container: Element[] = Array.from(main.children);
+        const container: Element[] = [...main.children];
         const getItem = (level: number, ele: Element) => {
             return {
                 level,
@@ -97,6 +97,19 @@ chrome.runtime.onConnect.addListener(function (port) {
                     port.postMessage(null);
                 }
             }
+            case 'notion-bookmark-desc-get': {
+                const bookmarkDom = document.querySelector(`[data-block-id='${data}']`);
+                if (!bookmarkDom) {
+                    // Note: 该 bookmark 虽然类型是 bookmark 但是 dom 不存在，直接渲染链接
+                    port.postMessage({});
+                }
+                const title = bookmarkDom.querySelector('a > div:nth-child(1) > div:nth-child(1)')?.textContent || '';
+                const desc = bookmarkDom.querySelector('a > div:nth-child(1) > div:nth-child(2)')?.textContent || '';
+                const img = (bookmarkDom.querySelector('a > div:nth-child(2) img') as HTMLImageElement)?.src;
+                // FIXME: img 可能存在于 notion 存储，需要转存一次
+                port.postMessage({title, desc, img});
+                break;
+            }
             /* case 'notion-meta-get': {
                 const {debug, blockId} = data;
                 const meta: Meta = api.getNotionMeta(blockId, debug);
@@ -157,7 +170,7 @@ window.addEventListener('load', () => {
         timer = setTimeout(() => {
             if (window.getSelection()?.type === 'None') {
                 // Note: 此时判断是否为块级选中
-                const selectBlock = Array.from(document.querySelectorAll('.notion-selectable-halo'));
+                const selectBlock = [...document.querySelectorAll('.notion-selectable-halo')];
                 if (selectBlock.length) {                        
                     // console.log('selectBlock:', selectBlock, target);
                     if (selectBlock.every(ele => {

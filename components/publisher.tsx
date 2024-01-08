@@ -3,7 +3,6 @@ import { Button, Row, Collapse, notification, message } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
-import { Storage } from "@plasmohq/storage"
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
 import type { PublisherOptions, State, Meta } from '$types';
@@ -12,24 +11,8 @@ import Req from '$api';
 
 const { Panel } = Collapse;
 
-const storage = new Storage();
-
-let _publisherOptions = null;
-
-let req = null;
-(async () => {
-    const _: PublisherOptions = await storage.get('options');
-    if (_) {
-        _publisherOptions = {
-            github: _.publisher.github,
-            notion: _.publisher.notion,
-            oss: _.oss[_.oss.name],
-        };
-        req = new Req(_publisherOptions);
-    }
-})();
-
 const Publisher = (props: any) => {
+    const {req} = props;
     const config = useSelector((state: State) => state.publisher.data);
     const logs = useSelector((state: State) => state.logs.data);
     // Note: 默认打开状态通过配置读取，记录上次打开状态
@@ -37,7 +20,6 @@ const Publisher = (props: any) => {
     const [activeLog, setActiveLog] = useState(config.logFold);
     const [loading, setLoading] = useState(false);
     const [noti, contextHolder] = notification.useNotification();
-    const [publisherOptions, setPublisherOptions] = useState(_publisherOptions);
     const [messageApi, contextHolder2] = message.useMessage();
     // const [logs, setLogs] = useState(_logs);
 
@@ -80,21 +62,21 @@ const Publisher = (props: any) => {
                     try {
                         // Note: meta 信息中可以拿到 cover 信息，对应 header-img 属性
                         // const meta = await window._toMain('notion-meta-get', blockId, debug);
-                        req.getNotionMeta(blockId, debug).then((meta: Meta) => {
+                        req.current?.getNotionMeta(blockId, debug).then((meta: Meta) => {
                             logToRenderer('获取 meta 信息:', meta);
                             if (!meta) {
                                 messageApi.open({
                                     type: 'error',
-                                    content: '获取 Notion Meta 信息失败',
+                                    content: 'getNotionMeta 方法错误，获取 Notion Meta 内容失败',
                                 });
                                 setLoading(false);
                                 return;
                             }
-                            req.getNotionContent(blockId).then((blocks) => {
+                            req.current?.getNotionContent(blockId).then((blocks) => {
                                 if (!blocks) {
                                     messageApi.open({
                                         type: 'error',
-                                        content: '获取 Notion 模块信息失败',
+                                        content: 'getNotionContent 方法错误，获取 Notion 内容失败',
                                     });
                                     setLoading(false);
                                     return;
@@ -102,10 +84,34 @@ const Publisher = (props: any) => {
                                 const metaString = notionMeta2string(meta);
                                 try {
                                     notion2markdown.bind(req)(blocks, meta, 0, debug).then(markdown => {
+                                        if (!markdown) {
+                                            messageApi.open({
+                                                type: 'error',
+                                                content: 'notion2markdown 方法错误，转换成 Markdown 格式失败',
+                                            });
+                                            setLoading(false);
+                                            return;
+                                        }
                                         logToRenderer('blocks:', metaString + markdown.join('\n'));
                                         console.log(metaString + markdown.join('\n'));
-                                        req.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
-                                            req.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
+                                        req.current?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
+                                            if (!result) {
+                                                messageApi.open({
+                                                    type: 'error',
+                                                    content: 'send2Github 方法错误',
+                                                });
+                                                setLoading(false);
+                                                return;
+                                            }
+                                            req.current?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
+                                                if (!updateMetaResult) {
+                                                    messageApi.open({
+                                                        type: 'error',
+                                                        content: 'updateNotionLastUpdateTime 方法错误，未更新 lastUpdateTime 字段',
+                                                    });
+                                                    setLoading(false);
+                                                    return;
+                                                }
                                                 logToRenderer('更新 Notion meta 结果:', updateMetaResult);
                                                 logToRenderer('更新到 github 结果:', result);
                                                 setLoading(false);
@@ -152,21 +158,6 @@ const Publisher = (props: any) => {
     // useEffect(() => {
     //     setLogs(_logs);
     // }, [_logs]);
-
-    useEffect(() => {
-        // Note: 初始化的时候读取 options 配置，变化的时候也监听该配置
-        storage.watch({
-            options: (opt) => {
-                const {newValue: {publisher, oss}} = opt;
-                // console.log('holy shit, i get the opt:', opt);
-                setPublisherOptions({
-                    github: publisher.github,
-                    notion: publisher.notion,
-                    oss: oss[oss.name]
-                });
-            }
-        });
-    }, []);
     
     return (
         <>
