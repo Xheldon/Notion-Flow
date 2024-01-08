@@ -96,12 +96,14 @@ chrome.runtime.onConnect.addListener(function (port) {
                 } catch (e) {
                     port.postMessage(null);
                 }
+                break;
             }
             case 'notion-bookmark-desc-get': {
                 const bookmarkDom = document.querySelector(`[data-block-id='${data}']`);
                 if (!bookmarkDom) {
                     // Note: 该 bookmark 虽然类型是 bookmark 但是 dom 不存在，直接渲染链接
                     port.postMessage({});
+                    break;
                 }
                 const title = bookmarkDom.querySelector('a > div:nth-child(1) > div:nth-child(1)')?.textContent || '';
                 const desc = bookmarkDom.querySelector('a > div:nth-child(1) > div:nth-child(2)')?.textContent || '';
@@ -110,12 +112,6 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({title, desc, img});
                 break;
             }
-            /* case 'notion-meta-get': {
-                const {debug, blockId} = data;
-                const meta: Meta = api.getNotionMeta(blockId, debug);
-                port.postMessage(meta);
-                break;
-            } */
             case 'reload' : { // Note: sidePanel 主动要求刷新页面
                 break;
             }

@@ -12,7 +12,7 @@ import Req from '$api';
 const { Panel } = Collapse;
 
 const Publisher = (props: any) => {
-    const {req} = props;
+    const {req: {current: req}} = props;
     const config = useSelector((state: State) => state.publisher.data);
     const logs = useSelector((state: State) => state.logs.data);
     // Note: 默认打开状态通过配置读取，记录上次打开状态
@@ -55,14 +55,12 @@ const Publisher = (props: any) => {
                 return;
             }
             setLoading(true);
-            // const blockId = await window._toMain('notion-block-id-get');
             _toContent('notion-block-id-get', null, (blockId) => {
                 console.log('获取当前 block id:', blockId);
                 if (blockId) {
                     try {
                         // Note: meta 信息中可以拿到 cover 信息，对应 header-img 属性
-                        // const meta = await window._toMain('notion-meta-get', blockId, debug);
-                        req.current?.getNotionMeta(blockId, debug).then((meta: Meta) => {
+                        req?.getNotionMeta(blockId, debug).then((meta: Meta) => {
                             logToRenderer('获取 meta 信息:', meta);
                             if (!meta) {
                                 messageApi.open({
@@ -72,7 +70,7 @@ const Publisher = (props: any) => {
                                 setLoading(false);
                                 return;
                             }
-                            req.current?.getNotionContent(blockId).then((blocks) => {
+                            req?.getNotionContent(blockId).then((blocks) => {
                                 if (!blocks) {
                                     messageApi.open({
                                         type: 'error',
@@ -94,7 +92,7 @@ const Publisher = (props: any) => {
                                         }
                                         logToRenderer('blocks:', metaString + markdown.join('\n'));
                                         console.log(metaString + markdown.join('\n'));
-                                        req.current?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
+                                        req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
                                             if (!result) {
                                                 messageApi.open({
                                                     type: 'error',
@@ -103,7 +101,7 @@ const Publisher = (props: any) => {
                                                 setLoading(false);
                                                 return;
                                             }
-                                            req.current?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
+                                            req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
                                                 if (!updateMetaResult) {
                                                     messageApi.open({
                                                         type: 'error',

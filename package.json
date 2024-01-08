@@ -38,7 +38,7 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://www.notion.so/*"
+      "https://*/*"
     ]
   }
 }
