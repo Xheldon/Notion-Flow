@@ -100,17 +100,26 @@ const Publisher = (props: any) => {
                                     return;
                                 }
                                 const metaString = notionMeta2string(meta);
-                                notion2markdown(blocks, meta, 0, debug).then(markdown => {
-                                    logToRenderer('blocks:', metaString + markdown.join('\n'));
-                                    console.log(metaString + markdown.join('\n'));
-                                    req.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
-                                        req.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
-                                            logToRenderer('更新 Notion meta 结果:', updateMetaResult);
-                                            logToRenderer('更新到 github 结果:', result);
-                                            setLoading(false);
+                                try {
+                                    notion2markdown.bind(req)(blocks, meta, 0, debug).then(markdown => {
+                                        logToRenderer('blocks:', metaString + markdown.join('\n'));
+                                        console.log(metaString + markdown.join('\n'));
+                                        req.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
+                                            req.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
+                                                logToRenderer('更新 Notion meta 结果:', updateMetaResult);
+                                                logToRenderer('更新到 github 结果:', result);
+                                                setLoading(false);
+                                            });
                                         });
                                     });
-                                });
+                                } catch(e) {
+                                    setLoading(false);
+                                    noti.error({
+                                        message: '转换 Notion 内容失败',
+                                        description: e.toString()
+                                    });
+                                    logToRenderer('转换 Notion 内容失败:', e);
+                                }
                             });
                         });
                     } catch (e) {

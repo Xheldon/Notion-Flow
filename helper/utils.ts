@@ -322,7 +322,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     const url = block[block.type]?.url;
                     if (url) {
                         // const ossUrl = await window._toMain('notion-image-upload', {url, meta, id: item.id, debug});
-                        const ossUrl = await this.uploadNotionImageToOSS('notion-image-upload', {url, meta, id: item.id, debug});
+                        const ossUrl = await this.uploadNotionImageToOSS({url, meta, id: item.id, debug});
                         const caption = _inline(block.caption);
                         return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                     }
@@ -365,7 +365,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                         // children = await window._toMain('notion-content-get', item.id);
                     }
                     const isChecked = block.checked;
-                    return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown(children, meta, ++_indent, debug)).join('')}`;
+                    return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                 }
                 case 'numbered_list_item': {
                     let children = [];
@@ -373,7 +373,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     if (item.has_children) {
                         // children = await window._toMain('notion-content-get', item.id);
                     }
-                    return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown(children, meta, ++_indent, debug)).join('')}`;
+                    return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                 }
                 case 'bulleted_list_item': {
                     let children = [];
@@ -381,7 +381,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     if (item.has_children) {
                         // children = await window._toMain('notion-content-get', item.id);
                     }
-                    return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown(children, meta, ++_indent, debug)).join('')}`;
+                    return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                 }
                 case 'quote': {
                     const text = _inline(block.rich_text);
