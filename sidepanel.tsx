@@ -37,7 +37,7 @@ class IO {
                 // window._toMain('config-set', currState.config.data);
                 // Note: 持久化
                 // FIXME: 后面需要改成 Secure Storage，下同
-                                await storage.set("publisher-config", currState.publisher.data)
+                await storage.set("publisher-config", currState.publisher.data)
                 prevConfigStateJson = currConfigStateJson;
             }
             // Note: aigc 配置持久化
@@ -46,7 +46,7 @@ class IO {
                 // logToRenderer('aigc State:', prevAigcStateJson, currAigcStateJson);
                 // window._toMain('aigc-set', currState.aigc.data);
                 // Note: 持久化
-                                await storage.set("aigc-config", currState.aigc.data)
+                await storage.set("aigc-config", currState.aigc.data)
                 prevAigcStateJson = currAigcStateJson;
             }
             // TODO: 面板展开、收起状态持久化
@@ -67,6 +67,7 @@ const tabList = [
             return {
                 key: 'basic',
                 label: "基本",
+                icon: <span>📚</span>,
                 children: (
                     <Collapse size="small" activeKey={["basic"]}>
                         <Toc {...props} />
@@ -81,6 +82,7 @@ const tabList = [
             return {
                 key: 'publisher',
                 label: '发布',
+                icon: <span>🧑🏻‍💻</span>,
                 children: (
                     <Collapse size="small">
                         <Publisher {...props} />
@@ -115,18 +117,36 @@ const tabList = [
     }
 ];
 
-function App() {
-    const {
-        token: { colorBgContainer }
-    } = theme.useToken();
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+}
+if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+}
+// Note: 自动切换
+window.matchMedia('(prefers-color-scheme: dark)').addListener(function (mediaQueryList) {
+    if (mediaQueryList.matches) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    }
+})
+window.matchMedia('(prefers-color-scheme: light)').addListener(function (mediaQueryList) {
+    if (mediaQueryList.matches) {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+    }
+});
 
+function App() {
     const [tabs, setTabs] = useState([]);
     const [tocstyle, setTocStyle] = useState("text");
     const req = useRef(null);
 
     useEffect(() => {
         (async () => {
-                        const options: PublisherOptions = await storage.get('options');
+            const options: PublisherOptions = await storage.get('options');
             enabledTabs = {
                 basic: true,
                 publisher: !!options?.publisher?.enable,
@@ -197,7 +217,6 @@ function App() {
     // }, []);
     return (
         <ConfigProvider theme={{
-            hashed: false,
             token: {
                 colorPrimary: '#0a85d1',
             }
@@ -208,6 +227,7 @@ function App() {
                         size={"small"}
                         type={"card"}
                         defaultActiveKey={"basic"}
+                        animated={true}
                         tabBarExtraContent={{
                             right: (
                                 <>
@@ -240,13 +260,9 @@ function App() {
                         }}
                         renderTabBar={(props, DefaultBar) => {
                             return (
-                                <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
+                                <StickyBox offsetTop={0}  style={{ zIndex: 999, background: 'rgb(251, 251, 250)' }}>
                                     <DefaultBar
                                         {...props}
-                                        style={{
-                                            backgroundColor: colorBgContainer,
-                                            paddingTop: 10
-                                        }}
                                     />
                                 </StickyBox>
                             );

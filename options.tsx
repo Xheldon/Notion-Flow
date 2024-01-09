@@ -11,14 +11,38 @@ import {
     message
 } from "antd";
 
+import './styles.css';
+
 import { Storage } from "@plasmohq/storage"
+
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+}
+if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+}
+// Note: 自动切换
+window.matchMedia('(prefers-color-scheme: dark)').addListener(function (mediaQueryList) {
+    if (mediaQueryList.matches) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    }
+})
+window.matchMedia('(prefers-color-scheme: light)').addListener(function (mediaQueryList) {
+    if (mediaQueryList.matches) {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+    }
+});
 
 const storage = new Storage();
 
 let config = null;
 
 (async () => {
-        config = await storage.get('options');
+    config = await storage.get('options');
 })();
 
 const {
@@ -186,7 +210,7 @@ function OptionsIndex() {
         clearTimeout(timer);
         timer = setTimeout(() => {
             (async () => {
-                                await storage.set('options', allValues);
+                await storage.set('options', allValues);
             })();
             messageApi.open({
                 type: 'success',
@@ -216,6 +240,7 @@ function OptionsIndex() {
                                 <Radio.Button value="none">无（仅缩进）</Radio.Button>
                             </Radio.Group>
                         </Form.Item>
+                        <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色等，敬请期待。</Text></Paragraph>
                         <Divider />
                         <Form.Item
                             name={['publisher', 'enable']}
@@ -256,9 +281,9 @@ function OptionsIndex() {
                                 extra={
                                     <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
                                 }>
-                                    <Radio.Group>
-                                        {Object.keys(ossFormItems).map(key => <Radio.Button value={key}>{ossNameMap[key]}</Radio.Button>)}
-                                    </Radio.Group>
+                                <Radio.Group>
+                                    {Object.keys(ossFormItems).map(key => <Radio.Button value={key}>{ossNameMap[key]}</Radio.Button>)}
+                                </Radio.Group>
                             </Form.Item>
                             <div style={{ display: (ossName && ossFormItems[ossName]) ? 'block' : 'none' }}>
                                 {ossName && ossFormItems[ossName].map((item, key) => {
