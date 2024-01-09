@@ -56,6 +56,11 @@ export interface PublisherOptions {
         enable: boolean;
         github: GithubConfig;
         notion: NotionConfig;
+        'trans-image': boolean;
+        'trans-video': boolean;
+        'trans-bookmark': boolean;
+        'trans-callout': boolean;
+        'trans-quote': boolean;
     }
 }
 export interface TocState {

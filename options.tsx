@@ -148,11 +148,11 @@ function OptionsIndex() {
                 branch: '',
                 owner: '',
             },
-            'trans-image': false,
-            'trans-bookmark': false,
-            'trans-callout': false,
-            'trans-video': false,
-            'trans-quote': false,
+            'trans-image': true,
+            'trans-bookmark': true,
+            'trans-callout': true,
+            'trans-video': true,
+            'trans-quote': true,
         },
         oss: {
             // enable: true,
@@ -181,9 +181,8 @@ function OptionsIndex() {
         return <div>参见:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
     }, []);
 
-    const onChange = useCallback((changedValues: any, allValues: any) => {
+    const onChange = useCallback((_: any, allValues: any) => {
         // console.log(changedValues, allValues);
-        // TODO: 保存 allValues 到 storage
         clearTimeout(timer);
         timer = setTimeout(() => {
             (async () => {

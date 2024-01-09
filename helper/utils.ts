@@ -2,7 +2,10 @@
  * 工具函数，不要导入任何环境相关的依赖如 electron，因为它会被 main 和 render 同时使用
  */
 import reduxStore, { setPublisher, setAigc, setLogs } from '$store';
-import type { PublisherConfig, TocItem, Meta, AigcData } from '$types';
+import type { PublisherConfig, TocItem, Meta, AigcData, PublisherOptions } from '$types';
+import { Storage, } from "@plasmohq/storage"
+
+const storage = new Storage();
 
 // import api from '$api';
 
@@ -61,7 +64,7 @@ const logToRenderer = (..._msgs: any[]) => {
 };
 
 const getPublisherConfig = async (storage) => {
-        const config: PublisherConfig = await storage.get('publisher-config');
+    const config: PublisherConfig = await storage.get('publisher-config');
     logToRenderer('get config:', config);
     if (!config) {
         const _config = {
@@ -298,6 +301,13 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
         return Promise.resolve('');
     } */
     // FIXME: 我时常在想，既然都写 render_xxx 的 Jekyll ruby 插件了，为啥不直接写 html 标签呢？我是不是傻 =_=
+    const {publisher: {
+        'trans-image': transImage,
+        'trans-video': transVideo,
+        'trans-bookmark': transBookmark,
+        'trans-callout': transCallout,
+        'trans-quote': transQuote,
+    }}: PublisherOptions = await storage.get('options') || {publisher: {}};
     return Promise.all(list.filter(item => item.object === 'block').map(item => {
         return (async (): Promise<any> => {
             const type = item.type;
@@ -313,9 +323,15 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     // await window._toMain('notion-bookmark-desc-get', item.id);
                     
                     return new Promise((res) => {
+                        if (!transBookmark) {
+                            logToRenderer('未启用内置 Bookmark 转换功能，即将输出链接格式');
+                            res(`[${block.url}](${block.url})\n`);
+                            return;
+                        }
                         _toContent('notion-bookmark-desc-get', item.id, (props) => {
                             const {title = '', desc = '', img = ''} = props;
                             if (title || desc || img) {
+                                logToRenderer('已启用内置 Bookmark 转换功能，请提前配置 Jekyll Ruby 处理插件');
                                 res(`{% render_bookmark url="${block.url}" title="${title}" img="${img}" yid="" bid="" %}\n${desc}\n{% endrender_bookmark %}\n`);
                             } else {
                                 // Note: 从 notion 获取 bookmark 信息失败，直接使用链接
@@ -330,6 +346,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     if (url) {
                         const ossUrl = await this.uploadNotionImageToOSS({url, meta, id: item.id, debug});
                         const caption = _inline(block.caption);
+                        if (!transImage) {
+                            logToRenderer('未启用内置图片转换功能，即将输出默认图片格式');
+                            return `![${caption}](${ossUrl})`;
+                        }
+                        logToRenderer('已启用内置 Image 转换功能，请提前配置 Jekyll Ruby 处理插件');
                         return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                     }
                     return `[图片 url 不存在]\n`;
@@ -393,19 +414,28 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     const text = _inline(block.rich_text);
                     // Note: notion 的 quote 还能设置背景色，但是我感觉太丑了，所以仅读取了 Notion 的颜色（左侧边框颜色+字体颜色）
                     // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
+                    if (!transQuote) {
+                        logToRenderer('未启用内置 Blockquote 转换功能，即将输出普通引用块格式');
+                        return `> ${text}\n`;
+                    }
+                    logToRenderer('已启用内置 Blockquote 转换功能，请提前配置 Jekyll Ruby 处理插件');
                     return `{% render_quote color="${COLORS[block.color as keyof typeof COLORS] || ''}" %}${text}{% endrender_quote %}\n`;
                 }
                 case 'callout': {
                     // Note: callout markdown 不支持，也当成 quote
-                    // TODO: jekyll 添加插件支持处理 callout
-                    const icon = block.icon[block.icon.type];
                     const text = _inline(block.rich_text);
+                    if (!transCallout) {
+                        logToRenderer('未启用内置 Callout 转换功能，即将输出普通引用块格式');
+                        return `> ${text}\n`;
+                    }
+                    const icon = block.icon[block.icon.type];
                     // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
                     const blockColor = block.color.split('_');
                     const finalColor = COLORS[block.color as keyof typeof COLORS];
                     let color = '';
                     let bgColor = '';
                     blockColor.length === 2 ? (bgColor = finalColor || '') : (color = finalColor || '');
+                    logToRenderer('已启用内置 Callout 转换功能，请提前配置 Jekyll Ruby 处理插件');
                     return `{% render_callout icon="${icon}" color="${color}" bgcolor="${bgColor}" %}${text}{% endrender_callout %}\n`;
                 }
                 case 'divider': {
@@ -425,10 +455,19 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             if (arr.length > 1) {
                                 suffix = arr[arr.length - 1];
                             }
-                            return `{% render_video caption="${caption}" img="${ossUrl}" suffix="${suffix}" %}\n![${caption}](${ossUrl})\n{% endrender_video %}\n`;
+                            if (!transVideo) {
+                                logToRenderer('未启用内置 Video 转换功能，即将输出链接格式');
+                                return `[${_ossUrl}](${_ossUrl})\n`;
+                            }
+                            logToRenderer('已启用内置 Video 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                            return `{% render_video caption="${caption}" img="${_ossUrl}" suffix="${suffix}" %}\n![${caption}](${_ossUrl})\n{% endrender_video %}\n`;
                         } else if (block.type === 'external') {
                             // Note: 目前只支持 Youtube 和 Bilibili
                             const url = new URL(_url);
+                            if (!transVideo) {
+                                logToRenderer('未启用内置 Video 转换功能，即将输出链接格式');
+                                return `[${_url}](${_url})\n`;
+                            }
                             let yid = '';
                             let bid = '';
                             if (url.hostname === 'www.youtube.com') {
@@ -440,6 +479,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             } else if (url.hostname === 'www.bilibili.com') {
                                 bid = url.pathname.split('/').filter(Boolean)[1];
                             }
+                            logToRenderer('已启用内置 Video 转换功能，请提前配置 Jekyll Ruby 处理插件');
                             return `{% render_bookmark url="${_url}" title="${caption || ''}" img="" yid="${yid}" bid="${bid}" %}{% endrender_bookmark %}\n`;
                         }
                     }
