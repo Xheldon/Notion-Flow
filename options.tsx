@@ -107,7 +107,7 @@ const ossFormItems = {
     tx: [{
         label: 'SecretId',
         tooltips: {
-            link: 'https://www.xheldon.com',
+            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
             text: '如何获取腾讯云 SecretId',
         },
         message: '请输入腾讯云 SecretId',
@@ -116,7 +116,7 @@ const ossFormItems = {
     {
         label: 'SecretKey',
         tooltips: {
-            link: 'https://www.xheldon.com',
+            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
             text: '如何获取腾讯云 SecretKey',
         },
         message: '请输入腾讯云 SecretKey',
@@ -125,7 +125,7 @@ const ossFormItems = {
     {
         label: 'Bucket',
         tooltips: {
-            link: 'https://www.xheldon.com',
+            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
             text: '如何获取腾讯云 Bucket',
         },
         message: '请输入腾讯云 Bucket',
@@ -134,7 +134,7 @@ const ossFormItems = {
     {
         label: 'Region',
         tooltips: {
-            link: 'https://www.xheldon.com',
+            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
             text: '如何获取腾讯云 Region',
         },
         message: '请输入腾讯云 Region',
@@ -142,7 +142,7 @@ const ossFormItems = {
     }, {
         label: 'CDN 地址',
         tooltips: {
-            link: 'https://www.xheldon.com',
+            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
             text: '如何设置 CDN 地址',
         },
         message: '请输入 CDN 地址',
@@ -240,7 +240,7 @@ function OptionsIndex() {
                                 <Radio.Button value="none">无（仅缩进）</Radio.Button>
                             </Radio.Group>
                         </Form.Item>
-                        <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色等，敬请期待。</Text></Paragraph>
+                        <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。</Text></Paragraph>
                         <Divider />
                         <Form.Item
                             name={['publisher', 'enable']}
@@ -257,6 +257,9 @@ function OptionsIndex() {
                             <Switch />
                         </Form.Item>
                         <div style={{ display: enablePublisher ? 'block' : 'none' }}>
+                            <Paragraph>
+                                <Text mark>重要！使用前必读！</Text> <Text strong><Link href='https://xheldon.notion.site/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4' target='_blank'>发布等高级功能使用说明及答疑</Link></Text>。
+                            </Paragraph>
                             {publisherFormItems.map((item, key) => {
                                 const { label, tooltips: _tooltips, message, name } = item;
                                 const _name = name.slice();
@@ -305,6 +308,9 @@ function OptionsIndex() {
                                     );
                                 })}
                             </div>
+                            <Paragraph>
+                                <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块。</Text>
+                            </Paragraph>
                             <Form.Item
                                 key="trans-image"
                                 name={['publisher', 'trans-image']}
@@ -312,7 +318,7 @@ function OptionsIndex() {
                                 style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>内置图片转换允许你将 Notion 中的 Image 模块的 caption 设置为博客图片中的图片描述，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                        <Text>内置图片转换允许你将 Notion 中的 Image 模块的 caption 设置为博客图片中的图片描述，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
                                 }
                                 label={'启用内置图片转换'}>
@@ -325,7 +331,7 @@ function OptionsIndex() {
                                 style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>内置 Bookmark 转换允许你的博客支持 Notion 中的 Bookmark 格式，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                        <Text>内置 Bookmark 转换允许你的博客支持 Notion 中的 Bookmark 格式，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                         <br />
                                         <Text>如果你的博客支持 RSS，可能会导致你的 RSS 格式错乱（因为不是标准的 Markdown 或者 HTML 格式，因此你还需要额外的一步将 feed.xml 中的 content 使用 ruby 插件过滤一下。</Text>
                                     </>
@@ -340,7 +346,7 @@ function OptionsIndex() {
                                 style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>内置 Callout 转换允许你的博客支持 Notion 中的 Callout 格式，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                        <Text>内置 Callout 转换允许你的博客支持 Notion 中的 Callout 格式，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
                                 }
                                 label={'启用内置 Callout 转换'}>
@@ -353,7 +359,7 @@ function OptionsIndex() {
                                 style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>内置 Video 转换允许你的博客支持 Notion 中的 Video 格式，需要一定配置，详见：：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                        <Text>内置 Video 转换允许你的博客支持 Notion 中的 Video 格式，需要一定配置，详见：：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
                                 }
                                 label={'启用内置 Video 转换'}>
@@ -366,7 +372,7 @@ function OptionsIndex() {
                                 style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>内置 Quoteblock 转换允许你的博客支持 Notion 中的 Quoteblock 格式，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                        <Text>内置 Quoteblock 转换允许你的博客支持 Notion 中的 Quoteblock 格式，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
                                 }
                                 label={'启用内置 Quoteblock 转换'}>
@@ -416,7 +422,7 @@ function OptionsIndex() {
                     <Paragraph>
                         <Text>
                             作者说：<br />
-                            一开始我是<Link href="#" target="_blank">基于 Craft 的插件系统</Link>构建的个人博客发布流程，后来因为一些原因，转战到 Notion，构建了一个 Electron 应用（未发布）。
+                            一开始我的<Link href='https://www.xheldon.com/tech/my-blog-ci.html' target='_blank'>博客自动化</Link>是<Link href="https://www.xheldon.com/tech/use-craft-extension-to-write-blog.html" target="_blank">基于 Craft 的插件系统</Link>构建的<Link href='https://www.xheldon.com/tech/my-blog-ci-in-2022.html' target='_blank'>个人博客发布流程</Link>，还有一些<Link href='https://www.xheldon.com/tech/optimize-of-my-blog-2.html' target='_blank'>其他细节</Link>，甚至还<Link href='https://www.xheldon.com/tech/workflow-of-blog-publish-base-of-craft.html' target="_blank">做了个视频</Link>。后来因为<Link href='https://twitter.com/_Xheldon/status/1637481908136468480' target='_blank'>一些原因</Link>，转战到 Notion，构建了<Link href='https://twitter.com/_Xheldon/status/1669279758616793090' target='_blank'>一个 Electron 应用</Link>（未发布）。
                         </Text>
                         <br />
                         <Text>
@@ -428,8 +434,9 @@ function OptionsIndex() {
                         </Text>
                         <br />
                         <Text>
-                            <Link href="#" target="_blank">问题反馈</Link>
-                            <Link href="#" target="_blank">讨论</Link>
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Bug 反馈</Link>
+                            <br />
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">讨论</Link>
                         </Text>
 
                     </Paragraph>

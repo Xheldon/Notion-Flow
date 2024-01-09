@@ -307,7 +307,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
         'trans-bookmark': transBookmark,
         'trans-callout': transCallout,
         'trans-quote': transQuote,
-    }}: PublisherOptions = await storage.get('options') || {publisher: {}};
+    }} = (await storage.get('options') || {publisher: {}}) as Pick<PublisherOptions, 'publisher'>;
     return Promise.all(list.filter(item => item.object === 'block').map(item => {
         return (async (): Promise<any> => {
             const type = item.type;
