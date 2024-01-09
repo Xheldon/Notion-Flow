@@ -51,7 +51,7 @@ const logToRenderer = (..._msgs: any[]) => {
                 return JSON.stringify(msg);
             }
             // return JSON.stringify(msg);
-            return msg.toString();
+            return msg;
         } catch (err) {
             console.log('log error:', err);
             return ` [[log err: ${err.message}]] `;
@@ -109,7 +109,6 @@ const _toSidePanel = (name, data?, cb?) => {
 const _toContent = (name, data?, cb?) => {
     console.log('_toContent:', name, data);
     chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
-        console.log('tab:', tab);
         // if (!tab) {
         //     console.log('tab 不存在');
         //     return

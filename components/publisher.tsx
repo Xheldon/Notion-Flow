@@ -5,9 +5,8 @@ import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
-import type { PublisherOptions, State, Meta } from '$types';
+import type { State, Meta } from '$types';
 import { notion2markdown, notionMeta2string, logToRenderer, _toContent } from '$utils';
-import Req from '$api';
 
 const { Panel } = Collapse;
 
@@ -90,7 +89,7 @@ const Publisher = (props: any) => {
                                             setLoading(false);
                                             return;
                                         }
-                                        logToRenderer('blocks:', metaString + markdown.join('\n'));
+                                        logToRenderer('正文 Markdown 内容:<br/>', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
                                         console.log(metaString + markdown.join('\n'));
                                         req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
                                             if (!result) {
@@ -150,12 +149,7 @@ const Publisher = (props: any) => {
     const onClearLog = useCallback((e: MouseEvent) => {
         e.stopPropagation();
         reduxStore.dispatch(reduxSetLogs([]));
-        // setLogs([]);
     }, []);
-
-    // useEffect(() => {
-    //     setLogs(_logs);
-    // }, [_logs]);
     
     return (
         <>

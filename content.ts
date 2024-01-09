@@ -61,7 +61,7 @@ function getNotionToc() {
 // Note: 接受来自 sidePanel 的消息
 chrome.runtime.onConnect.addListener(function (port) {
     port.onMessage.addListener(function (msg) {
-        console.log('content 收到:', msg);
+        // console.log('content 收到:', msg);
         const {name, data} = msg;
         // TODO: 滚动页面等
         switch (name) {
@@ -79,7 +79,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             }
             case 'notion-block-id-get': { // Note: 获取当前 Notion 页面的 id
                 const _url = location.href;
-                console.log('_url:', _url);
+                // console.log('_url:', _url);
                 const url = new URL(_url);
                 try {
                     const path = url.pathname.split('/');
@@ -112,10 +112,12 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({title, desc, img});
                 break;
             }
-            case 'reload' : { // Note: sidePanel 主动要求刷新页面
+            case 'notion-page-reload' : { // Note: sidePanel 主动要求刷新页面
+                window.location.reload();
                 break;
             }
-            case 'back-to-top': { // Note: sidePanel 主动要求回到顶部
+            case 'notion-page-backtop': { // Note: sidePanel 主动要求回到顶部
+                document.querySelector('.notion-app-inner .notion-frame .notion-scroller')?.scrollTo(0, 0);
                 break;
             }
             default: {
@@ -126,7 +128,6 @@ chrome.runtime.onConnect.addListener(function (port) {
 });
 
 window.addEventListener('load', () => {
-    console.log('here');
     // Note: load 后短期内执行一次，不跟着 mouseup 或者 selectionchange 触发，以立即生成 toc
     getNotionToc();
     // Note: Notion 页面内导航是在 .notion-frame 中（也可能是 #notion-app 如数据表页面）
@@ -164,6 +165,7 @@ window.addEventListener('load', () => {
     const eventCb = (e) => {
         clearTimeout(timer);
         timer = setTimeout(() => {
+            getNotionToc();
             if (window.getSelection()?.type === 'None') {
                 // Note: 此时判断是否为块级选中
                 const selectBlock = [...document.querySelectorAll('.notion-selectable-halo')];
@@ -182,7 +184,7 @@ window.addEventListener('load', () => {
             } else {
                 _toSidePanel('aigc-select-content', window.getSelection()?.toString());
             }
-        }, 200);
+        }, 800);
     };
     // EventBus.on('heading-locate', (msg) => {
     //     console.log('来自 heading-locate 的广播:', msg);

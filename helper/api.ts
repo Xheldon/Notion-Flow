@@ -4,10 +4,11 @@ import { Client, collectPaginatedAPI } from '@notionhq/client';
 import { Storage } from "@plasmohq/storage"
 import COS from 'cos-js-sdk-v5';
 import axios from 'axios';
+import imageCompression from 'browser-image-compression';
 // import sharp from 'sharp';
 import { _inline, logToRenderer, getISODateTime } from '$utils';
 import { Octokit } from 'octokit';
-import * as tencentcloud from 'tencentcloud-sdk-nodejs';
+// import * as tencentcloud from 'tencentcloud-sdk-nodejs';
 
 // Note: 除了数组中的元素不转为 webp，其他的都转成 webp
 const imgSuffix = [
@@ -129,12 +130,24 @@ export default class Req {
                     const res = await axios({
                         method: 'get',
                         url,
-                        responseType: 'arraybuffer',
+                        responseType: 'blob',
                     });
                     if (res.status === 200) {
-                        let buffer: Buffer = res.data;
+                        let blob: any = res.data;
                         if (!hasSuffix) {
-                            console.log('什么鬼');
+                            blob = await imageCompression(blob, {
+                                fileType: 'image/webp',
+                                initialQuality: 0.8,
+                                alwaysKeepResolution: true,
+                            });
+                            /* blob = await imageConversion.compress(blob, {
+                                quality: 0.8,
+                                type: "image/webp",
+                                width: 300,
+                                height: 200,
+                                orientation:2,
+                                scale: 0.5,
+                              }); */
                             /* buffer = await sharp(res.data)
                             .withMetadata({
                                 exif: {
@@ -156,16 +169,24 @@ export default class Req {
                             const uri = `${cdn}/${key}`;
                             if (!debug) {
                                 // Note: 不搞那么复杂，加个随机的延时就行
-                                await new Promise((res) => {
+                                await new Promise((res, rej) => {
                                     setTimeout(() => {
-                                        res(this.oss.putObject({
+                                        this.oss.putObject({
                                             ...this.ossCommon,
                                             Key: key,
-                                            Body: buffer
-                                        }));
+                                            Body: blob
+                                        }, (err, data) => {
+                                            if (err) {
+                                                rej(err);
+                                                logToRenderer(`上传 ${key} 失败！e:`, err);
+                                                return;
+                                            }
+                                            res(data);
+                                            logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
+                                        })
                                     }, 1000 * Math.random());
                                 });
-                                logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
+                                // logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
                                 // FIXME: 先获取其中图片总数，然后在最后一次性刷新，而不是上传一次刷新一次
                                 /* const res = await this.cdn.PurgeUrlsCache({
                                     Urls: [uri]
@@ -298,7 +319,9 @@ export default class Req {
         const contentBase64 = Buffer.from(content).toString('base64');
         try {
             const res = await this.github.rest.repos.getContent(getContentConfig);
-            logToRenderer('get info success:', res);
+            // Note: content 是 base64 编码的，输出太占空间，所以不打印了
+            const {content, ..._res} = res as any;
+            logToRenderer('get info success:', _res);
             
             const createOrUpdateConfig = {
                 ...this.githubCommon,

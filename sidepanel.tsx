@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react"
-import { ReloadOutlined, VerticalAlignTopOutlined, BarsOutlined, AppstoreOutlined } from "@ant-design/icons"
+import { ReloadOutlined, VerticalAlignTopOutlined } from "@ant-design/icons"
 import StickyBox from 'react-sticky-box';
-import type { PlasmoCSConfig } from 'plasmo';
 import { Provider } from 'react-redux';
 import { Storage, } from "@plasmohq/storage"
-import { Button, Collapse, Layout, Tabs, theme, Tooltip, Segmented, ConfigProvider } from "antd"
+import { Button, Collapse, Layout, Tabs, theme, Tooltip, ConfigProvider } from "antd"
 
 import type { State, PublisherOptions } from '$types';
-import { getPublisherConfig, getAigcConfig } from '$utils';
+import { getPublisherConfig, _toContent } from '$utils';
 import store, { setToc, setLogs } from '$store';
 import Toc from "$components/toc"
 import Publisher from '$components/publisher';
@@ -15,7 +14,7 @@ import Aigc from '$components/aigc';
 import Req from '$api';
 
 import "./styles.css"
- 
+
 const storage = new Storage();
 
 // export const config: PlasmoCSConfig = {
@@ -54,7 +53,7 @@ class IO {
         });
         // Note: 初始化
         getPublisherConfig(storage);
-        getAigcConfig(storage);
+        // getAigcConfig(storage);
         store.dispatch(setLogs([]));
     }
 }
@@ -147,8 +146,8 @@ function App() {
         })();
         const cb = (port) => {
             port.onMessage.addListener(function (msg) {
-                console.log('sidePanel 收到消息:', msg);
-                const {name, data} = msg;
+                // console.log('sidePanel 收到消息:', msg);
+                const { name, data } = msg;
                 // port.postMessage({ type: 'toc', content: 'sidePanel 知道了'});
                 switch (name) {
                     case 'toc-update': {
@@ -164,11 +163,11 @@ function App() {
             chrome.runtime.onConnect.removeListener(cb);
         }
     }, []);
-    
+
     useEffect(() => {
         storage.watch({
             options: (opt) => {
-                const {newValue: {'heading-style': headingStyle, publisher, oss, aigc, plugin}} = opt;
+                const { newValue: { 'heading-style': headingStyle, publisher, oss, aigc, plugin } } = opt;
                 const enabledTabs = {
                     basic: true,
                     publisher: !!publisher?.enable,
@@ -200,9 +199,9 @@ function App() {
         <ConfigProvider theme={{
             hashed: false,
             token: {
-              colorPrimary: '#0a85d1',
+                colorPrimary: '#0a85d1',
             }
-          }}>
+        }}>
             <Provider store={store}>
                 <Layout style={{ padding: 10 }}>
                     <Tabs
@@ -214,7 +213,9 @@ function App() {
                                 <>
                                     <Tooltip title={"Notion 返回顶部"}>
                                         <Button type={"link"} size={"small"}>
-                                            <VerticalAlignTopOutlined />
+                                            <VerticalAlignTopOutlined onClick={() => {
+                                                _toContent('notion-page-backtop');
+                                            }} />
                                         </Button>
                                     </Tooltip>
                                     <Tooltip title={"Notion 刷新页面"}>
@@ -223,12 +224,7 @@ function App() {
                                             size={"small"}
                                         >
                                             <ReloadOutlined onClick={() => {
-                                                chrome.sidePanel.getOptions({}, (options) => {
-                                                    console.log('getOptions:', options);
-                                                });
-                                                chrome.sidePanel.getPanelBehavior((options) => {
-                                                    console.log('getOptions:', options);
-                                                })
+                                                _toContent('notion-page-reload');
                                             }} />
                                         </Button>
                                     </Tooltip>
@@ -237,7 +233,7 @@ function App() {
                         }}
                         renderTabBar={(props, DefaultBar) => {
                             return (
-                                <StickyBox offsetTop={0} style={{zIndex: 1}}>
+                                <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
                                     <DefaultBar
                                         {...props}
                                         style={{
@@ -250,13 +246,13 @@ function App() {
                         }}
                         items={tabList.map(tab => {
                             if (tabs.includes(tab.key)) {
-                                return tab.content({tocstyle, req});
+                                return tab.content({ tocstyle, req });
                             }
                         }).filter(Boolean)}
                     />
                 </Layout>
             </Provider>
-          </ConfigProvider>
+        </ConfigProvider>
     );
 }
 

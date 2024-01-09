@@ -147,7 +147,12 @@ function OptionsIndex() {
                 repo: '',
                 branch: '',
                 owner: '',
-            }
+            },
+            'trans-image': false,
+            'trans-bookmark': false,
+            'trans-callout': false,
+            'trans-video': false,
+            'trans-quote': false,
         },
         oss: {
             // enable: true,
@@ -177,7 +182,7 @@ function OptionsIndex() {
     }, []);
 
     const onChange = useCallback((changedValues: any, allValues: any) => {
-        console.log(changedValues, allValues);
+        // console.log(changedValues, allValues);
         // TODO: 保存 allValues 到 storage
         clearTimeout(timer);
         timer = setTimeout(() => {
@@ -196,7 +201,7 @@ function OptionsIndex() {
             {contextHolder}
             <Row>
                 <Col span={18} offset={3}>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 24 }}>设置（记得点保存）</Divider>
+                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 24 }}>设置</Divider>
                     <Form
                         form={form}
                         onValuesChange={onChange}
@@ -215,10 +220,10 @@ function OptionsIndex() {
                         <Divider />
                         <Form.Item
                             name={['publisher', 'enable']}
-                            label="发布"
+                            label="发布到 Github"
                             extra={
                                 <>
-                                    <Text>发布功能可以让你能够将 Notion 内容发布到 Github Pages。</Text>
+                                    <Text>发布功能可以让你能够将 Notion 内容发布到 Github Pages<Text strong mark type="danger">（目前仅支持 Jekyll 博客系统）。</Text></Text>
                                     <br />
                                     <Text>在将来，还支持直接在插件中写 Github Pages 的 Jekyll 博客系统所支持的 Ruby 插件，以在博客中正确展示 Notion 的非 Markdown 标准模块，典型的有 Bookmark 模块。</Text>
                                     <br />
@@ -245,25 +250,12 @@ function OptionsIndex() {
                                     </Form.Item>
                                 );
                             })}
-                        </div>
-                        {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
-                            <Divider />
-                            <Form.Item
-                                name={['oss', 'enable']}
-                                label="对象存储"
-                                extra={
-                                    <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，强烈建议配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
-                                }>
-                                <Switch />
-                            </Form.Item>
-                        </div> */}
-                        <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Form.Item
                                 label='OSS 提供商'
                                 name={['oss', 'name']}
                                 labelAlign='right'
                                 extra={
-                                    <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，强烈建议配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
+                                    <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
                                 }>
                                     <Radio.Group>
                                         {Object.keys(ossFormItems).map(key => <Radio.Button value={key}>{ossNameMap[key]}</Radio.Button>)}
@@ -289,7 +281,85 @@ function OptionsIndex() {
                                     );
                                 })}
                             </div>
+                            <Form.Item
+                                key="trans-image"
+                                name={['publisher', 'trans-image']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>内置图片转换允许你将 Notion 中的 Image 模块的 caption 设置为博客图片中的图片描述，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'启用内置图片转换'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="trans-bookmark"
+                                name={['publisher', 'trans-bookmark']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>内置 Bookmark 转换允许你的博客支持 Notion 中的 Bookmark 格式，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                        <br />
+                                        <Text>如果你的博客支持 RSS，可能会导致你的 RSS 格式错乱（因为不是标准的 Markdown 或者 HTML 格式，因此你还需要额外的一步将 feed.xml 中的 content 使用 ruby 插件过滤一下。</Text>
+                                    </>
+                                }
+                                label={'启用内置 Bookmark 转换'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="trans-callout"
+                                name={['publisher', 'trans-callout']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>内置 Callout 转换允许你的博客支持 Notion 中的 Callout 格式，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'启用内置 Callout 转换'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="trans-video"
+                                name={['publisher', 'trans-video']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>内置 Video 转换允许你的博客支持 Notion 中的 Video 格式，需要一定配置，详见：：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'启用内置 Video 转换'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="trans-quote"
+                                name={['publisher', 'trans-quote']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>内置 Quoteblock 转换允许你的博客支持 Notion 中的 Quoteblock 格式，需要一定配置，详见：<Link href='https://www.xheldon.com'>如何使用内置图片处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'启用内置 Quoteblock 转换'}>
+                                <Switch />
+                            </Form.Item>
                         </div>
+                        {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
+                            <Divider />
+                            <Form.Item
+                                name={['oss', 'enable']}
+                                label="对象存储"
+                                extra={
+                                    <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，强烈建议配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
+                                }>
+                                <Switch />
+                            </Form.Item>
+                        </div> */}
                         <Divider />
                         <Form.Item
                             name={['aigc', 'enable']}
