@@ -1,11 +1,4 @@
-// declare global {
-//     interface Window {
-//         _fromMain: (name: string, cb: Listener) => void;
-//         _fromMainOnce: (name: string, cb: Listener) => void;
-//         _toMain: (name: string, ...props: any[]) => Promise<any>;
-//         observerNotionMutation: () => void;
-//     }
-// }
+
 export interface State {
     publisher: PublisherState;
     toc: TocState;

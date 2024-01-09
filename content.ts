@@ -1,6 +1,6 @@
 import type { PlasmoCSConfig } from 'plasmo';
 import { _toSidePanel } from '$utils';
-import type { PublisherConfig, TocItem, Meta, AigcState, AigcData } from '$types';
+import type { TocItem } from '$types';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://www.notion.so/*'],

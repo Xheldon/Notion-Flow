@@ -8,7 +8,6 @@ import imageCompression from 'browser-image-compression';
 // import sharp from 'sharp';
 import { _inline, logToRenderer, getISODateTime } from '$utils';
 import { Octokit } from 'octokit';
-// import * as tencentcloud from 'tencentcloud-sdk-nodejs';
 
 // Note: 除了数组中的元素不转为 webp，其他的都转成 webp
 const imgSuffix = [
@@ -37,7 +36,7 @@ const imgSuffix = [
 const storage = new Storage();
 
 async function updateConfigDeco (that: Req) {
-    const _: PublisherOptions = await storage.get('options');
+        const _: PublisherOptions = await storage.get('options');
     this.updateConfig({
         github: _.publisher.github,
         notion: _.publisher.notion,
@@ -63,7 +62,7 @@ export default class Req {
     ossDirCache: COS.CosObject[]; // Note: 第一次获取资源目录后缓存起来
     config: PublisherRequestConfig;
     constructor(props: PublisherRequestConfig) {
-        console.log('ppprops:', props);
+        // console.log('ppprops:', props);
         this.updateConfig(props);
     }
 
@@ -101,7 +100,7 @@ export default class Req {
                 logToRenderer('uploadNotionImageToOSS 错误，OSS 未配置');
                 return Promise.resolve(null);
             }
-            const options = await storage.get('options') as PublisherOptions;
+                        const options = await storage.get('options') as PublisherOptions;
             const cdn = options.oss[options.oss.name].cdn;
             if (!cdn) {
                 logToRenderer('uploadNotionImageToOSS 错误，CDN 未配置');
@@ -114,15 +113,25 @@ export default class Req {
             const hasSuffix = imgSuffix.includes(suffix);
             const key = `img/in-post/${cos}/${uuid ? btoa(uuid) + '-' : ''}${id}.${(suffix && hasSuffix) ? suffix : 'webp'}`;
             try {
-                await new Promise((res) => {
+                await new Promise((res, rej) => {
                     setTimeout(() => {
-                        res(this.oss.headObject({
+                        this.oss.headObject({
                             ...this.ossCommon,
                             Key: key,
-                        }));
-                    }, 1000 * Math.random());
+                        }, (err, data) => {
+                            if (err) {
+                                rej(err);
+                                return;
+                            }
+                            if (data) {
+                                logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
+                                // console.log('res data:', data);
+                                res(data);
+                                return;
+                            }
+                        });
+                    }, 5000 * Math.random());
                 });
-                logToRenderer(`资源 ${key} 已存在`);
                 // FIXME: 设置自定义 cdn 参数
                 return `${cdn}/${key}`;
             } catch (err) {
@@ -182,9 +191,9 @@ export default class Req {
                                                 return;
                                             }
                                             res(data);
-                                            logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
+                                            logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${cdn}/${key}`);
                                         })
-                                    }, 1000 * Math.random());
+                                    }, 5000 * Math.random());
                                 });
                                 // logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
                                 // FIXME: 先获取其中图片总数，然后在最后一次性刷新，而不是上传一次刷新一次
@@ -321,6 +330,7 @@ export default class Req {
             const res = await this.github.rest.repos.getContent(getContentConfig);
             // Note: content 是 base64 编码的，输出太占空间，所以不打印了
             const {content, ..._res} = res as any;
+            console.log('rrrr:', content, res);
             logToRenderer('get info success:', _res);
             
             const createOrUpdateConfig = {

@@ -2,11 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Button, Form, Input, Divider, Col, Row, Collapse, notification, Select, Space, Typography} from "antd";
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
-import type { MouseEvent } from 'react';
 
-import reduxStore, { setAigc, setPublisher } from '$store';
-import type { State, PublisherConfig, AigcPrompt, AigcData } from '$types';
-import { notion2markdown, notionMeta2string, logToRenderer, getPublisherConfig, getAigcConfig } from '$utils';
+import reduxStore, { setAigc } from '$store';
+import type { State, AigcPrompt, AigcData } from '$types';
 
 const { Panel } = Collapse;
 const { Paragraph, Text } = Typography;

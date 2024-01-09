@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react"
-import { ReloadOutlined, VerticalAlignTopOutlined } from "@ant-design/icons"
+import { ReloadOutlined, VerticalAlignTopOutlined, ArrowUpOutlined } from "@ant-design/icons"
 import StickyBox from 'react-sticky-box';
 import { Provider } from 'react-redux';
 import { Storage, } from "@plasmohq/storage"
@@ -37,7 +37,7 @@ class IO {
                 // window._toMain('config-set', currState.config.data);
                 // Note: 持久化
                 // FIXME: 后面需要改成 Secure Storage，下同
-                await storage.set("publisher-config", currState.publisher.data)
+                                await storage.set("publisher-config", currState.publisher.data)
                 prevConfigStateJson = currConfigStateJson;
             }
             // Note: aigc 配置持久化
@@ -46,7 +46,7 @@ class IO {
                 // logToRenderer('aigc State:', prevAigcStateJson, currAigcStateJson);
                 // window._toMain('aigc-set', currState.aigc.data);
                 // Note: 持久化
-                await storage.set("aigc-config", currState.aigc.data)
+                                await storage.set("aigc-config", currState.aigc.data)
                 prevAigcStateJson = currAigcStateJson;
             }
             // TODO: 面板展开、收起状态持久化
@@ -126,7 +126,7 @@ function App() {
 
     useEffect(() => {
         (async () => {
-            const options: PublisherOptions = await storage.get('options');
+                        const options: PublisherOptions = await storage.get('options');
             enabledTabs = {
                 basic: true,
                 publisher: !!options?.publisher?.enable,
@@ -215,6 +215,13 @@ function App() {
                                         <Button type={"link"} size={"small"}>
                                             <VerticalAlignTopOutlined onClick={() => {
                                                 _toContent('notion-page-backtop');
+                                            }} />
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip title={"插件返回顶部"}>
+                                        <Button type={"link"} size={"small"}>
+                                            <ArrowUpOutlined onClick={() => {
+                                                window.document.scrollingElement.scrollTop = 0;
                                             }} />
                                         </Button>
                                     </Tooltip>

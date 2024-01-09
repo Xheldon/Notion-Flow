@@ -1,7 +1,5 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
-import type { PublisherState, TocState, TocItem, PublisherConfig, AigcState, AigcData, AigcPrompt, AigcModel } from '$types';
-
-// import { logToRenderer } from '$utils';
+import type { PublisherState, TocState, TocItem, PublisherConfig, AigcState, AigcData } from '$types';
 
 // TODO: 在 Pannel 中展开的部分也持久化一下
 export const publisherConfigSlice = createSlice({

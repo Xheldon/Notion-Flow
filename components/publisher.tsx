@@ -55,7 +55,7 @@ const Publisher = (props: any) => {
             }
             setLoading(true);
             _toContent('notion-block-id-get', null, (blockId) => {
-                console.log('获取当前 block id:', blockId);
+                // console.log('获取当前 block id:', blockId);
                 if (blockId) {
                     try {
                         // Note: meta 信息中可以拿到 cover 信息，对应 header-img 属性
@@ -90,7 +90,7 @@ const Publisher = (props: any) => {
                                             return;
                                         }
                                         logToRenderer('正文 Markdown 内容:<br/>', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
-                                        console.log(metaString + markdown.join('\n'));
+                                        // console.log(metaString + markdown.join('\n'));
                                         req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
                                             if (!result) {
                                                 messageApi.open({
@@ -100,6 +100,10 @@ const Publisher = (props: any) => {
                                                 setLoading(false);
                                                 return;
                                             }
+                                            messageApi.open({
+                                                type: 'success',
+                                                content: '发布到 Github 成功，即将更新 Notion meta 信息',
+                                            });
                                             req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
                                                 if (!updateMetaResult) {
                                                     messageApi.open({
@@ -162,8 +166,8 @@ const Publisher = (props: any) => {
                 </Row>
             </Panel>
             <Panel {...props} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
-                <div style={{whiteSpace: 'nowrap', overflow: 'scroll'}}>{logs.map(log => {
-                    return (<div key={log}>{log}</div>);
+                <div style={{wordWrap: 'break-word', wordBreak: 'break-all'}}>{logs.map(log => {
+                    return (<div style={{marginBottom: 5}} key={log} dangerouslySetInnerHTML={{ __html: log }} />);
                 })}</div>
             </Panel>
         </>

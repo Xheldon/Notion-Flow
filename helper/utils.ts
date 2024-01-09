@@ -2,7 +2,7 @@
  * 工具函数，不要导入任何环境相关的依赖如 electron，因为它会被 main 和 render 同时使用
  */
 import reduxStore, { setPublisher, setAigc, setLogs } from '$store';
-import type { PublisherConfig, TocItem, Meta, AigcState, AigcData } from '$types';
+import type { PublisherConfig, TocItem, Meta, AigcData } from '$types';
 
 // import api from '$api';
 
@@ -61,7 +61,7 @@ const logToRenderer = (..._msgs: any[]) => {
 };
 
 const getPublisherConfig = async (storage) => {
-    const config: PublisherConfig = await storage.get('publisher-config');
+        const config: PublisherConfig = await storage.get('publisher-config');
     logToRenderer('get config:', config);
     if (!config) {
         const _config = {
@@ -78,7 +78,7 @@ const getPublisherConfig = async (storage) => {
 
 const getAigcConfig = async (storage) => {
     // const aigc: Aigc = await window._toMain('aigc-get');
-    const aigc: AigcData = await storage.get('aigc-config');
+        const aigc: AigcData = await storage.get('aigc-config');
     // TODO: 从持久化存储中获取
     logToRenderer('get aigc:', aigc);
     if (!aigc || !aigc.model) {

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import {
     Typography,
     Row,
@@ -18,7 +18,7 @@ const storage = new Storage();
 let config = null;
 
 (async () => {
-    config = await storage.get('options');
+        config = await storage.get('options');
 })();
 
 const {
@@ -187,7 +187,7 @@ function OptionsIndex() {
         clearTimeout(timer);
         timer = setTimeout(() => {
             (async () => {
-                await storage.set('options', allValues);
+                                await storage.set('options', allValues);
             })();
             messageApi.open({
                 type: 'success',
@@ -379,6 +379,8 @@ function OptionsIndex() {
                             extra={
                                 <>
                                     <Text>插件功能可以让你通过编写代码的方式，参与到 Notion 博客内容构建中去，如自定义 Notion Block 处理函数以生成特定格式内容，然后再自定义 Jekyll 插件来处理该特定内容以生成特定 HTML，典型的用法就是处理在 Notion 的非标准 Markdown 语法的 Bookmark 元素。</Text>
+                                    <br />
+                                    <Text>插件的另一个典型用法是可以让你在发布成功之后，修改 Notoin 页面内容，如更新 lastUpdateTime 字段等。</Text>
                                     <br />
                                     <Text strong>您可以自由的选择是否启用 插件爱你 功能，注意，这需要您熟悉 JavaScript 和 Ruby 以及 Notion API，同时理解本插件的构建原理。</Text>
                                 </>
