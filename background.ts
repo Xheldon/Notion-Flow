@@ -57,7 +57,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 // Note: 检测首次安装和更新
 chrome.runtime.onInstalled.addListener(function(details){
     if(details.reason == "install" || details.reason == "update"){
-        chrome.tabs.create({url:chrome.extension.getURL("options.html")}, function (tab) {
+        chrome.tabs.create({url:chrome.runtime.getURL("options.html")}, function (tab) {
             var thisVersion = chrome.runtime.getManifest().version;
             console.log(`Open Type: ${details.reason}; Version: ${details.previousVersion} to ${thisVersion} !`);
         });
