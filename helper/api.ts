@@ -253,10 +253,10 @@ export default class Req {
                 cover = response.cover[response.cover.type]?.url;
             }
             const getValue = (obj: any) => {
-                return obj[obj?.type];
+                return obj?.[obj?.type];
             };
             const getCompuValue = (obj: any) => {
-                return obj[obj?.type][obj[obj?.type]?.type]
+                return obj?.[obj?.type]?.[obj?.[obj?.type]?.type]
             };
             const meta = {
                 tags: getValue(tags).map((tag: {name: string;}) => tag.name),
@@ -275,7 +275,7 @@ export default class Req {
                 headerImg: '',
             };
             // Note: 将其上传到 oss 后拿到 url, 图片 id 就以 pageId（blockId 即可）
-            if (cover) {
+            if (cover && meta.cos && meta.path && meta.title) {
                 const pathname = new URL(cover).pathname;
                 const coverUrl = await this.uploadNotionImageToOSS({url: cover, meta, id: blockId, debug, uuid: pathname});
                 meta.headerImg = coverUrl;

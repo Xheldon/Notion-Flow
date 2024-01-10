@@ -17,11 +17,6 @@ import "./styles.css"
 
 const storage = new Storage();
 
-// export const config: PlasmoCSConfig = {
-//     matches: ['https://www.notion.so/*'],
-//     all_frames: true,
-// };
-
 let enabledTabs: any = {};
 
 class IO {
@@ -66,7 +61,7 @@ const tabList = [
         content: (props) => {
             return {
                 key: 'basic',
-                label: "基本",
+                label: props.cn ? "基本" : 'Basic',
                 icon: <span>📚</span>,
                 children: (
                     <Collapse size="small" activeKey={["basic"]}>
@@ -81,7 +76,7 @@ const tabList = [
         content: (props) => {
             return {
                 key: 'publisher',
-                label: '发布',
+                label: props.cn ? '发布' : 'Publisher',
                 icon: <span>🧑🏻‍💻</span>,
                 children: (
                     <Collapse size="small">
@@ -110,7 +105,7 @@ const tabList = [
         content: (props) => {
             return {
                 key: "plugin",
-                label: "插件",
+                label: props.cn ? "插件" : 'Plugin',
                 children: <div>插件列表</div>
             };
         }
@@ -143,6 +138,7 @@ function App() {
     const [tabs, setTabs] = useState([]);
     const [tocstyle, setTocStyle] = useState("text");
     const req = useRef(null);
+    const cn = navigator.language === 'zh-CN';
 
     useEffect(() => {
         (async () => {
@@ -231,7 +227,7 @@ function App() {
                         tabBarExtraContent={{
                             right: (
                                 <>
-                                    <Tooltip title={"Notion 返回顶部"}>
+                                    <Tooltip title={cn ? "Notion 返回顶部" : 'Notion Back To Top'}>
                                         <Button type={"link"} size={"small"}>
                                             <VerticalAlignTopOutlined onClick={() => {
                                                 _toContent('notion-page-backtop');
@@ -245,7 +241,7 @@ function App() {
                                             }} />
                                         </Button>
                                     </Tooltip>
-                                    <Tooltip title={"Notion 刷新页面"}>
+                                    <Tooltip title={cn ? "Notion 刷新页面" : 'Notion Reload'}>
                                         <Button
                                             type={"link"}
                                             size={"small"}
@@ -269,7 +265,7 @@ function App() {
                         }}
                         items={tabList.map(tab => {
                             if (tabs.includes(tab.key)) {
-                                return tab.content({ tocstyle, req });
+                                return tab.content({ tocstyle, req, cn });
                             }
                         }).filter(Boolean)}
                     />

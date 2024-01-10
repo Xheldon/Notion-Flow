@@ -3,7 +3,7 @@ import { _toSidePanel } from '$utils';
 import type { TocItem } from '$types';
 
 export const config: PlasmoCSConfig = {
-    matches: ['https://www.notion.so/*'],
+    matches: ['https://www.notion.so/*', 'https://*.notion.site/*'],
     all_frames: true,
 };
 

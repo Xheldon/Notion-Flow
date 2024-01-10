@@ -16,7 +16,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
         return;
     };
     const url = new URL(tab.url);
-    if (url.origin === 'https://www.notion.so') {
+    if (url.origin === 'https://www.notion.so' || url.origin.endsWith('.notion.site')) {
         await chrome.sidePanel.setOptions({
             tabId,
             path: 'sidepanel.html',
@@ -39,7 +39,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
         return;
     };
     const url = new URL(tab.url);
-    if (url.origin === 'https://www.notion.so') {
+    if (url.origin === 'https://www.notion.so' || url.origin.endsWith('.notion.site')) {
         await chrome.sidePanel.setOptions({
             tabId,
             path: 'sidepanel.html',
@@ -54,4 +54,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     }
 });
 
-// Note: sidePanel 无法发送跨域请求
+// Note: 检测首次安装和更新
+chrome.runtime.onInstalled.addListener(function(details){
+    if(details.reason == "install" || details.reason == "update"){
+        chrome.tabs.create({url:chrome.extension.getURL("options.html")}, function (tab) {
+            var thisVersion = chrome.runtime.getManifest().version;
+            console.log(`Open Type: ${details.reason}; Version: ${details.previousVersion} to ${thisVersion} !`);
+        });
+    }
+});

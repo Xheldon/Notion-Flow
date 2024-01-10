@@ -69,6 +69,14 @@ const Publisher = (props: any) => {
                                 setLoading(false);
                                 return;
                             }
+                            if (!meta.title || !meta.cos || !meta.path) {
+                                messageApi.open({
+                                    type: 'error',
+                                    content: '获取 Notion Meta 内容失败，请检查是否存在 Page Properties',
+                                });
+                                setLoading(false);
+                                return;    
+                            }
                             req?.getNotionContent(blockId).then((blocks) => {
                                 if (!blocks) {
                                     messageApi.open({

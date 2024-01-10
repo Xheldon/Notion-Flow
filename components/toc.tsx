@@ -68,7 +68,7 @@ const Toc = (props: any) => {
       {...props}
       isActive={active}
       onItemClick={onItemClick}
-      header={'目录'}
+      header={props.cn ? '目录' : 'TOC'}
       key={'toc'}
       extra={getExtra()}
     >
