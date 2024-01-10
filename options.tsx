@@ -434,9 +434,13 @@ function OptionsIndex() {
                         </Text>
                         <br />
                         <Text>
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Bug 反馈</Link>
-                            <br />
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">讨论</Link>
+                            
+                        </Text>
+                        <Text>
+                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">电报交流群</Link> &nbsp;&nbsp;&nbsp;
+                            <Link href="https://twitter.com/_Xheldon" target="_blank">Twitter</Link> &nbsp;&nbsp;&nbsp;
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Bug 反馈</Link> &nbsp;&nbsp;&nbsp;
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">功能讨论</Link> 
                         </Text>
 
                     </Paragraph>
