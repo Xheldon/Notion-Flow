@@ -214,7 +214,7 @@ function OptionsIndex() {
 
     const enablePublisher = Form.useWatch(['publisher', 'enable'], form);
     const ossName = Form.useWatch(['oss', 'name'], form);
-    const enableTransCover = Form.useWatch(['publusher', 'trans-coverImg'], form);
+    const enableTransCover = Form.useWatch(['publisher', 'trans-coverImg'], form);
 
     const tooltips = useCallback((tooltip: { link: string; text: string }) => {
         return <div>参见:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
@@ -248,7 +248,7 @@ function OptionsIndex() {
                         labelAlign='left'
                         initialValues={initialValues}
                     >
-                        <Form.Item label='Toc 样式' name='heading-style'>
+                        <Form.Item key={'heading-style'} label='Toc 样式' name='heading-style'>
                             <Radio.Group>
                                 <Radio.Button value="text">文本（H1 H2 H3）</Radio.Button>
                                 <Radio.Button value="number">数字（1. 2. 3.）</Radio.Button>
@@ -258,6 +258,7 @@ function OptionsIndex() {
                         <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。</Text></Paragraph>
                         <Divider />
                         <Form.Item
+                            key={'publisher.enable'}
                             name={['publisher', 'enable']}
                             label="发布到 Github"
                             extra={
@@ -293,14 +294,20 @@ function OptionsIndex() {
                                 );
                             })}
                             <Form.Item
+                                key={'oss.name'}
+                                style={{ marginBottom: 10 }}
                                 label='OSS 提供商'
                                 name={['oss', 'name']}
                                 labelAlign='right'
                                 extra={
-                                    <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
+                                    <>
+                                        <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
+                                        <br />
+                                        <Text>更多 OSS 服务提供商开发中...</Text>
+                                    </>
                                 }>
                                 <Radio.Group>
-                                    {Object.keys(ossFormItems).map(key => <Radio.Button value={key}>{ossNameMap[key]}</Radio.Button>)}
+                                    {Object.keys(ossFormItems).map(key => <Radio.Button key={key} value={key}>{ossNameMap[key]}</Radio.Button>)}
                                 </Radio.Group>
                             </Form.Item>
                             <div style={{ display: (ossName && ossFormItems[ossName]) ? 'block' : 'none' }}>
@@ -324,49 +331,49 @@ function OptionsIndex() {
                                 })}
                             </div>
                             <Form.Item
-                                key="frontMatter"
+                                key="filePath"
                                 name={['publisher', 'filePath']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>在这里设置发布到 Github 仓库的文件路径，支持引用 Notion Page Property 的字段、支持 YYYY、YY、MM、DD 等通配符，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                        <Text>在这里设置发布到 Github 仓库的文件路径，支持使用 {"{{}}"} 引用 Notion Page Property 的字段以及 YYYY、YY、MM、DD 等变量，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
                                 }
                                 label={'上传文件路径'}>
                                 <Input placeholder='输入发布到 Github 仓库的文件路径' />
                             </Form.Item>
                             <Form.Item
-                                key="setNotionLastUpdateTime"
-                                name={['publisher', 'setNotionLastUpdateTime']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
-                                extra={
-                                    <>
-                                        <Text>从 Notion Flow 发布博客成功后，将 lastUpdateTime 设置到 Notion Page 的 Property 中，以让你在 Notion 中查看该文章何时最后发布。需要提前设置好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'更新 Notion lastUpdateTime 字段'}>
-                                <Switch />
-                            </Form.Item>
-                            <Form.Item
                                 key="autoAddLastUpdateTime"
                                 name={['publisher', 'autoAddLastUpdateTime']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                style={{ marginBottom: 10 }}
                                 extra={
                                     <>
-                                        <Text>从 Notion Flow 发布博客的时候，开启自动添加固定的 lastUpdateTime 字段到 Front Matter，你可以在 Jekyll 博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                        <Text>从 Notion Flow 发布博客的时候，自动添加一个固定的 lastUpdateTime 的字段到在 Front Matter 中，你可以在 Jekyll 博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
                                 }
                                 label={'自动添加 lastUpdateTime'}>
                                 <Switch />
                             </Form.Item>
                             <Form.Item
+                                key="setNotionLastUpdateTime"
+                                name={['publisher', 'setNotionLastUpdateTime']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>从 Notion Flow 发布博客成功后，更新 Notion Page 的 lastUpdateTime Property，以方便你在 Notion 中查看该文章何时最后发布。需要提前添加好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'更新 Notion lastUpdateTime 字段'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
                                 key="frontMatter"
                                 name={['publisher', 'frontMatter']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                style={{ marginBottom: 10}}
                                 extra={
                                     <>
                                         <Text>一般情况你应该在 Pages 的 Property 中写与页面有关的 Front Matter，在这里写固定的 Front Matter，如我的使用 case 是设置一个 layout: post 属性。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
@@ -402,18 +409,13 @@ function OptionsIndex() {
                                 <Input placeholder='输入将要在博客中使用的 Front Matter 字段，默认为 header-img' />
                             </Form.Item>
                             <Paragraph>
-                                <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块。</Text>
+                                <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块，需要一定样式设置。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                             </Paragraph>
                             <Form.Item
                                 key="trans-image"
                                 name={['publisher', 'trans-image']}
                                 labelAlign='right'
                                 style={{ marginBottom: 10 }}
-                                extra={
-                                    <>
-                                        <Text>内置图片转换允许你将 Notion 中的 Image 模块的 caption 设置为博客图片中的图片描述，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
                                 label={'启用内置图片转换'}>
                                 <Switch />
                             </Form.Item>
@@ -422,13 +424,6 @@ function OptionsIndex() {
                                 name={['publisher', 'trans-bookmark']}
                                 labelAlign='right'
                                 style={{ marginBottom: 10 }}
-                                extra={
-                                    <>
-                                        <Text>内置 Bookmark 转换允许你的博客支持 Notion 中的 Bookmark 格式，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                        <br />
-                                        <Text>如果你的博客支持 RSS，可能会导致你的 RSS 格式错乱（因为不是标准的 Markdown 或者 HTML 格式，因此你还需要额外的一步将 feed.xml 中的 content 使用 ruby 插件过滤一下。</Text>
-                                    </>
-                                }
                                 label={'启用内置 Bookmark 转换'}>
                                 <Switch />
                             </Form.Item>
@@ -437,11 +432,6 @@ function OptionsIndex() {
                                 name={['publisher', 'trans-callout']}
                                 labelAlign='right'
                                 style={{ marginBottom: 10 }}
-                                extra={
-                                    <>
-                                        <Text>内置 Callout 转换允许你的博客支持 Notion 中的 Callout 格式，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
                                 label={'启用内置 Callout 转换'}>
                                 <Switch />
                             </Form.Item>
@@ -450,11 +440,6 @@ function OptionsIndex() {
                                 name={['publisher', 'trans-video']}
                                 labelAlign='right'
                                 style={{ marginBottom: 10 }}
-                                extra={
-                                    <>
-                                        <Text>内置 Video 转换允许你的博客支持 Notion 中的 Video 格式，需要一定配置，详见：：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
                                 label={'启用内置 Video 转换'}>
                                 <Switch />
                             </Form.Item>
@@ -463,11 +448,6 @@ function OptionsIndex() {
                                 name={['publisher', 'trans-quote']}
                                 labelAlign='right'
                                 style={{ marginBottom: 10 }}
-                                extra={
-                                    <>
-                                        <Text>内置 Quoteblock 转换允许你的博客支持 Notion 中的 Quoteblock 格式，需要一定配置，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
                                 label={'启用内置 Quoteblock 转换'}>
                                 <Switch />
                             </Form.Item>
