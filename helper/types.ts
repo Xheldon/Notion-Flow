@@ -25,6 +25,8 @@ export interface OssConfig {
     secretKey: string;
     bucket: string;
     region: string;
+    cdn?: string;
+    mediaPath?: string;
 }
 
 export interface PublisherRequestConfig {
@@ -61,6 +63,12 @@ export interface PublisherOptions {
         'trans-bookmark': boolean;
         'trans-callout': boolean;
         'trans-quote': boolean;
+        'trans-coverImg': boolean;
+        'headerImgName': string;
+        frontMatter: string;
+        autoAddLastUpdateTime: boolean;
+        setNotionLastUpdateTime: boolean;
+        filePath: string;
     }
 }
 export interface TocState {
@@ -103,16 +111,17 @@ export interface LogsState {
 
 export interface Meta {
     title: string;
-    cos: string;
-    tags: string[];
-    categories: string;
-    reference: string;
-    headerStyle: string;
-    headerMask: string;
-    path: string;
-    callout: string;
-    noCatalog: boolean;
+    name: string;
+    // cos?: string;
+    // tags?: string[];
+    // categories?: string;
+    // reference?: string;
+    // headerStyle?: string;
+    // headerMask?: string;
+    // path?: string;
+    // callout?: string;
+    // noCatalog?: boolean;
     date: string;
-    lastUpdateTime: string;
-    [key: string]: string | string[] | boolean;
+    // lastUpdateTime?: string;
+    [key: string]: string | string[] | boolean | never;
 }

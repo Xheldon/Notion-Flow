@@ -6,7 +6,7 @@ import COS from 'cos-js-sdk-v5';
 import axios from 'axios';
 import imageCompression from 'browser-image-compression';
 // import sharp from 'sharp';
-import { _inline, logToRenderer, getISODateTime } from '$utils';
+import { _inline, logToRenderer, getISODateTime, getPropertyValue, getPropertyCompuValue, parserProperty } from '$utils';
 import { Octokit } from 'octokit';
 
 // Note: 除了数组中的元素不转为 webp，其他的都转成 webp
@@ -100,18 +100,20 @@ export default class Req {
                 logToRenderer('uploadNotionImageToOSS 错误，OSS 未配置');
                 return Promise.resolve(null);
             }
-                        const options = await storage.get('options') as PublisherOptions;
-            const cdn = options.oss[options.oss.name].cdn;
+            const {oss, publisher} = await storage.get('options') as PublisherOptions;
+            const cdn = oss[oss.name].cdn;
             if (!cdn) {
                 logToRenderer('uploadNotionImageToOSS 错误，CDN 未配置');
                 return Promise.resolve(null);
             }
-            const {url, meta: {cos}, id, debug, uuid = ''} = props;
+            const {url, meta, id, debug, uuid = ''} = props;
             const pathname = new URL(url).pathname;
             const suffixArr = pathname.split('.');
             const suffix = suffixArr.length > 1 && suffixArr[suffixArr.length - 1];
             const hasSuffix = imgSuffix.includes(suffix);
-            const key = `img/in-post/${cos}/${uuid ? btoa(uuid) + '-' : ''}${id}.${(suffix && hasSuffix) ? suffix : 'webp'}`;
+            const cosPath = parserProperty(oss[oss.name].mediaPath, {meta});
+            // Note: 我的 mediaPath 设置就应该是 img/in-post/{{YYYY}}/{{name}}
+            const key = `${cosPath}/${uuid ? btoa(uuid) + '-' : ''}${id}.${(suffix && hasSuffix) ? suffix : 'webp'}`;
             try {
                 await new Promise((res, rej) => {
                     setTimeout(() => {
@@ -234,31 +236,65 @@ export default class Req {
             }
             const response = await this.notion.pages.retrieve({ page_id: blockId });
             const {
-                tags,
-                categories,
-                cos,
-                reference,
-                headerStyle,
-                headerMask,
-                path,
-                callout,
-                noCatalog,
+                // tags,
+                // categories,
+                // cos,
+                // reference,
+                // headerStyle,
+                // headerMask,
+                // path,
+                // callout,
+                // noCatalog,
                 title,
+                name,
                 date,
-                lastUpdateTime,
-                notion,
+                // lastUpdateTime,
+                // notion,
+                ...rest // Note: 用户自定义 Page Property 会放在这里
             } = response.properties;
+            // Note: 其他的根据插件配置生成的部分，如果页面配置了，则用页面写死的，否则根据规则生成，且不写到 Markdown 文件中:
+            // 1. cos 根据配置生成，支持引用页面的其他 property 变量，内置的变量有（取自必填项 date 属性） YYYY、YY、MM、DD，如 {{YYYY}}/{{MM}}/{{DD}}/{{title}}/{{name}} 这种
+            // 2. 文件 path 同理，Jekyll 博客强制 post 位于 _posts 目录下，因此这个可以不用配置，剩余的变量同上
+
+            // 目前 Property 只支持单选框 checkbox、多选 multi_select、文本 rich_text、日期 date、链接格式 url、formula
+            // 如果有头图，默认是 cover 属性
+
             let cover = '';
             if (response.cover) {
                 cover = response.cover[response.cover.type]?.url;
             }
-            const getValue = (obj: any) => {
-                return obj?.[obj?.type];
+            let meta = {
+                title,
+                name,
+                date,
             };
-            const getCompuValue = (obj: any) => {
-                return obj?.[obj?.type]?.[obj?.[obj?.type]?.type]
-            };
-            const meta = {
+            Object.keys(rest).forEach(key => {
+                const obj = rest[key];
+                if (!obj) return;
+                switch (obj.type) {
+                    case 'rich_text':
+                        meta[key] = _inline(getPropertyValue(obj));
+                        break;
+                    case 'multi_select':
+                        meta[key] = getPropertyValue(obj).map((tag: {name: string;}) => tag.name) || [];
+                        break;
+                    case 'select':
+                        meta[key] = getPropertyValue(obj).name;
+                        break;
+                    case 'date':
+                        meta[key] = getPropertyValue(obj)?.start;
+                        break;
+                    case 'url':
+                        meta[key] = getPropertyValue(obj);
+                        break;
+                    case 'formula':
+                        meta[key] = getPropertyCompuValue(obj);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            /* const meta = {
                 tags: getValue(tags).map((tag: {name: string;}) => tag.name),
                 categories: getCompuValue(categories),
                 cos: getCompuValue(cos),
@@ -273,12 +309,19 @@ export default class Req {
                 lastUpdateTime: getValue(lastUpdateTime)?.start || '',
                 notion: getValue(notion) || '',
                 headerImg: '',
-            };
+            }; */
             // Note: 将其上传到 oss 后拿到 url, 图片 id 就以 pageId（blockId 即可）
-            if (cover && meta.cos && meta.path && meta.title) {
+            const {publisher} = await storage.get('options') as PublisherOptions;
+            // Note: 既然走到这里，publisher 一定是启用的，所以不判断了 enable 了
+            // Note: 处理一下 上传的 path
+            if (cover && publisher['trans-coverImg']) {
                 const pathname = new URL(cover).pathname;
                 const coverUrl = await this.uploadNotionImageToOSS({url: cover, meta, id: blockId, debug, uuid: pathname});
-                meta.headerImg = coverUrl;
+                if (publisher['headerImgName']) {
+                    meta[publisher['headerImgName']] = coverUrl;
+                } else {
+                    meta['headerImg'] = coverUrl;
+                }
             }
             return meta;
         } catch (e) {
@@ -319,11 +362,14 @@ export default class Req {
             logToRenderer('send2Github 错误， Github Token 未配置');
             return Promise.resolve(null);
         }
+        const {publisher} = await storage.get('options') as PublisherOptions;
+        // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
+        const _path = parserProperty(publisher.filePath, {meta: props.meta});
         const {meta, content, debug} = props;
-        // Note: 
+        // Note: path 需要 parserProperty 处理一下
         const getContentConfig = {
             ...this.githubCommon,
-            path: meta.path,
+            path: _path,
         };
         const contentBase64 = Buffer.from(content).toString('base64');
         try {
@@ -335,7 +381,7 @@ export default class Req {
             
             const createOrUpdateConfig = {
                 ...this.githubCommon,
-                path: meta.path,
+                path: _path,
                 message: `更新 ${meta.title} !`,
                 // Note: 显然这是一个 octokit 的 bug，它的类型定义里面 data 只能是数组（目录），但实际还可以是对象
                 //  见：https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
@@ -360,7 +406,7 @@ export default class Req {
             if (err.status === 404) {
                 const createOrUpdateConfig = {
                     ...this.githubCommon,
-                    path: meta.path,
+                    path: _path,
                     message: `创建 ${meta.title} !`,
                     content: contentBase64,
                 };

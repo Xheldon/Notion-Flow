@@ -147,6 +147,14 @@ const ossFormItems = {
         },
         message: '请输入 CDN 地址',
         name: ['cdn']
+    },{
+        label: '图片上传路径',
+        tooltips: {
+            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+            text: '图片路径支持的占位符格式',
+        },
+        message: '请输入图片上传路径',
+        name: ['mediaPath']
     }],
 }
 
@@ -160,7 +168,7 @@ function OptionsIndex() {
     const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
     const initialValues = config || {
-        'heading-style': 'text',
+        'heading-style': 'none', // Note: 默认是不显示分级标题
         publisher: {
             enable: false,
             notion: {
@@ -172,6 +180,12 @@ function OptionsIndex() {
                 branch: '',
                 owner: '',
             },
+            'filePath': '',
+            'setNotionLastUpdateTime': true,
+            'autoAddLastUpdateTime': true,
+            'frontMatter': '',
+            'trans-coverImg': true,
+            'headerImgName': 'header-img',
             'trans-image': true,
             'trans-bookmark': true,
             'trans-callout': true,
@@ -186,7 +200,8 @@ function OptionsIndex() {
                 secretKey: '',
                 bucket: '',
                 region: '',
-                cdn: 'https://static.xheldon.cn',
+                cdn: '',
+                mediaPath: '', // Note: 支持通配符如 {{year}}/{{month}}/{{name}}
             }
         },
         aigc: {
@@ -198,8 +213,8 @@ function OptionsIndex() {
     };
 
     const enablePublisher = Form.useWatch(['publisher', 'enable'], form);
-    // const enableOss = Form.useWatch(['oss', 'enable'], form);
     const ossName = Form.useWatch(['oss', 'name'], form);
+    const enableTransCover = Form.useWatch(['publusher', 'trans-coverImg'], form);
 
     const tooltips = useCallback((tooltip: { link: string; text: string }) => {
         return <div>参见:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
@@ -308,6 +323,84 @@ function OptionsIndex() {
                                     );
                                 })}
                             </div>
+                            <Form.Item
+                                key="frontMatter"
+                                name={['publisher', 'filePath']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                extra={
+                                    <>
+                                        <Text>在这里设置发布到 Github 仓库的文件路径，支持引用 Notion Page Property 的字段、支持 YYYY、YY、MM、DD 等通配符，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'上传文件路径'}>
+                                <Input placeholder='输入发布到 Github 仓库的文件路径' />
+                            </Form.Item>
+                            <Form.Item
+                                key="setNotionLastUpdateTime"
+                                name={['publisher', 'setNotionLastUpdateTime']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                extra={
+                                    <>
+                                        <Text>从 Notion Flow 发布博客成功后，将 lastUpdateTime 设置到 Notion Page 的 Property 中，以让你在 Notion 中查看该文章何时最后发布。需要提前设置好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'更新 Notion lastUpdateTime 字段'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="autoAddLastUpdateTime"
+                                name={['publisher', 'autoAddLastUpdateTime']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                extra={
+                                    <>
+                                        <Text>从 Notion Flow 发布博客的时候，开启自动添加固定的 lastUpdateTime 字段到 Front Matter，你可以在 Jekyll 博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'自动添加 lastUpdateTime'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="frontMatter"
+                                name={['publisher', 'frontMatter']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                extra={
+                                    <>
+                                        <Text>一般情况你应该在 Pages 的 Property 中写与页面有关的 Front Matter，在这里写固定的 Front Matter，如我的使用 case 是设置一个 layout: post 属性。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'其他 Front Matter 字段'}>
+                                <Input placeholder='输入将要在博客中使用的其他固定 Front Matter 字段，英文半角逗号分隔' />
+                            </Form.Item>
+                            <Form.Item
+                                key="trans-coverImg"
+                                name={['publisher', 'trans-coverImg']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10 }}
+                                extra={
+                                    <>
+                                        <Text>Notion Page 的头图，可以作为博客的头图，需要在下方设置字段后，在 Jekyll 博客中使用该信息（会上传到 OSS），用法详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                }
+                                label={'使用 Notion 头图'}>
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item
+                                key="headerImgName"
+                                name={['publisher', 'headerImgName']}
+                                labelAlign='right'
+                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
+                                /* extra={
+                                    <>
+                                        <Text>Notion Page 的头图，可以作为博客的头图，需要设置字段后，在 Jekyll 博客中使用该信息（会上传到 OSS）详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </>
+                                } */
+                                label={'头图字段'}>
+                                <Input placeholder='输入将要在博客中使用的 Front Matter 字段，默认为 header-img' />
+                            </Form.Item>
                             <Paragraph>
                                 <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块。</Text>
                             </Paragraph>

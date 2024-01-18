@@ -500,48 +500,98 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
     }));
 };
 
-const notionMeta2string = (meta: Meta): string => {
+const parserProperty = (value, {meta}) => {
+    // Note: 可用的变量有 YYYY、YY、MM、DD 及 meta 属性
+    const date = new Date(meta.date);
+    const YYYY = `${date.getFullYear()}`;
+    const YY = `${date.getFullYear()}`.slice(-2);
+    const MM = `${date.getMonth() + 1}`;
+    const DD = `${date.getDate()}`;
+    const replacements = { YYYY, YY, DD, MM, ...meta };
+    return value.replace(/{{(.*?)}}/g, (match, key) => {
+        return replacements[key] || match;
+    });
+};
+
+const notionMeta2string = async (meta: Meta): Promise<string> => {
     const {
         title = '',
-        cos = '',
-        tags = [],
+        // cos = '',
+        // tags = [],
         date = '',
-        categories = '',
-        reference = '',
-        headerStyle = '',
-        headerMask = '',
-        path = '',
-        callout = '',
-        noCatalog = '',
+        name = '',
         lastUpdateTime = '',
-        headerImg = '',
-        notion = '',
+        // categories = '',
+        // reference = '',
+        // headerStyle = '',
+        // headerMask = '',
+        // path = '',
+        // callout = '',
+        // noCatalog = '',
+        // lastUpdateTime = '',
+        // headerImg = '',
+        // notion = '',
+        ...rest
     } = meta;
-    const tagsString = `${tags.map((tag, k) => '    - ' + tag + (k === tags.length - 1 ? '' : '\n')).join('')}`
+    const {publisher} = await storage.get('options') as PublisherOptions;
+    const {frontMatter} = publisher;
+    let fM = '';
+    if (frontMatter) {
+        try {
+            frontMatter.split(',').forEach(item => {
+                fM += `${item.trim()}\n`;
+            });
+        } catch (e) {
+            logToRenderer('Front Matter 配置错误，请检查配置项，不影响继续构建，但会忽略设置值');
+        }
+    }
+    // Note: 数组会被表示为 name: \n -item1\n -item2\n，典型的有 tags
     const _date = new Date(date);
-    const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`
-    const _lastUpdateTime = lastUpdateTime ? new Date(lastUpdateTime) : '';
-    const lastUpdateString = _lastUpdateTime && `${_lastUpdateTime.getFullYear()}-${_lastUpdateTime.getMonth() + 1}-${_lastUpdateTime.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
+    const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
+    let _lastUpdateTime = '';
+    if (publisher.autoAddLastUpdateTime) {
+        const _ = new Date();
+        _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
+    }
+
     return `---
 title: ${title}
-layout: post
-date: ${dateString}
-cos: ${cos}
-path: ${path}
-header-mask: ${headerMask}
-header-style: ${headerStyle}
-callout: ${callout}
-categories: ${categories}
-reference: ${reference}
-no-catalog: ${noCatalog}
-lastUpdateTime: ${lastUpdateString}
-header-img: ${headerImg}
-notion: ${notion}
-tags:
-${tagsString}
+date: ${dateString}${_lastUpdateTime ? '\n' + _lastUpdateTime : ''}
+name: ${name}${fM ? '\n' + fM : ''}
+${Object.keys(rest).reduce((prev, curr) => {
+        return prev += `${curr}: ${Array.isArray(rest[curr]) ? `\n${(rest[curr] as string[]).map(item => `    - ${item}`).join('\n')}` : rest[curr]}\n`;
+    }, '')}
 ---
 
 `;
+
+
+
+    // const tagsString = `${tags.map((tag, k) => '    - ' + tag + (k === tags.length - 1 ? '' : '\n')).join('')}`
+    // const _date = new Date(date);
+    // const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`
+    // const _lastUpdateTime = lastUpdateTime ? new Date(lastUpdateTime) : '';
+    // const lastUpdateString = _lastUpdateTime && `${_lastUpdateTime.getFullYear()}-${_lastUpdateTime.getMonth() + 1}-${_lastUpdateTime.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
+//     return `---
+// title: ${title}
+// layout: post
+// date: ${dateString}
+// cos: ${cos}
+// path: ${path}
+// header-mask: ${headerMask}
+// header-style: ${headerStyle}
+// callout: ${callout}
+// categories: ${categories}
+// reference: ${reference}
+// no-catalog: ${noCatalog}
+// lastUpdateTime: ${lastUpdateString}
+// header-img: ${headerImg}
+// notion: ${notion}
+// tags:
+// ${tagsString}
+// ---
+
+// `;
 };
 
 const normalizeNum = (num: number) => {
@@ -551,6 +601,7 @@ const normalizeNum = (num: number) => {
     return '0' + String(num);
 };
 
+// Note: 返回符合 Notion API 要求的 ISO 8601 格式的日期字符串
 const getISODateTime = (time: Date): string => {
     const year = time.getFullYear(),
     month = time.getMonth() + 1, // 月份取值0-11
@@ -562,6 +613,13 @@ const getISODateTime = (time: Date): string => {
   return `${year}-${normalizeNum(month)}-${normalizeNum(date)}T${normalizeNum(hour)}:${normalizeNum(minute)}:${normalizeNum(second)}.000+08:00`;
 }
 
+
+const getPropertyValue = (obj: any) => {
+    return obj?.[obj?.type];
+};
+const getPropertyCompuValue = (obj: any) => {
+    return obj?.[obj?.type]?.[obj?.[obj?.type]?.type];
+};
 
 
 export {
@@ -578,6 +636,9 @@ export {
     logToRenderer,
     getISODateTime,
     notionSelectionChange,
+    getPropertyValue,
+    getPropertyCompuValue,
+    parserProperty,
     _toSidePanel,
     _toContent,
 }

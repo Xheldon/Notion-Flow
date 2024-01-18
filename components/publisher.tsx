@@ -69,15 +69,15 @@ const Publisher = (props: any) => {
                                 setLoading(false);
                                 return;
                             }
-                            if (!meta.title || !meta.cos || !meta.path) {
+                            if (!meta.title || !meta.name || !meta.date) {
                                 messageApi.open({
                                     type: 'error',
-                                    content: '获取 Notion Meta 内容失败，请检查是否存在 Page Properties',
+                                    content: '获取 Notion Meta 内容失败，请检查是否缺失必填字段（name、date）且文章标题不能为空',
                                 });
                                 setLoading(false);
                                 return;    
                             }
-                            req?.getNotionContent(blockId).then((blocks) => {
+                            req?.getNotionContent(blockId).then(async (blocks) => {
                                 if (!blocks) {
                                     messageApi.open({
                                         type: 'error',
@@ -86,7 +86,7 @@ const Publisher = (props: any) => {
                                     setLoading(false);
                                     return;
                                 }
-                                const metaString = notionMeta2string(meta);
+                                const metaString = await notionMeta2string(meta);
                                 try {
                                     notion2markdown.bind(req)(blocks, meta, 0, debug).then(markdown => {
                                         if (!markdown) {

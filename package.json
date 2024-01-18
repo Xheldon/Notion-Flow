@@ -1,8 +1,8 @@
 {
   "name": "notion-flow",
-  "displayName": "Notion flow",
-  "version": "0.1.0",
-  "description": "Publish your Notion article to your Github Jekyll blog, and upload the blog images to an OSS service.",
+  "displayName": "Notion Flow",
+  "version": "0.2.0",
+  "description": "Show TOC of Notion Page、Publish your Notion pages to your Github Jekyll blog, and upload the blog images to an OSS service.",
   "author": "Xheldon",
   "scripts": {
     "dev": "plasmo dev",
