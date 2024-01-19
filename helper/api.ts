@@ -71,7 +71,7 @@ export default class Req {
             await updateConfigDeco.bind(this);
             if (!this.notion) {
                 logToRenderer('getNotionContent Notion Token 未配置');
-                return Promise.resolve(null);
+                return Promise.reject(null);
             }
             return new Promise((res, rej) => {
                 setTimeout(() => {
@@ -98,13 +98,13 @@ export default class Req {
             await updateConfigDeco.bind(this);
             if (!this.oss) {
                 logToRenderer('uploadNotionImageToOSS 错误，OSS 未配置');
-                return Promise.resolve(null);
+                return Promise.reject(null);
             }
             const {oss, publisher} = await storage.get('options') as PublisherOptions;
             const cdn = oss[oss.name].cdn;
             if (!cdn) {
                 logToRenderer('uploadNotionImageToOSS 错误，CDN 未配置');
-                return Promise.resolve(null);
+                return Promise.reject(null);
             }
             const {url, meta, id, debug, uuid = ''} = props;
             const pathname = new URL(url).pathname;
@@ -234,7 +234,7 @@ export default class Req {
             await updateConfigDeco.bind(this);
             if (!this.notion) {
                 logToRenderer('getNotionMeta 错误，Notion Token 未配置');
-                return Promise.resolve(null);
+                return Promise.reject(null);
             }
             const response = await this.notion.pages.retrieve({ page_id: blockId });
             const {
@@ -337,7 +337,7 @@ export default class Req {
         await updateConfigDeco.bind(this);
         if (!this.notion) {
             logToRenderer('updateNotionLastUpdateTime 错误， Notion Token 未配置');
-            return Promise.resolve(null);
+            return Promise.reject(null);
         }
         const { blockId, debug } = props;
         const date = getISODateTime(new Date());
@@ -364,14 +364,14 @@ export default class Req {
         await updateConfigDeco.bind(this);
         if (!this.github) {
             logToRenderer('send2Github 错误， Github Token 未配置');
-            return Promise.resolve(null);
+            return Promise.reject(null);
         }
         const {publisher} = await storage.get('options') as PublisherOptions;
         // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
         const _path = parserProperty(publisher.filePath, {meta: props.meta});
         if (!_path) {
             logToRenderer('send2Github 错误， 上传文件路径配置错误');
-            return Promise.resolve(null);
+            return Promise.reject(null);
         }
         const {meta, content, debug} = props;
         // Note: path 需要 parserProperty 处理一下
@@ -384,7 +384,6 @@ export default class Req {
             const res = await this.github.rest.repos.getContent(getContentConfig);
             // Note: content 是 base64 编码的，输出太占空间，所以不打印了
             const {content, ..._res} = res as any;
-            console.log('rrrr:', content, res);
             logToRenderer('get info success:', _res);
             
             const createOrUpdateConfig = {
@@ -429,6 +428,7 @@ export default class Req {
                     }
                 } catch (err) {
                     logToRenderer('创建文件失败:', err.status, err);
+                    return Promise.reject(null);
                 }
             }
         }

@@ -3,12 +3,15 @@ import { Button, Row, Collapse, notification, message } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
+import { Storage } from "@plasmohq/storage"
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
-import type { State, Meta } from '$types';
+import type { State, Meta, PublisherOptions } from '$types';
 import { notion2markdown, notionMeta2string, logToRenderer, _toContent } from '$utils';
 
 const { Panel } = Collapse;
+
+const storage = new Storage();
 
 const Publisher = (props: any) => {
     const {req: {current: req}, ...restProps} = props;
@@ -99,7 +102,7 @@ const Publisher = (props: any) => {
                                         }
                                         logToRenderer('正文 Markdown 内容:<br/>', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
                                         // console.log(metaString + markdown.join('\n'));
-                                        req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(result => {
+                                        req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(async result => {
                                             if (!result) {
                                                 messageApi.open({
                                                     type: 'error',
@@ -108,23 +111,27 @@ const Publisher = (props: any) => {
                                                 setLoading(false);
                                                 return;
                                             }
+                                            const {publisher} = await storage.get('options') as PublisherOptions;
+                                            const setNotionLastUpdateTime = publisher?.setNotionLastUpdateTime;
                                             messageApi.open({
                                                 type: 'success',
-                                                content: '发布到 Github 成功，即将更新 Notion meta 信息',
+                                                content: `发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion Page Property 信息' : ''}'`,
                                             });
-                                            req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
-                                                if (!updateMetaResult) {
-                                                    messageApi.open({
-                                                        type: 'error',
-                                                        content: 'updateNotionLastUpdateTime 方法错误，未更新 lastUpdateTime 字段',
-                                                    });
+                                            if (setNotionLastUpdateTime) {
+                                                req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
+                                                    if (!updateMetaResult) {
+                                                        messageApi.open({
+                                                            type: 'error',
+                                                            content: 'updateNotionLastUpdateTime 方法错误，未更新 lastUpdateTime 字段',
+                                                        });
+                                                        setLoading(false);
+                                                        return;
+                                                    }
+                                                    logToRenderer('更新 Notion meta 结果:', updateMetaResult);
+                                                    logToRenderer('更新到 github 结果:', result);
                                                     setLoading(false);
-                                                    return;
-                                                }
-                                                logToRenderer('更新 Notion meta 结果:', updateMetaResult);
-                                                logToRenderer('更新到 github 结果:', result);
-                                                setLoading(false);
-                                            });
+                                                });
+                                            }
                                         });
                                     });
                                 } catch(e) {
