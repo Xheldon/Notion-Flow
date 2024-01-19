@@ -16,6 +16,7 @@ const tocStyleMap = {
 };
 
 const Toc = (props: any) => {
+  const { req, cn, ...restProps } = props;
   const toc: TocItem[] = useSelector((state: State) => state.toc.data);
   const [active, setActive] = useState(true);
 
@@ -51,12 +52,12 @@ const Toc = (props: any) => {
             offset={t.level - 1}
             className={'toc-item'}
             key={t.key}
-          >{`${tocStyleMap[props.tocstyle][t.level - 1]} ${t.title}`}</Col>
+          >{`${tocStyleMap[restProps.tocstyle][t.level - 1]} ${t.title}`}</Col>
         );
       });
     }
     return <Empty />;
-  }, [toc, props.tocstyle]);
+  }, [toc, restProps.tocstyle]);
 
   useEffect(() => {
     // Noote: 组件加载后立即获取一次
@@ -65,10 +66,10 @@ const Toc = (props: any) => {
 
   return (
     <Panel
-      {...props}
+      {...restProps}
       isActive={active}
       onItemClick={onItemClick}
-      header={props.cn ? '目录' : 'TOC'}
+      header={cn ? '目录' : 'TOC'}
       key={'toc'}
       extra={getExtra()}
     >

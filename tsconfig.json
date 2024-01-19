@@ -20,6 +20,7 @@
       "$store": ["helper/store.ts"],
       "$utils": ["helper/utils.ts"],
       "$api": ["helper/api.ts"],
+      "$lib/*": ["helper/lib/*"],
       "$components/*": ["components/*"],
     },
     "baseUrl": "."

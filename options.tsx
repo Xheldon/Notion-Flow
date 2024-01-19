@@ -8,12 +8,16 @@ import {
     Switch,
     Radio,
     Input,
-    message
+    message,
+    Button,
 } from "antd";
+
+import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 import './styles.css';
 
 import { Storage } from "@plasmohq/storage"
+import { logToRenderer } from '~helper/utils';
 
 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.classList.remove('light');
@@ -184,7 +188,6 @@ function OptionsIndex() {
             'setNotionLastUpdateTime': true,
             'autoAddLastUpdateTime': true,
             'frontMatter': '',
-            'trans-coverImg': true,
             'headerImgName': 'header-img',
             'trans-image': true,
             'trans-bookmark': true,
@@ -214,7 +217,6 @@ function OptionsIndex() {
 
     const enablePublisher = Form.useWatch(['publisher', 'enable'], form);
     const ossName = Form.useWatch(['oss', 'name'], form);
-    const enableTransCover = Form.useWatch(['publisher', 'trans-coverImg'], form);
 
     const tooltips = useCallback((tooltip: { link: string; text: string }) => {
         return <div>参见:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
@@ -234,12 +236,75 @@ function OptionsIndex() {
         }, 1000);
     }, [form]);
 
+    const onDownloadConfig = useCallback(() => {
+        try {
+            const json = form.getFieldsValue();
+            const url = URL.createObjectURL(new Blob([JSON.stringify(json)], { type: 'application/json' }));
+            const a = document.createElement("a");
+            const now = new Date();
+            a.href = url;
+            a.download = `notion-flow-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}_${now.getMinutes()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            messageApi.open({
+                type: 'success',
+                content: '导出配置成功',
+            });
+        } catch (e) {
+            messageApi.open({
+                type: 'error',
+                content: '导出配置失败',
+            });
+        }
+    }, []);
+
+    const onUploadConfig = useCallback(() => {
+        const inputElement = document.createElement('input');
+        inputElement.type = 'file';
+        inputElement.addEventListener('change', (event) => {
+            const file = (event.target as any).files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result as string;
+                    const jsonObj = JSON.parse(text);
+                    console.log('导入配置文件:', jsonObj);
+                    form.setFieldsValue(jsonObj);
+                    messageApi.open({
+                        type: 'success',
+                        content: '导入配置成功',
+                    });
+                } catch (e) {
+                    messageApi.open({
+                        type: 'error',
+                        content: '导入配置失败',
+                    });
+                }
+                
+            };
+            reader.readAsText(file);
+        });
+        inputElement.click();
+    }, []);
+
     return (
         <>
             {contextHolder}
             <Row>
                 <Col span={18} offset={3}>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 24 }}>设置</Divider>
+                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
+                        导入导出
+                    </Divider>
+                    <Paragraph>
+                        <Button onClick={onDownloadConfig} icon={<UploadOutlined />}>导出配置</Button>
+                        <Divider type="vertical" />
+                        <Button onClick={onUploadConfig} icon={<DownloadOutlined />}>导入配置</Button>
+                    </Paragraph>
+                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
+                        基础功能
+                    </Divider>
                     <Form
                         form={form}
                         onValuesChange={onChange}
@@ -256,7 +321,9 @@ function OptionsIndex() {
                             </Radio.Group>
                         </Form.Item>
                         <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。</Text></Paragraph>
-                        <Divider />
+                        <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
+                            高级功能
+                        </Divider>
                         <Form.Item
                             key={'publisher.enable'}
                             name={['publisher', 'enable']}
@@ -283,7 +350,7 @@ function OptionsIndex() {
                                 return (
                                     <Form.Item
                                         key={name.toString()}
-                                        style={{ marginBottom: 10 }}
+                                        style={{ marginBottom: 20 }}
                                         labelAlign='right'
                                         tooltip={tooltips(_tooltips)}
                                         rules={[{ required: true, message }]}
@@ -295,7 +362,7 @@ function OptionsIndex() {
                             })}
                             <Form.Item
                                 key={'oss.name'}
-                                style={{ marginBottom: 10 }}
+                                style={{ marginBottom: 20 }}
                                 label='OSS 提供商'
                                 name={['oss', 'name']}
                                 labelAlign='right'
@@ -303,7 +370,7 @@ function OptionsIndex() {
                                     <>
                                         <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
                                         <br />
-                                        <Text>更多 OSS 服务提供商开发中...</Text>
+                                        <Text strong italic>更多 OSS 服务提供商开发中...</Text>
                                     </>
                                 }>
                                 <Radio.Group>
@@ -319,7 +386,7 @@ function OptionsIndex() {
                                     return (
                                         <Form.Item
                                             key={name.toString()}
-                                            style={{ marginBottom: 10 }}
+                                            style={{ marginBottom: 20 }}
                                             labelAlign='right'
                                             tooltip={tooltips(_tooltips)}
                                             rules={[{ required: true, message }]}
@@ -334,7 +401,7 @@ function OptionsIndex() {
                                 key="filePath"
                                 name={['publisher', 'filePath']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10 }}
+                                style={{ marginBottom: 20 }}
                                 extra={
                                     <>
                                         <Text>在这里设置发布到 Github 仓库的文件路径，支持使用 {"{{}}"} 引用 Notion Page Property 的字段以及 YYYY、YY、MM、DD 等变量，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
@@ -347,7 +414,7 @@ function OptionsIndex() {
                                 key="autoAddLastUpdateTime"
                                 name={['publisher', 'autoAddLastUpdateTime']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10 }}
+                                style={{ marginBottom: 20 }}
                                 extra={
                                     <>
                                         <Text>从 Notion Flow 发布博客的时候，自动添加一个固定的 lastUpdateTime 的字段到在 Front Matter 中，你可以在 Jekyll 博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
@@ -360,7 +427,7 @@ function OptionsIndex() {
                                 key="setNotionLastUpdateTime"
                                 name={['publisher', 'setNotionLastUpdateTime']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10 }}
+                                style={{ marginBottom: 20 }}
                                 extra={
                                     <>
                                         <Text>从 Notion Flow 发布博客成功后，更新 Notion Page 的 lastUpdateTime Property，以方便你在 Notion 中查看该文章何时最后发布。需要提前添加好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
@@ -373,7 +440,7 @@ function OptionsIndex() {
                                 key="frontMatter"
                                 name={['publisher', 'frontMatter']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10}}
+                                style={{ marginBottom: 20}}
                                 extra={
                                     <>
                                         <Text>一般情况你应该在 Pages 的 Property 中写与页面有关的 Front Matter，在这里写固定的 Front Matter，如我的使用 case 是设置一个 layout: post 属性。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
@@ -383,74 +450,78 @@ function OptionsIndex() {
                                 <Input placeholder='输入将要在博客中使用的其他固定 Front Matter 字段，英文半角逗号分隔' />
                             </Form.Item>
                             <Form.Item
-                                key="trans-coverImg"
-                                name={['publisher', 'trans-coverImg']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10 }}
-                                extra={
-                                    <>
-                                        <Text>Notion Page 的头图，可以作为博客的头图，需要在下方设置字段后，在 Jekyll 博客中使用该信息（会上传到 OSS），用法详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'使用 Notion 头图'}>
-                                <Switch />
-                            </Form.Item>
-                            <Form.Item
                                 key="headerImgName"
                                 name={['publisher', 'headerImgName']}
                                 labelAlign='right'
-                                style={{ marginBottom: 10, display: enableTransCover ? 'block' : 'none' }}
-                                /* extra={
+                                style={{ marginBottom: 20 }}
+                                extra={
                                     <>
-                                        <Text>Notion Page 的头图，可以作为博客的头图，需要设置字段后，在 Jekyll 博客中使用该信息（会上传到 OSS）详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                        <Text>Notion Page 的头图，可以作为博客的头图，需要在此设置将 Noiton 头图设置为 Front Matter 的哪个字段，然后在 Jekyll 博客中使用该字段（图片会上传到 OSS）。<Text italic>（不填表示不使用）</Text>详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                                     </>
-                                } */
+                                }
                                 label={'头图字段'}>
-                                <Input placeholder='输入将要在博客中使用的 Front Matter 字段，默认为 header-img' />
+                                <Input placeholder='留空表示不使用' />
                             </Form.Item>
-                            <Paragraph>
-                                <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块，需要一定样式设置。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                            </Paragraph>
-                            <Form.Item
-                                key="trans-image"
-                                name={['publisher', 'trans-image']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10 }}
-                                label={'启用内置图片转换'}>
-                                <Switch />
-                            </Form.Item>
-                            <Form.Item
-                                key="trans-bookmark"
-                                name={['publisher', 'trans-bookmark']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10 }}
-                                label={'启用内置 Bookmark 转换'}>
-                                <Switch />
-                            </Form.Item>
-                            <Form.Item
-                                key="trans-callout"
-                                name={['publisher', 'trans-callout']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10 }}
-                                label={'启用内置 Callout 转换'}>
-                                <Switch />
-                            </Form.Item>
-                            <Form.Item
-                                key="trans-video"
-                                name={['publisher', 'trans-video']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10 }}
-                                label={'启用内置 Video 转换'}>
-                                <Switch />
-                            </Form.Item>
-                            <Form.Item
-                                key="trans-quote"
-                                name={['publisher', 'trans-quote']}
-                                labelAlign='right'
-                                style={{ marginBottom: 10 }}
-                                label={'启用内置 Quoteblock 转换'}>
-                                <Switch />
-                            </Form.Item>
+                            <Row>
+                                <Col offset={6}>
+                                    <Divider />
+                                    <Paragraph>
+                                        <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块，需要一定样式设置。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                    </Paragraph>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col offset={6} span={7}>
+                                    <Form.Item
+                                        key="trans-image"
+                                        labelCol={{span: 10}}
+                                        wrapperCol={{span: 10}}
+                                        name={['publisher', 'trans-image']}
+                                        labelAlign='right'
+                                        style={{ marginBottom: 20 }}
+                                        label={'图片转换'}>
+                                        <Switch />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={7}>
+                                    <Form.Item
+                                        key="trans-bookmark"
+                                        labelCol={{span: 10}}
+                                        wrapperCol={{span: 10}}
+                                        name={['publisher', 'trans-bookmark']}
+                                        labelAlign='right'
+                                        style={{ marginBottom: 20 }}
+                                        label={'Bookmark 转换'}>
+                                        <Switch />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col offset={6} span={7}>
+                                    <Form.Item
+                                        key="trans-callout"
+                                        labelCol={{span: 10}}
+                                        wrapperCol={{span: 10}}
+                                        name={['publisher', 'trans-callout']}
+                                        labelAlign='right'
+                                        style={{ marginBottom: 20 }}
+                                        label={'Callout 转换'}>
+                                        <Switch />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={7}>
+                                    <Form.Item
+                                        key="trans-quote"
+                                        labelCol={{span: 10}}
+                                        wrapperCol={{span: 10}}
+                                        name={['publisher', 'trans-quote']}
+                                        labelAlign='right'
+                                        style={{ marginBottom: 20 }}
+                                        label={'Quoteblock 转换'}>
+                                        <Switch />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                         </div>
                         {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Divider />
@@ -491,7 +562,7 @@ function OptionsIndex() {
                             <Switch disabled />
                         </Form.Item>
                     </Form>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 24 }}>关于</Divider>
+                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>关于</Divider>
                     <Paragraph>
                         <Text>
                             作者说：<br />

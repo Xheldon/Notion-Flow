@@ -538,8 +538,9 @@ const notionMeta2string = async (meta: Meta): Promise<string> => {
     let fM = '';
     if (frontMatter) {
         try {
-            frontMatter.split(',').forEach(item => {
-                fM += `${item.trim()}\n`;
+            const arr = frontMatter.split(',');
+            arr.forEach((item, key) => {
+                fM += `${item.trim()}${key === arr.length - 1 ? '' : '\n'}`;
             });
         } catch (e) {
             logToRenderer('Front Matter 配置错误，请检查配置项，不影响继续构建，但会忽略设置值');
@@ -553,15 +554,14 @@ const notionMeta2string = async (meta: Meta): Promise<string> => {
         const _ = new Date();
         _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
     }
-
+    const restLength = Object.keys(rest).length;
     return `---
 title: ${title}
-date: ${dateString}${_lastUpdateTime ? '\n' + _lastUpdateTime : ''}
+date: ${dateString}${_lastUpdateTime ? '\nlastUpdateTime: ' + _lastUpdateTime : ''}
 name: ${name}${fM ? '\n' + fM : ''}
 ${Object.keys(rest).reduce((prev, curr) => {
         return prev += `${curr}: ${Array.isArray(rest[curr]) ? `\n${(rest[curr] as string[]).map(item => `    - ${item}`).join('\n')}` : rest[curr]}\n`;
-    }, '')}
----
+    }, '')}---
 
 `;
 

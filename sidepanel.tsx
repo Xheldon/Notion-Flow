@@ -58,14 +58,14 @@ new IO();
 const tabList = [
     {
         key: "basic",
-        content: (props) => {
+        content: (props, opt) => {
             return {
                 key: 'basic',
-                label: props.cn ? "基本" : 'Basic',
+                label: opt.cn ? "基本" : 'Basic',
                 icon: <span>📚</span>,
                 children: (
                     <Collapse size="small" activeKey={["basic"]}>
-                        <Toc {...props} />
+                        <Toc {...props} cn={opt.cn} />
                     </Collapse>
                 )
             };
@@ -73,10 +73,10 @@ const tabList = [
     },
     {
         key: 'publisher',
-        content: (props) => {
+        content: (props, opt) => {
             return {
                 key: 'publisher',
-                label: props.cn ? '发布' : 'Publisher',
+                label: opt.cn ? '发布' : 'Publisher',
                 icon: <span>🧑🏻‍💻</span>,
                 children: (
                     <Collapse size="small">
@@ -88,7 +88,7 @@ const tabList = [
     },
     {
         key: 'aigc',
-        content: (props) => {
+        content: (props, opt) => {
             return {
                 key: 'aigc',
                 label: 'AIGC',
@@ -265,7 +265,7 @@ function App() {
                         }}
                         items={tabList.map(tab => {
                             if (tabs.includes(tab.key)) {
-                                return tab.content({ tocstyle, req, cn });
+                                return tab.content({ tocstyle, req}, {cn});
                             }
                         }).filter(Boolean)}
                     />

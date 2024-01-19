@@ -150,6 +150,7 @@ export default class Req {
                                 fileType: 'image/webp',
                                 initialQuality: 0.8,
                                 alwaysKeepResolution: true,
+                                useWebWorker: false,
                             });
                             /* blob = await imageConversion.compress(blob, {
                                 quality: 0.8,
@@ -176,9 +177,9 @@ export default class Req {
                             }); */
                         }
                         try {
-                            logToRenderer('准备上传', key);
                             const uri = `${cdn}/${key}`;
                             if (!debug) {
+                                logToRenderer('准备上传', key);
                                 // Note: 不搞那么复杂，加个随机的延时就行
                                 await new Promise((res, rej) => {
                                     setTimeout(() => {
@@ -204,6 +205,7 @@ export default class Req {
                                 });
                                 logToRenderer(`刷新 ${key} 结果:`, res); */
                             } else {
+                                logToRenderer('[debug]准备上传', key);
                                 logToRenderer(`[debug] 上传 ${key} 成功！，准备刷新缓存！`);
                                 logToRenderer(`[debug] 刷新 ${key} 结果:`, '成功');
                             }
@@ -264,9 +266,9 @@ export default class Req {
                 cover = response.cover[response.cover.type]?.url;
             }
             let meta = {
-                title,
-                name,
-                date,
+                title: _inline(getPropertyValue(title)),
+                name: _inline(getPropertyValue(name)),
+                date: getPropertyValue(date)?.start,
             };
             Object.keys(rest).forEach(key => {
                 const obj = rest[key];
@@ -314,15 +316,17 @@ export default class Req {
             const {publisher} = await storage.get('options') as PublisherOptions;
             // Note: 既然走到这里，publisher 一定是启用的，所以不判断了 enable 了
             // Note: 处理一下 上传的 path
-            if (cover && publisher['trans-coverImg']) {
+            if (cover && publisher['headerImgName']) {
                 const pathname = new URL(cover).pathname;
                 const coverUrl = await this.uploadNotionImageToOSS({url: cover, meta, id: blockId, debug, uuid: pathname});
-                if (publisher['headerImgName']) {
                     meta[publisher['headerImgName']] = coverUrl;
-                } else {
-                    meta['headerImg'] = coverUrl;
-                }
             }
+            // Note: 过滤掉空属性
+            Object.keys(meta).forEach(key => {
+                if (!meta[key]) {
+                    delete meta[key];
+                }
+            });
             return meta;
         } catch (e) {
             logToRenderer('获取页面 meta 信息错误:', e);
@@ -365,6 +369,10 @@ export default class Req {
         const {publisher} = await storage.get('options') as PublisherOptions;
         // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
         const _path = parserProperty(publisher.filePath, {meta: props.meta});
+        if (!_path) {
+            logToRenderer('send2Github 错误， 上传文件路径配置错误');
+            return Promise.resolve(null);
+        }
         const {meta, content, debug} = props;
         // Note: path 需要 parserProperty 处理一下
         const getContentConfig = {

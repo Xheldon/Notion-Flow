@@ -63,7 +63,6 @@ export interface PublisherOptions {
         'trans-bookmark': boolean;
         'trans-callout': boolean;
         'trans-quote': boolean;
-        'trans-coverImg': boolean;
         'headerImgName': string;
         frontMatter: string;
         autoAddLastUpdateTime: boolean;
