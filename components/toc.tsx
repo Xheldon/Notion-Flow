@@ -7,6 +7,7 @@ import { Storage } from "@plasmohq/storage"
 import type { State, TocItem } from '$types';
 import { _toContent } from '$utils';
 
+const storage = new Storage();
 const { Panel } = Collapse;
 
 const tocStyleMap = {
@@ -21,8 +22,9 @@ const Toc = (props: any) => {
   const [active, setActive] = useState(true);
 
   const _locateHeading = useCallback((key: string) => {
-    return () => {
-      _toContent('toc-locate', key);
+    return async () => {
+      const options = await storage.get('options');
+      _toContent('toc-locate', {key, smooth: options['scroll-animation']});
     };
   }, []);
 

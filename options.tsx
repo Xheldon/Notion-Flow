@@ -173,6 +173,7 @@ function OptionsIndex() {
     const [form] = Form.useForm();
     const initialValues = config || {
         'heading-style': 'none', // Note: 默认是不显示分级标题
+        'scroll-animation': true, // Note: 默认是开启滚动动画
         publisher: {
             enable: false,
             notion: {
@@ -319,6 +320,9 @@ function OptionsIndex() {
                                 <Radio.Button value="number">数字（1. 2. 3.）</Radio.Button>
                                 <Radio.Button value="none">无（仅缩进）</Radio.Button>
                             </Radio.Group>
+                        </Form.Item>
+                        <Form.Item key={'scroll-animation'} label='分级标题定位动画' name='scroll-animation'>
+                            <Switch />
                         </Form.Item>
                         <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。</Text></Paragraph>
                         <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>

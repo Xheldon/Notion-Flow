@@ -61,7 +61,6 @@ function getNotionToc() {
 // Note: 接受来自 sidePanel 的消息
 chrome.runtime.onConnect.addListener(function (port) {
     port.onMessage.addListener(function (msg) {
-        // console.log('content 收到:', msg);
         const {name, data} = msg;
         // TODO: 滚动页面等
         switch (name) {
@@ -71,7 +70,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             }
             case 'toc-locate': { // Note: sidePanel 主动要求定位到某个 heading
                 try {
-                    document.querySelector('.notion-page-content')?.querySelector(`[data-block-id="${data}"]`)?.scrollIntoView({behavior: 'smooth'});
+                    document.querySelector('.notion-page-content')?.querySelector(`[data-block-id="${data.key}"]`)?.scrollIntoView({behavior: data.smooth ? 'smooth' : 'instant'});
                 } catch (e) {
                     console.error('toc-locate fail:', e);
                 }
