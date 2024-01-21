@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
     Typography,
     Row,
@@ -17,7 +17,9 @@ import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 import './styles.css';
 
 import { Storage } from "@plasmohq/storage"
-import { logToRenderer } from '~helper/utils';
+import { logToRenderer } from '$utils';
+
+import * as Lang from '$lang';
 
 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.classList.remove('light');
@@ -43,10 +45,12 @@ window.matchMedia('(prefers-color-scheme: light)').addListener(function (mediaQu
 
 const storage = new Storage();
 
-let config = null;
+let config;
+let LocaleConfig;
 
 (async () => {
     config = await storage.get('options');
+    LocaleConfig = Lang[config.language || 'en'];
 })();
 
 const {
@@ -55,112 +59,118 @@ const {
     Link
 } = Typography;
 
-const publisherFormItems = [
-    {
-        label: 'Notion Token',
-        tooltips: {
-            link: 'https://www.xheldon.com',
-            text: '如何获取 Notion Token',
+const publisherFormItems = (Locale) => {
+    return [
+        {
+            label: Locale.Options.Publisher.Notion.Label,
+            tooltips: {
+                link: 'https://www.xheldon.com',
+                text: Locale.Options.Publisher.Notion.Tooltips,
+            },
+            message: Locale.Options.Publisher.Notion.Message,
+            name: ['notion', 'token']
         },
-        message: '请输入 Notion Token',
-        name: ['notion', 'token']
-    },
-    {
-        label: 'Github Personal Token',
-        tooltips: {
-            link: 'https://www.xheldon.com',
-            text: '如何获取 Github Token'
+        {
+            label: Locale.Options.Publisher.Github.Token.Label,
+            tooltips: {
+                link: 'https://www.xheldon.com',
+                text: Locale.Options.Publisher.Github.Token.Tooltips,
+            },
+            message: Locale.Options.Publisher.Github.Token.Message,
+            name: ['github', 'token'],
         },
-        message: '请输入 Github Token',
-        name: ['github', 'token'],
-    },
-    {
-        label: 'Github 仓库',
-        tooltips: {
-            link: 'https://www.xheldon.com',
-            text: '如何获取 Github Repo 名'
+        {
+            label: Locale.Options.Publisher.Github.Repo.Label,
+            tooltips: {
+                link: 'https://www.xheldon.com',
+                text: Locale.Options.Publisher.Github.Repo.Tooltips,
+            },
+            message: Locale.Options.Publisher.Github.Repo.Message,
+            name: ['github', 'repo']
         },
-        message: '请输入 Blog 所在的仓库名',
-        name: ['github', 'repo']
-    },
-    {
-        label: 'Github 分支',
-        tooltips: {
-            link: 'https://www.xheldon.com',
-            text: '如何获取 Github Branch 名'
+        {
+            label: Locale.Options.Publisher.Github.Branch.Label,
+            tooltips: {
+                link: 'https://www.xheldon.com',
+                text: Locale.Options.Publisher.Github.Branch.Tooltips,
+            },
+            message: Locale.Options.Publisher.Github.Branch.Message,
+            name: ['github', 'branch']
         },
-        message: '请输入 Blog 分支名',
-        name: ['github', 'branch']
-    },
-    {
-        label: 'Github 用户名',
-        tooltips: {
-            link: 'https://www.xheldon.com',
-            text: '如何获取 Github Owner 名'
+        {
+            label: Locale.Options.Publisher.Github.User.Label,
+            tooltips: {
+                link: 'https://www.xheldon.com',
+                text: Locale.Options.Publisher.Github.User.Tooltips,
+            },
+            message: Locale.Options.Publisher.Github.User.Message,
+            name: ['github', 'owner']
         },
-        message: '请输入 Github 用户名',
-        name: ['github', 'owner']
-    },
-];
-
-const ossNameMap = {
-    tx: '腾讯云',
+    ];
 };
 
-const ossFormItems = {
-    tx: [{
-        label: 'SecretId',
-        tooltips: {
-            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-            text: '如何获取腾讯云 SecretId',
+const ossNameMap = (Locale) => {
+    return {
+        tx: Locale.Options.Publisher.Oss.TX.Label,
+    }
+};
+
+const ossFormItems = (Locale) => {
+    return {
+        tx: [{
+            label: Locale.Options.Publisher.Oss.TX.SecretId.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.TX.SecretId.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.TX.SecretId.Message,
+            name: ['secretId']
         },
-        message: '请输入腾讯云 SecretId',
-        name: ['secretId']
-    },
-    {
-        label: 'SecretKey',
-        tooltips: {
-            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-            text: '如何获取腾讯云 SecretKey',
+        {
+            label: Locale.Options.Publisher.Oss.TX.SecretKey.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.TX.SecretKey.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.TX.SecretKey.Message,
+            name: ['secretKey']
         },
-        message: '请输入腾讯云 SecretKey',
-        name: ['secretKey']
-    },
-    {
-        label: 'Bucket',
-        tooltips: {
-            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-            text: '如何获取腾讯云 Bucket',
+        {
+            label: Locale.Options.Publisher.Oss.TX.Bucket.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.TX.Bucket.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.TX.Bucket.Message,
+            name: ['bucket']
         },
-        message: '请输入腾讯云 Bucket',
-        name: ['bucket']
-    },
-    {
-        label: 'Region',
-        tooltips: {
-            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-            text: '如何获取腾讯云 Region',
-        },
-        message: '请输入腾讯云 Region',
-        name: ['region']
-    }, {
-        label: 'CDN 地址',
-        tooltips: {
-            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-            text: '如何设置 CDN 地址',
-        },
-        message: '请输入 CDN 地址',
-        name: ['cdn']
-    },{
-        label: '图片上传路径',
-        tooltips: {
-            link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-            text: '图片路径支持的占位符格式',
-        },
-        message: '请输入图片上传路径',
-        name: ['mediaPath']
-    }],
-}
+        {
+            label: Locale.Options.Publisher.Oss.TX.Region.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.TX.Region.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.TX.Region.Message,
+            name: ['region']
+        }, {
+            label: Locale.Options.Publisher.Oss.TX.CDN.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.TX.CDN.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.TX.CDN.Message,
+            name: ['cdn']
+        },{
+            label: Locale.Options.Publisher.Oss.TX.MediaPath.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.TX.MediaPath.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.TX.MediaPath.Message,
+            name: ['mediaPath']
+        }],
+    };
+};
 
 const formItemLayout = {
     labelCol: { span: 6 },
@@ -172,6 +182,7 @@ function OptionsIndex() {
     const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
     const initialValues = config || {
+        language: 'en', // Note: 默认英文界面
         'heading-style': 'none', // Note: 默认是不显示分级标题
         'scroll-animation': true, // Note: 默认是开启滚动动画
         publisher: {
@@ -220,11 +231,11 @@ function OptionsIndex() {
     const ossName = Form.useWatch(['oss', 'name'], form);
 
     const tooltips = useCallback((tooltip: { link: string; text: string }) => {
-        return <div>参见:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
+        return <div>{LocaleConfig.Options.Common.More}:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
     }, []);
 
-    const onChange = useCallback((_: any, allValues: any) => {
-        // console.log(changedValues, allValues);
+    const onChange = useCallback((changedValues: any, allValues: any) => {
+        const {language} = changedValues;
         clearTimeout(timer);
         timer = setTimeout(() => {
             (async () => {
@@ -232,8 +243,11 @@ function OptionsIndex() {
             })();
             messageApi.open({
                 type: 'success',
-                content: '设置保存成功',
+                content: LocaleConfig.Options.Common.Message.OptionsSaveSucc,
             });
+            if (language) {
+                window.location.reload();
+            }
         }, 1000);
     }, [form]);
 
@@ -251,12 +265,12 @@ function OptionsIndex() {
             URL.revokeObjectURL(url);
             messageApi.open({
                 type: 'success',
-                content: '导出配置成功',
+                content: LocaleConfig.Options.Common.Message.OptionsExportSucc,
             });
         } catch (e) {
             messageApi.open({
                 type: 'error',
-                content: '导出配置失败',
+                content: LocaleConfig.Options.Common.Message.OptionsExportFail,
             });
         }
     }, []);
@@ -275,12 +289,12 @@ function OptionsIndex() {
                     form.setFieldsValue(jsonObj);
                     messageApi.open({
                         type: 'success',
-                        content: '导入配置成功',
+                        content: LocaleConfig.Options.Common.Message.OptionsImportSucc,
                     });
                 } catch (e) {
                     messageApi.open({
                         type: 'error',
-                        content: '导入配置失败',
+                        content: LocaleConfig.Options.Common.Message.OptionsImportFail,
                     });
                 }
                 
@@ -296,15 +310,15 @@ function OptionsIndex() {
             <Row>
                 <Col span={18} offset={3}>
                     <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
-                        导入导出
+                        {LocaleConfig.Options.Common.ExportAndImport}
                     </Divider>
                     <Paragraph>
-                        <Button onClick={onDownloadConfig} icon={<UploadOutlined />}>导出配置</Button>
+                        <Button onClick={onDownloadConfig} icon={<UploadOutlined />}>{LocaleConfig.Options.Common.Export}</Button>
                         <Divider type="vertical" />
-                        <Button onClick={onUploadConfig} icon={<DownloadOutlined />}>导入配置</Button>
+                        <Button onClick={onUploadConfig} icon={<DownloadOutlined />}>{LocaleConfig.Options.Common.Import}</Button>
                     </Paragraph>
                     <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
-                        基础功能
+                        {LocaleConfig.Options.Common.Basic}
                     </Divider>
                     <Form
                         form={form}
@@ -314,40 +328,55 @@ function OptionsIndex() {
                         labelAlign='left'
                         initialValues={initialValues}
                     >
-                        <Form.Item key={'heading-style'} label='Toc 样式' name='heading-style'>
+                        <Form.Item
+                            key={'language'}
+                            style={{ marginBottom: 20 }}
+                            label='Language'
+                            extra={
+                                <Paragraph>
+                                    <Text>修改此处将会刷新本页面和插件界面</Text>
+                                    <br />
+                                    <Text>Making changes here will refresh this page and the plugin interface.</Text>
+                                </Paragraph>
+                            }
+                            name='language'>
                             <Radio.Group>
-                                <Radio.Button value="text">文本（H1 H2 H3）</Radio.Button>
-                                <Radio.Button value="number">数字（1. 2. 3.）</Radio.Button>
-                                <Radio.Button value="none">无（仅缩进）</Radio.Button>
+                                <Radio.Button value="cn">中文</Radio.Button>
+                                <Radio.Button value="en">English</Radio.Button>
                             </Radio.Group>
                         </Form.Item>
-                        <Form.Item key={'scroll-animation'} label='分级标题定位动画' name='scroll-animation'>
+                        <Form.Item
+                            key={'heading-style'}
+                            style={{ marginBottom: 20 }}
+                            label={LocaleConfig.Options.Basic.Toc.Label}
+                            name='heading-style'>
+                            <Radio.Group>
+                                <Radio.Button value="text">{LocaleConfig.Options.Basic.Toc.Text}</Radio.Button>
+                                <Radio.Button value="number">{LocaleConfig.Options.Basic.Toc.Number}</Radio.Button>
+                                <Radio.Button value="none">{LocaleConfig.Options.Basic.Toc.None}</Radio.Button>
+                            </Radio.Group>
+                        </Form.Item>
+                        <Form.Item key={'scroll-animation'} label={LocaleConfig.Options.Basic.ScrollAnimation} name='scroll-animation'>
                             <Switch />
                         </Form.Item>
-                        <Paragraph><Text strong>后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。</Text></Paragraph>
+                        <Paragraph><Text strong>{LocaleConfig.Options.Basic.MoreFeature}</Text></Paragraph>
                         <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
-                            高级功能
+                            {LocaleConfig.Options.Common.Advance}
                         </Divider>
                         <Form.Item
                             key={'publisher.enable'}
+                            style={{ marginBottom: 20 }}
                             name={['publisher', 'enable']}
-                            label="发布到 Github"
-                            extra={
-                                <>
-                                    <Text>发布功能可以让你能够将 Notion 内容发布到 Github Pages<Text strong mark type="danger">（目前仅支持 Jekyll 博客系统）。</Text></Text>
-                                    <br />
-                                    <Text>在将来，还支持直接在插件中写 Github Pages 的 Jekyll 博客系统所支持的 Ruby 插件，以在博客中正确展示 Notion 的非 Markdown 标准模块，典型的有 Bookmark 模块。</Text>
-                                    <br />
-                                    <Text strong>您可以自由的选择是否启用发布功能，注意，这需要您熟悉 Github Person Token、Notion 集成、OSS Token 等相关概念。</Text>
-                                </>
-                            }>
+                            label={LocaleConfig.Options.Publisher.Common.PublishToGithub}
+                            extra={LocaleConfig.Options.Publisher.Common.Desc}>
                             <Switch />
                         </Form.Item>
                         <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Paragraph>
                                 <Text mark>重要！使用前必读！</Text> <Text strong><Link href='https://xheldon.notion.site/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4' target='_blank'>发布等高级功能使用说明及答疑</Link></Text>。
                             </Paragraph>
-                            {publisherFormItems.map((item, key) => {
+                            {publisherFormItems(LocaleConfig).map((item, key) => {
+                                console.log('LocaleConfig', LocaleConfig, item);
                                 const { label, tooltips: _tooltips, message, name } = item;
                                 const _name = name.slice();
                                 _name.unshift('publisher');
@@ -378,11 +407,11 @@ function OptionsIndex() {
                                     </>
                                 }>
                                 <Radio.Group>
-                                    {Object.keys(ossFormItems).map(key => <Radio.Button key={key} value={key}>{ossNameMap[key]}</Radio.Button>)}
+                                    {Object.keys(ossFormItems(LocaleConfig)).map(key => <Radio.Button key={key} value={key}>{ossNameMap(LocaleConfig)[key]}</Radio.Button>)}
                                 </Radio.Group>
                             </Form.Item>
-                            <div style={{ display: (ossName && ossFormItems[ossName]) ? 'block' : 'none' }}>
-                                {ossName && ossFormItems[ossName].map((item, key) => {
+                            <div style={{ display: (ossName && ossFormItems(LocaleConfig)[ossName]) ? 'block' : 'none' }}>
+                                {ossName && ossFormItems(LocaleConfig)[ossName].map((item, key) => {
                                     const { label, tooltips: _tooltips, message, name } = item;
                                     const _name = name.slice();
                                     _name.unshift(form.getFieldValue(['oss', 'name']));

@@ -183,7 +183,14 @@ function App() {
     useEffect(() => {
         storage.watch({
             options: (opt) => {
-                const { newValue: { 'heading-style': headingStyle, publisher, oss, aigc, plugin } } = opt;
+                console.log('options:', opt);
+                const {
+                    newValue: { language, 'heading-style': headingStyle, publisher, oss, aigc, plugin },
+                    oldValue: { language: preLanguage},
+                } = opt;
+                if (language !== preLanguage) {
+                    window.location.reload();
+                }
                 const enabledTabs = {
                     basic: true,
                     publisher: !!publisher?.enable,

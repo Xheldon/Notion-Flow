@@ -21,6 +21,8 @@
       "$utils": ["helper/utils.ts"],
       "$api": ["helper/api.ts"],
       "$lib/*": ["helper/lib/*"],
+      "$lang": ["helper/i18n/index.ts"],
+      "$helper/*": ["helper/*"],
       "$components/*": ["components/*"],
     },
     "baseUrl": "."
