@@ -373,7 +373,7 @@ function OptionsIndex() {
                         </Form.Item>
                         <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Paragraph>
-                                <Text mark>重要！使用前必读！</Text> <Text strong><Link href='https://xheldon.notion.site/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4' target='_blank'>发布等高级功能使用说明及答疑</Link></Text>。
+                                {LocaleConfig.Options.Publisher.Common.Alert}
                             </Paragraph>
                             {publisherFormItems(LocaleConfig).map((item, key) => {
                                 console.log('LocaleConfig', LocaleConfig, item);
@@ -396,16 +396,10 @@ function OptionsIndex() {
                             <Form.Item
                                 key={'oss.name'}
                                 style={{ marginBottom: 20 }}
-                                label='OSS 提供商'
+                                label={LocaleConfig.Options.Publisher.Oss.Label}
                                 name={['oss', 'name']}
                                 labelAlign='right'
-                                extra={
-                                    <>
-                                        <Text>Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。</Text>
-                                        <br />
-                                        <Text strong italic>更多 OSS 服务提供商开发中...</Text>
-                                    </>
-                                }>
+                                extra={LocaleConfig.Options.Publisher.Oss.Extra}>
                                 <Radio.Group>
                                     {Object.keys(ossFormItems(LocaleConfig)).map(key => <Radio.Button key={key} value={key}>{ossNameMap(LocaleConfig)[key]}</Radio.Button>)}
                                 </Radio.Group>
@@ -435,25 +429,17 @@ function OptionsIndex() {
                                 name={['publisher', 'filePath']}
                                 labelAlign='right'
                                 style={{ marginBottom: 20 }}
-                                extra={
-                                    <>
-                                        <Text>在这里设置发布到 Github 仓库的文件路径，支持使用 {"{{}}"} 引用 Notion Page Property 的字段以及 YYYY、YY、MM、DD 等变量，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'上传文件路径'}>
-                                <Input placeholder='输入发布到 Github 仓库的文件路径' />
+                                extra={LocaleConfig.Options.Publisher.Github.FilePath.Extra}
+                                label={LocaleConfig.Options.Publisher.Github.FilePath.Label}>
+                                <Input placeholder={LocaleConfig.Options.Publisher.Github.FilePath.Placeholder} />
                             </Form.Item>
                             <Form.Item
                                 key="autoAddLastUpdateTime"
                                 name={['publisher', 'autoAddLastUpdateTime']}
                                 labelAlign='right'
                                 style={{ marginBottom: 20 }}
-                                extra={
-                                    <>
-                                        <Text>从 Notion Flow 发布博客的时候，自动添加一个固定的 lastUpdateTime 的字段到在 Front Matter 中，你可以在 Jekyll 博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'自动添加 lastUpdateTime'}>
+                                extra={LocaleConfig.Options.Publisher.Github.AddLastUpdateTime.Extra}
+                                label={LocaleConfig.Options.Publisher.Github.AddLastUpdateTime.Label}>
                                 <Switch />
                             </Form.Item>
                             <Form.Item
@@ -461,12 +447,8 @@ function OptionsIndex() {
                                 name={['publisher', 'setNotionLastUpdateTime']}
                                 labelAlign='right'
                                 style={{ marginBottom: 20 }}
-                                extra={
-                                    <>
-                                        <Text>从 Notion Flow 发布博客成功后，更新 Notion Page 的 lastUpdateTime Property，以方便你在 Notion 中查看该文章何时最后发布。需要提前添加好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'更新 Notion lastUpdateTime 字段'}>
+                                extra={LocaleConfig.Options.Publisher.Github.UpdateNotionLastUpdateTime.Extra}
+                                label={LocaleConfig.Options.Publisher.Github.UpdateNotionLastUpdateTime.Label}>
                                 <Switch />
                             </Form.Item>
                             <Form.Item
@@ -474,32 +456,24 @@ function OptionsIndex() {
                                 name={['publisher', 'frontMatter']}
                                 labelAlign='right'
                                 style={{ marginBottom: 20}}
-                                extra={
-                                    <>
-                                        <Text>一般情况你应该在 Pages 的 Property 中写与页面有关的 Front Matter，在这里写固定的 Front Matter，如我的使用 case 是设置一个 layout: post 属性。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'其他 Front Matter 字段'}>
-                                <Input placeholder='输入将要在博客中使用的其他固定 Front Matter 字段，英文半角逗号分隔' />
+                                extra={LocaleConfig.Options.Publisher.Github.FrontMatter.Extra}
+                                label={LocaleConfig.Options.Publisher.Github.FrontMatter.Label}>
+                                <Input placeholder={LocaleConfig.Options.Publisher.Github.FrontMatter.Placeholder} />
                             </Form.Item>
                             <Form.Item
                                 key="headerImgName"
                                 name={['publisher', 'headerImgName']}
                                 labelAlign='right'
                                 style={{ marginBottom: 20 }}
-                                extra={
-                                    <>
-                                        <Text>Notion Page 的头图，可以作为博客的头图，需要在此设置将 Noiton 头图设置为 Front Matter 的哪个字段，然后在 Jekyll 博客中使用该字段（图片会上传到 OSS）。<Text italic>（不填表示不使用）</Text>详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                                    </>
-                                }
-                                label={'头图字段'}>
-                                <Input placeholder='留空表示不使用' />
+                                extra={LocaleConfig.Options.Publisher.Github.HeaderImgName.Extra}
+                                label={LocaleConfig.Options.Publisher.Github.HeaderImgName.Label}>
+                                <Input placeholder={LocaleConfig.Options.Publisher.Github.HeaderImgName.Placeholder} />
                             </Form.Item>
                             <Row>
                                 <Col offset={6}>
                                     <Divider />
                                     <Paragraph>
-                                        <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块，需要一定样式设置。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
+                                        {LocaleConfig.Options.Publisher.Github.Transform.Desc}
                                     </Paragraph>
                                 </Col>
                             </Row>
@@ -512,7 +486,7 @@ function OptionsIndex() {
                                         name={['publisher', 'trans-image']}
                                         labelAlign='right'
                                         style={{ marginBottom: 20 }}
-                                        label={'图片转换'}>
+                                        label={LocaleConfig.Options.Publisher.Github.Transform.Image}>
                                         <Switch />
                                     </Form.Item>
                                 </Col>
@@ -524,7 +498,7 @@ function OptionsIndex() {
                                         name={['publisher', 'trans-bookmark']}
                                         labelAlign='right'
                                         style={{ marginBottom: 20 }}
-                                        label={'Bookmark 转换'}>
+                                        label={LocaleConfig.Options.Publisher.Github.Transform.Bookmark}>
                                         <Switch />
                                     </Form.Item>
                                 </Col>
@@ -538,7 +512,7 @@ function OptionsIndex() {
                                         name={['publisher', 'trans-callout']}
                                         labelAlign='right'
                                         style={{ marginBottom: 20 }}
-                                        label={'Callout 转换'}>
+                                        label={LocaleConfig.Options.Publisher.Github.Transform.Callout}>
                                         <Switch />
                                     </Form.Item>
                                 </Col>
@@ -550,7 +524,7 @@ function OptionsIndex() {
                                         name={['publisher', 'trans-quote']}
                                         labelAlign='right'
                                         style={{ marginBottom: 20 }}
-                                        label={'Quoteblock 转换'}>
+                                        label={LocaleConfig.Options.Publisher.Github.Transform.Quoteblock}>
                                         <Switch />
                                     </Form.Item>
                                 </Col>
@@ -570,32 +544,18 @@ function OptionsIndex() {
                         <Divider />
                         <Form.Item
                             name={['aigc', 'enable']}
-                            label="「AIGC」功能（敬请期待）"
-                            extra={
-                                <>
-                                    <Text>AIGC 功能可以让你通过 OpenAI API 的形式来使用 AIGC 功能，虽然不如 Notion AI 方便（如需要选中内容，然后生成内容后再粘贴；或者选中块后再点击插入），但是其自由度更高，成本更低。</Text>
-                                    <br />
-                                    <Text strong>您可以自由的选择是否启用 AIGC 功能，注意，这需要您提供 OpenAI API。</Text>
-                                </>
-                            }>
+                            label={LocaleConfig.Options.AIGC.Label}
+                            extra={LocaleConfig.Options.AIGC.Extra}>
                             <Switch disabled />
                         </Form.Item>
                         <Form.Item
                             name={['plugin', 'enable']}
-                            label="「插件」功能（敬请期待）"
-                            extra={
-                                <>
-                                    <Text>插件功能可以让你通过编写代码的方式，参与到 Notion 博客内容构建中去，如自定义 Notion Block 处理函数以生成特定格式内容，然后再自定义 Jekyll 插件来处理该特定内容以生成特定 HTML，典型的用法就是处理在 Notion 的非标准 Markdown 语法的 Bookmark 元素。</Text>
-                                    <br />
-                                    <Text>插件的另一个典型用法是可以让你在发布成功之后，修改 Notoin 页面内容，如更新 lastUpdateTime 字段等。</Text>
-                                    <br />
-                                    <Text strong>您可以自由的选择是否启用 插件爱你 功能，注意，这需要您熟悉 JavaScript 和 Ruby 以及 Notion API，同时理解本插件的构建原理。</Text>
-                                </>
-                            }>
+                            label={LocaleConfig.Options.Plugin.Label}
+                            extra={LocaleConfig.Options.Plugin.Extra}>
                             <Switch disabled />
                         </Form.Item>
                     </Form>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>关于</Divider>
+                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>{LocaleConfig.Options.About.Label}</Divider>
                     <Paragraph>
                         <Text>
                             作者说：<br />
