@@ -67,13 +67,13 @@ export default {
                 },
                 Branch: {
                     Label: 'Github 分支',
-                    Tooltips: '如何获取 Github Branch 名',
-                    Message: '请输入 Blog 分支名',
+                    Tooltips: '如何获取 Github 分支名',
+                    Message: '请输入 Blog 仓库分支名',
                 },
                 User: {
                     Label: 'Github 用户名',
-                    Tooltips: '如何获取 Github User',
-                    Message: '如何获取 Github Owner 名',
+                    Tooltips: '如何获取 Github Username',
+                    Message: '如何获取 Github Username 名',
                 },
                 FilePath: {
                     Label: '上传文件路径',
@@ -83,6 +83,8 @@ export default {
                             <Text>在这里设置发布到 Github 仓库的文件路径，支持使用 {"{{}}"} 引用 Notion Page Property 的字段以及 YYYY、YY、MM、DD 等变量，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何设置上传文件路径？</Link></Text>
                         </>
                     ),
+                    Tooltips: '如何设置上传文件路径',
+                    Message: '请输入上传文件路径',
                 },
                 AddLastUpdateTime: {
                     Label: '自动添加 \'lastUpdateTime\'',
@@ -119,13 +121,14 @@ export default {
                     Placeholder: '留空表示不使用'
                 },
                 Transform: {
+                    Label: '模块转换',
                     Desc: (
                         <Text strong>Notion 中含有非标准 Markdown 格式，如 Bookmark、Video。但是通过一定配置和少量代码书写，你也可以在自己博客上支持你想要的模块，需要一定样式设置。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                     ),
-                    Image: '图片转换',
-                    Bookmark: 'Bookmark 转换',
-                    Callout: 'Callout 转换',
-                    Quoteblock: 'Quoteblock 转换',
+                    Image: '图片',
+                    Bookmark: 'Bookmark',
+                    Callout: 'Callout',
+                    Quoteblock: 'Quoteblock',
                 }
             },
             Oss: {
@@ -158,6 +161,72 @@ export default {
                         Label: 'Region',
                         Tooltips: '如何获取腾讯云 Region',
                         Message: '请输入腾讯云 Region'
+                    },
+                    CDN: {
+                        Label: 'CDN 地址',
+                        Tooltips: '如何设置 CDN 地址',
+                        Message: '请输入 CDN 地址'
+                    },
+                    MediaPath: {
+                        Label: '图片路径',
+                        Tooltips: '如何设置 CDN 地址',
+                        Message: '请输入 CDN 地址'
+                    },
+                },
+                ALI: {
+                    Label: '阿里云',
+                    SecretId: {
+                        Label: 'AccessKey Id',
+                        Tooltips: '如何获取阿里云 AccessKey Id',
+                        Message: '请输入阿里云 AccessKey Id'
+                    },
+                    SecretKey: {
+                        Label: 'AccessKey Secret',
+                        Tooltips: '如何获取阿里云 AccessKey Secret',
+                        Message: '请输入阿里云 AccessKey Secret'
+                    },
+                    Bucket: {
+                        Label: 'Bucket',
+                        Tooltips: '如何获取阿里云 Bucket',
+                        Message: '请输入阿里云 Bucket'
+                    },
+                    Region: {
+                        Label: 'Region',
+                        Tooltips: '如何获取阿里云 Region',
+                        Message: '请输入阿里云 Region'
+                    },
+                    CDN: {
+                        Label: 'CDN 地址',
+                        Tooltips: '如何设置 CDN 地址',
+                        Message: '请输入 CDN 地址'
+                    },
+                    MediaPath: {
+                        Label: '图片路径',
+                        Tooltips: '如何设置 CDN 地址',
+                        Message: '请输入 CDN 地址'
+                    },
+                },
+                AWS: {
+                    Label: 'AWS',
+                    SecretId: {
+                        Label: 'Access key',
+                        Tooltips: '如何获取 AWS Access key',
+                        Message: '请输入 AWS Access key'
+                    },
+                    SecretKey: {
+                        Label: 'Secret Access Key',
+                        Tooltips: '如何获取 AWS Secret Access Key',
+                        Message: '请输入 AWS Secret Access Key'
+                    },
+                    Bucket: {
+                        Label: 'Bucket',
+                        Tooltips: '如何获取 AWS Bucket',
+                        Message: '请输入 AWS Bucket'
+                    },
+                    Region: {
+                        Label: 'Region',
+                        Tooltips: '如何获取 AWS Region',
+                        Message: '请输入 AWS Region'
                     },
                     CDN: {
                         Label: 'CDN 地址',

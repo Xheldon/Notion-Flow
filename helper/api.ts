@@ -152,29 +152,6 @@ export default class Req {
                                 alwaysKeepResolution: true,
                                 useWebWorker: false,
                             });
-                            /* blob = await imageConversion.compress(blob, {
-                                quality: 0.8,
-                                type: "image/webp",
-                                width: 300,
-                                height: 200,
-                                orientation:2,
-                                scale: 0.5,
-                              }); */
-                            /* buffer = await sharp(res.data)
-                            .withMetadata({
-                                exif: {
-                                    IFD0: {
-                                        Copyright: 'image from xheldon.com'
-                                    }
-                                }
-                            })
-                            .webp({
-                                quality: 75
-                            })
-                            .toBuffer({resolveWithObject: true})
-                            .then(({data}) => {
-                                return data;
-                            }); */
                         }
                         try {
                             const uri = `${cdn}/${key}`;

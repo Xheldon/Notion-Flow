@@ -112,6 +112,8 @@ const publisherFormItems = (Locale) => {
 const ossNameMap = (Locale) => {
     return {
         tx: Locale.Options.Publisher.Oss.TX.Label,
+        ali: Locale.Options.Publisher.Oss.ALI.Label,
+        aws: Locale.Options.Publisher.Oss.AWS.Label,
     }
 };
 
@@ -169,6 +171,110 @@ const ossFormItems = (Locale) => {
             message: Locale.Options.Publisher.Oss.TX.MediaPath.Message,
             name: ['mediaPath']
         }],
+        ali: [{
+            label: Locale.Options.Publisher.Oss.ALI.SecretId.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.ALI.SecretId.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.ALI.SecretId.Message,
+            name: ['secretId']
+        },
+        {
+            label: Locale.Options.Publisher.Oss.ALI.SecretKey.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.ALI.SecretKey.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.ALI.SecretKey.Message,
+            name: ['secretKey']
+        },
+        {
+            label: Locale.Options.Publisher.Oss.ALI.Bucket.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.ALI.Bucket.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.ALI.Bucket.Message,
+            name: ['bucket']
+        },
+        {
+            label: Locale.Options.Publisher.Oss.ALI.Region.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.ALI.Region.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.ALI.Region.Message,
+            name: ['region']
+        }, {
+            label: Locale.Options.Publisher.Oss.ALI.CDN.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.ALI.CDN.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.ALI.CDN.Message,
+            name: ['cdn']
+        },{
+            label: Locale.Options.Publisher.Oss.ALI.MediaPath.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.ALI.MediaPath.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.ALI.MediaPath.Message,
+            name: ['mediaPath']
+        }],
+        aws: [{
+            label: Locale.Options.Publisher.Oss.AWS.SecretId.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.AWS.SecretId.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.AWS.SecretId.Message,
+            name: ['secretId']
+        },
+        {
+            label: Locale.Options.Publisher.Oss.AWS.SecretKey.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.AWS.SecretKey.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.AWS.SecretKey.Message,
+            name: ['secretKey']
+        },
+        {
+            label: Locale.Options.Publisher.Oss.AWS.Bucket.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.AWS.Bucket.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.AWS.Bucket.Message,
+            name: ['bucket']
+        },
+        {
+            label: Locale.Options.Publisher.Oss.AWS.Region.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.AWS.Region.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.AWS.Region.Message,
+            name: ['region']
+        }, {
+            label: Locale.Options.Publisher.Oss.AWS.CDN.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.AWS.CDN.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.AWS.CDN.Message,
+            name: ['cdn']
+        },{
+            label: Locale.Options.Publisher.Oss.AWS.MediaPath.Label,
+            tooltips: {
+                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
+                text: Locale.Options.Publisher.Oss.AWS.MediaPath.Tooltips,
+            },
+            message: Locale.Options.Publisher.Oss.AWS.MediaPath.Message,
+            name: ['mediaPath']
+        }],
     };
 };
 
@@ -211,6 +317,22 @@ function OptionsIndex() {
             // enable: true,
             name: 'tx',
             tx: {
+                secretId: '',
+                secretKey: '',
+                bucket: '',
+                region: '',
+                cdn: '',
+                mediaPath: '', // Note: 支持通配符如 {{year}}/{{month}}/{{name}}
+            },
+            ali: {
+                secretId: '',
+                secretKey: '',
+                bucket: '',
+                region: '',
+                cdn: '',
+                mediaPath: '', // Note: 支持通配符如 {{year}}/{{month}}/{{name}}
+            },
+            aws: {
                 secretId: '',
                 secretKey: '',
                 bucket: '',
@@ -429,6 +551,11 @@ function OptionsIndex() {
                                 name={['publisher', 'filePath']}
                                 labelAlign='right'
                                 style={{ marginBottom: 20 }}
+                                rules={[{ required: true, message: LocaleConfig.Options.Publisher.Github.FilePath.Message }]}
+                                tooltip={tooltips({
+                                    link: 'https://www.xheldon.com',
+                                    text: LocaleConfig.Options.Publisher.Github.FilePath.Tooltips,
+                                })}
                                 extra={LocaleConfig.Options.Publisher.Github.FilePath.Extra}
                                 label={LocaleConfig.Options.Publisher.Github.FilePath.Label}>
                                 <Input placeholder={LocaleConfig.Options.Publisher.Github.FilePath.Placeholder} />
@@ -470,8 +597,12 @@ function OptionsIndex() {
                                 <Input placeholder={LocaleConfig.Options.Publisher.Github.HeaderImgName.Placeholder} />
                             </Form.Item>
                             <Row>
-                                <Col offset={6}>
-                                    <Divider />
+                                <Col span={6}>
+                                    <Paragraph style={{textAlign: 'right', marginRight: 10}}>
+                                        {LocaleConfig.Options.Publisher.Github.Transform.Label}
+                                    </Paragraph>
+                                    </Col>
+                                <Col span={14}>
                                     <Paragraph>
                                         {LocaleConfig.Options.Publisher.Github.Transform.Desc}
                                     </Paragraph>

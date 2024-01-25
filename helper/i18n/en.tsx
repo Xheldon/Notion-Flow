@@ -76,12 +76,14 @@ export default {
                 },
                 FilePath: {
                     Label: 'Upload file Path',
-                    Placeholder: 'Please enter the file path to publish to the Github repository.',
+                    Placeholder: 'Please enter the file path to publish to the Github repository',
                     Extra: (
                         <>
                             <Text>Set the file path to publish to the Github repository here, with support for using {"{{}}"} to reference Notion Page Property fields, as well as variables such as YYYY, YY, MM, DD, etc. See details: <Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to set up the file upload path?</Link></Text>
                         </>
                     ),
+                    Tooltips: 'How to set github file path',
+                    Message: 'File path is required',
                 },
                 AddLastUpdateTime: {
                     Label: 'Auto Add \'lastUpdateTime\'',
@@ -92,7 +94,7 @@ export default {
                     ),
                 },
                 UpdateNotionLastUpdateTime: {
-                    Label: 'Update the \'lastUpdateTime\' field in Notion',
+                    Label: 'Update the \'lastUpdateTime\' field',
                     Extra: (
                         <>
                             <Text>After successfully publishing a blog from Notion Flow, update the lastUpdateTime Property on the Notion Page. This will allow you to easily see when the article was last posted in Notion. You will need to add this field to the Notion Page's Property in advance. See the detailed information for further instructions. See details:<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to check the last published time of a page in Notion?</Link></Text>
@@ -106,7 +108,7 @@ export default {
                             <Text>Under normal circumstances, you should write the Front Matter related to the page within the Property section of Pages. Here, you can write fixed Front Matter. For example, in my use case, I set a 'layout: post' property for each blog post published through Notion Flow. See details: <Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to set up a fixed Front Matter?</Link></Text>
                         </>
                     ),
-                    Placeholder: 'Enter the additional fixed Front Matter fields to be used in the blog, separated by English commas.'
+                    Placeholder: 'Enter the additional fixed Front Matter fields, separated by English commas.'
                 },
                 HeaderImgName: {
                     Label: 'Header image name',
@@ -118,13 +120,14 @@ export default {
                     Placeholder: 'Leave blank if not applicable'
                 },
                 Transform: {
+                    Label: 'Conversion',
                     Desc: (
                         <Text strong>Notion contains non-standard Markdown formats, such as Bookmarks and Video. However, with some configuration and a bit of coding, you can also support the modules you want on your own blog, although this will require certain style settings. See details:<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
                     ),
-                    Image: 'Image conversion',
-                    Bookmark: 'Bookmark conversion',
-                    Callout: 'Callout conversion',
-                    Quoteblock: 'Quoteblock conversion',
+                    Image: 'Image',
+                    Bookmark: 'Bookmark',
+                    Callout: 'Callout',
+                    Quoteblock: 'Quoteblock',
 
                 }
             },
@@ -162,11 +165,77 @@ export default {
                     CDN: {
                         Label: 'CDN address',
                         Tooltips: 'How to set tecent cloud CDN address',
-                        Message: 'Cdn address is required'
+                        Message: 'CDN address is required'
                     },
                     MediaPath: {
                         Label: 'Media path',
                         Tooltips: 'How to set tecent cloud media path',
+                        Message: 'Media path is required'
+                    },
+                },
+                ALI: {
+                    Label: 'Alibaba Cloud',
+                    SecretId: {
+                        Label: 'AccessKey Id',
+                        Tooltips: 'How to get alibaba cloud  accessKey id',
+                        Message: 'AccessKey id is required'
+                    },
+                    SecretKey: {
+                        Label: 'AccessKey Secret',
+                        Tooltips: 'How to get alibaba cloud accessKey secret',
+                        Message: 'AccessKey secret is required'
+                    },
+                    Bucket: {
+                        Label: 'Bucket',
+                        Tooltips: 'How to get alibaba cloud bucket',
+                        Message: 'Bucket is required'
+                    },
+                    Region: {
+                        Label: 'Region',
+                        Tooltips: 'How to get alibaba cloud region',
+                        Message: 'Region is required'
+                    },
+                    CDN: {
+                        Label: 'CDN address',
+                        Tooltips: 'How to set alibaba cloud CDN address',
+                        Message: 'CDN address is required'
+                    },
+                    MediaPath: {
+                        Label: 'Media path',
+                        Tooltips: 'How to set alibaba cloud media path',
+                        Message: 'Media path is required'
+                    },
+                },
+                AWS: {
+                    Label: 'AWS',
+                    SecretId: {
+                        Label: 'Access key',
+                        Tooltips: 'How to get AWS access key',
+                        Message: 'Access key is required'
+                    },
+                    SecretKey: {
+                        Label: 'Secret Access Key',
+                        Tooltips: 'How to get AWS secret sccess key',
+                        Message: 'Secret access key is required'
+                    },
+                    Bucket: {
+                        Label: 'Bucket',
+                        Tooltips: 'How to get AWS bucket',
+                        Message: 'Bucket is required'
+                    },
+                    Region: {
+                        Label: 'Region',
+                        Tooltips: 'How to get AWS region',
+                        Message: 'Region is required'
+                    },
+                    CDN: {
+                        Label: 'CDN address',
+                        Tooltips: 'How to set AWS CDN address',
+                        Message: 'CDN address is required'
+                    },
+                    MediaPath: {
+                        Label: 'Media path',
+                        Tooltips: 'How to set AWS media path',
                         Message: 'Media path is required'
                     },
                 },
