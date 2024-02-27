@@ -50,7 +50,7 @@ let LocaleConfig;
 
 (async () => {
     config = await storage.get('options');
-    LocaleConfig = Lang[config.language || 'en'];
+    LocaleConfig = Lang[config?.language || 'en'];
 })();
 
 const {
@@ -61,15 +61,15 @@ const {
 
 const publisherFormItems = (Locale) => {
     return [
-        {
-            label: Locale.Options.Publisher.Notion.Label,
+        /* {
+            label: Locale.Options.Notion.Label,
             tooltips: {
                 link: 'https://www.xheldon.com',
-                text: Locale.Options.Publisher.Notion.Tooltips,
+                text: Locale.Options.Notion.Tooltips,
             },
-            message: Locale.Options.Publisher.Notion.Message,
+            message: Locale.Options.Notion.Message,
             name: ['notion', 'token']
-        },
+        }, */
         {
             label: Locale.Options.Publisher.Github.Token.Label,
             tooltips: {
@@ -291,27 +291,32 @@ function OptionsIndex() {
         language: 'en', // Note: 默认英文界面
         'heading-style': 'none', // Note: 默认是不显示分级标题
         'scroll-animation': true, // Note: 默认是开启滚动动画
+        notion: {
+            token: '',
+        },
         publisher: {
             enable: false,
-            notion: {
-                token: '',
-            },
+            enableFrontMatter: true,
             github: {
                 token: '',
                 repo: '',
                 branch: '',
                 owner: '',
             },
-            'filePath': '',
-            'setNotionLastUpdateTime': true,
-            'autoAddLastUpdateTime': true,
-            'frontMatter': '',
-            'headerImgName': 'header-img',
+            filePath: '',
+            setNotionLastUpdateTime: true,
+            autoAddLastUpdateTime: true,
+            frontMatter: '',
+            headerImgName: 'header-img',
             'trans-image': true,
             'trans-bookmark': true,
             'trans-callout': true,
             'trans-video': true,
             'trans-quote': true,
+        },
+        wechat: {
+            enable: false,
+            
         },
         oss: {
             // enable: true,
@@ -456,9 +461,7 @@ function OptionsIndex() {
                             label='Language'
                             extra={
                                 <Paragraph>
-                                    <Text>修改此处将会刷新本页面和插件界面</Text>
-                                    <br />
-                                    <Text>Making changes here will refresh this page and the plugin interface.</Text>
+                                    <Text>{LocaleConfig.Options.Basic.ReloadRxplain}</Text>
                                 </Paragraph>
                             }
                             name='language'>
@@ -486,6 +489,16 @@ function OptionsIndex() {
                             {LocaleConfig.Options.Common.Advance}
                         </Divider>
                         <Form.Item
+                            key={'notion'}
+                            style={{ marginBottom: 20 }}
+                            rules={[{required: true, message: LocaleConfig.Options.Notion.Message}]}
+                            name={['notion', 'token']}
+                            label={LocaleConfig.Options.Notion.Label}
+                            extra={LocaleConfig.Options.Notion.Desc}>
+                            <Input />
+                        </Form.Item>
+                        <Divider />
+                        <Form.Item
                             key={'publisher.enable'}
                             style={{ marginBottom: 20 }}
                             name={['publisher', 'enable']}
@@ -497,6 +510,15 @@ function OptionsIndex() {
                             <Paragraph>
                                 {LocaleConfig.Options.Publisher.Common.Alert}
                             </Paragraph>
+                            <Form.Item
+                                key={'publisher.frontMatter'}
+                                style={{ marginBottom: 20 }}
+                                labelAlign='right'
+                                name={['publisher', 'enableFrontMatter']}
+                                label={LocaleConfig.Options.Publisher.Common.EnableFrontMatter.Label}
+                                extra={LocaleConfig.Options.Publisher.Common.EnableFrontMatter.Desc}>
+                                <Input />
+                            </Form.Item>
                             {publisherFormItems(LocaleConfig).map((item, key) => {
                                 console.log('LocaleConfig', LocaleConfig, item);
                                 const { label, tooltips: _tooltips, message, name } = item;
@@ -661,6 +683,14 @@ function OptionsIndex() {
                                 </Col>
                             </Row>
                         </div>
+                        <Form.Item
+                            key={'wechat.enable'}
+                            style={{ marginBottom: 20 }}
+                            name={['wechat', 'enable']}
+                            label={LocaleConfig.Options.Wechat.Common.PublishToWechat}
+                            extra={LocaleConfig.Options.Wechat.Common.Desc}>
+                            <Switch />
+                        </Form.Item>
                         {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Divider />
                             <Form.Item

@@ -28,6 +28,7 @@ export default {
                 None: 'None（Only Intent）'
             },
             ScrollAnimation: 'Locate Heading Animation',
+            ReloadRxplain: 'Making changes here will refresh this page and the plugin interface.',
             MoreFeature: 'More configurable options will be made available later on, such as whether to use animations when scrolling in Notion, scroll speed, types of notifications, theme colors, Markdown syntax styles, etc. Please stay tuned.',
         },
         Publisher: {

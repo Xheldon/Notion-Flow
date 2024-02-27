@@ -29,18 +29,34 @@ export default {
                 None: '无（仅缩进）'
             },
             ScrollAnimation: '分级标题定位动画',
+            ReloadRxplain: '修改此处将会刷新本页面和插件界面',
             MoreFeature: '后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。',
+        },
+        Notion: {
+            Label: 'Notion API Token',
+            Message: '请输入 Notion Token',
+            Desc: (
+                <>
+                    <Text>Notion Flow 需要使用 Notion API 来获取 Notion 内容。如何获取及更多信息详见<Link href='https://www.xheldon.com' target='_blank'>Notion Token</Link></Text>
+                </>
+            ),
         },
         Publisher: {
             Common: {
                 PublishToGithub: '发布到 Github',
+                EnableFrontMatter: {
+                    Label: '启用 Front Matter',
+                    Desc: (
+                        <>
+                            <Text>如果你的博客支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress 博客系统等。这会在 Markdown 文章的顶部插入以三个短斜线 `---` 开始和结尾的内容。</Text>
+                        </>
+                    ),
+                },
                 Desc: (
                 <>
-                    <Text>发布功能可以让你能够将 Notion 内容发布到 Github Pages<Text strong mark type="danger">（目前仅支持 Jekyll 博客系统）。</Text></Text>
+                    <Text>发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages<Text strong mark type="danger">（需要配置如文件路径、CDN、图片等，可选是否包含 Front Matter）。</Text></Text>
                     <br />
-                    <Text>在将来，还支持直接在插件中写 Github Pages 的 Jekyll 博客系统所支持的 Ruby 插件，以在博客中正确展示 Notion 的非 Markdown 标准模块，典型的有 Bookmark 模块。</Text>
-                    <br />
-                    <Text strong>您可以自由的选择是否启用发布功能，注意，这需要您熟悉 Github Person Token、Notion 集成、OSS Token 等相关概念。</Text>
+                    <Text strong>注意，这需要您熟悉 Github Person Token、Notion 集成、OSS Token 等相关概念。</Text>
                 </>),
                 Alert: (
                     <>
@@ -48,11 +64,6 @@ export default {
                         <Text strong><Link href='https://xheldon.notion.site/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4' target='_blank'>发布等高级功能使用说明及答疑</Link></Text>。
                     </>
                 ),
-            },
-            Notion: {
-                Label: 'Notion Token',
-                Tooltips: '如何获取 Notion Token',
-                Message: '请输入 Notion Token',
             },
             Github: {
                 Token: {
@@ -95,7 +106,7 @@ export default {
                     ),
                 },
                 UpdateNotionLastUpdateTime: {
-                    Label: 'Auto Add \'lastUpdateTime\'',
+                    Label: '发布后更新 \'lastUpdateTime\'',
                     Extra: (
                         <>
                             <Text>从 Notion Flow 发布博客成功后，更新 Notion Page 的 lastUpdateTime Property，以方便你在 Notion 中查看该文章何时最后发布。需要提前添加好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何在 Notion 中查看页面最后更新时间？</Link></Text>
@@ -240,6 +251,12 @@ export default {
                     },
                 },
             },
+        },
+        Wechat: {
+            Common: {
+                PublishToWechat: '发布到微信公众号',
+                Desc: '如果你有微信公众号（一种仅在中国的大陆运营的的封闭媒体平台），还可以将 Notion 内容以几种固定可选的 HTML 格式发送到该平台。发布到微信公众号功能可以让你能够将 Notion 内容以几种固定可选的 HTML 格式发送到微信公众号。',
+            }
         },
         AIGC: {
             Label: 'AI（敬请期待）',
