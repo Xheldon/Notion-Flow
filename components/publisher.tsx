@@ -177,12 +177,13 @@ const Publisher = (props: any) => {
             <Panel {...restProps} isActive={activeFunc} onItemClick={onItemClick('Func')} header="功能" key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>
                     <Button disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>日志</Button>
-                    <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布</Button>
+                    <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布到 Github</Button>
+                    {/* <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>生成微信公众号格式</Button> */}
                 </Row>
             </Panel>
             <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
                 <div style={{wordWrap: 'break-word', wordBreak: 'break-all'}}>{logs.map(log => {
-                    return (<div style={{marginBottom: 5}} key={`${log}+${Math.random() * 10000}`} dangerouslySetInnerHTML={{ __html: `> ${log}` }} />);
+                    return (<div style={{marginBottom: 5}} key={`${log}+${Math.random() * 10000}`} dangerouslySetInnerHTML={{ __html: `❯ ${log}` }} />);
                 })}</div>
             </Panel>
         </>

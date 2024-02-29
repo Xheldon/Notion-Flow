@@ -54,10 +54,10 @@ export interface PublisherOptions {
         name: 'tx' | 'ali';
         tx: OssConfig;
     };
+    notion: NotionConfig;
     publisher: {
         enable: boolean;
         github: GithubConfig;
-        notion: NotionConfig;
         'trans-image': boolean;
         'trans-video': boolean;
         'trans-bookmark': boolean;

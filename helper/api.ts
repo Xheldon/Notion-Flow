@@ -2,7 +2,13 @@
 import type { PublisherRequestConfig, PublisherOptions, Meta } from '$types';
 import { Client, collectPaginatedAPI } from '@notionhq/client';
 import { Storage } from "@plasmohq/storage"
-import COS from 'cos-js-sdk-v5';
+import txOSS from 'cos-js-sdk-v5';
+import aliOSS from 'ali-oss'
+import {
+    S3Client,
+    HeadObjectCommand,
+    PutObjectCommand,
+} from '@aws-sdk/client-s3';
 import axios from 'axios';
 import imageCompression from 'browser-image-compression';
 // import sharp from 'sharp';
@@ -39,15 +45,17 @@ async function updateConfigDeco (that: Req) {
         const _: PublisherOptions = await storage.get('options');
     this.updateConfig({
         github: _.publisher.github,
-        notion: _.publisher.notion,
+        notion: _.notion,
         oss: _.oss[_.oss.name],
     });
 }
 
+// Note: 不同 OSS 服务商对应的接口配置给统一一下
+
 // const store = new Store<{'config': Config}>();
 export default class Req {
     notion: Client | any;
-    oss: COS;
+    oss: txOSS | aliOSS | any;
     cdn: any;
     github: Octokit;
     githubCommon: {
@@ -59,7 +67,7 @@ export default class Req {
         Bucket: string;
         Region: string;
     };
-    ossDirCache: COS.CosObject[]; // Note: 第一次获取资源目录后缓存起来
+    // ossDirCache: COS.CosObject[]; // Note: 第一次获取资源目录后缓存起来
     config: PublisherRequestConfig;
     constructor(props: PublisherRequestConfig) {
         // console.log('ppprops:', props);
@@ -467,6 +475,101 @@ export default class Req {
             }
         }
     }
+    // Note: 根据 oss 服务的名字，对外提供统一的接口
+    //  因为先接入的腾讯云，就以他作为标准了
+    OSSPolyfill(name, ossConfig) {
+        const {region, bucket, secretId, secretKey} = ossConfig;
+        switch (name) {
+            case 'tx': {
+                const oss = new txOSS({
+                    SecretId: secretId,
+                    SecretKey: secretKey,
+                });
+                return {
+                    headObject: (param, opt) => {
+                        const {key} = param;
+                        const {rej, res} = opt;
+                        oss.headObject({
+                            Bucket: bucket,
+                            Region: region,
+                            Key: key,
+                        }, (err, data) => {
+                            if (err) {
+                                rej(err);
+                                return;
+                            }
+                            if (data) {
+                                logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
+                                res(data);
+                                return;
+                            }
+                            logToRenderer(`资源 ${key} 数据异常，请检查是否上传成功`);
+                        });
+                    },
+                    pubObject: (param, opt) => {
+                        const {key, body} = param;
+                        const {rej, res} = opt;
+                        oss.putObject({
+                            Bucket: bucket,
+                            Region: region,
+                            Key: key,
+                            Body: body,
+                        }, (err, data) => {
+                            if (err) {
+                                rej(err);
+                                logToRenderer(`上传 ${key} 失败！e:`, err);
+                                return;
+                            }
+                            res(data);
+                            logToRenderer(`上传 ${key} 成功！`);
+                        });
+                    }
+                }
+            }
+            case 'ali': {
+                const oss = new aliOSS({
+                    accessKeyId: secretId,
+                    accessKeySecret: secretKey,
+                    bucket,
+                    region,
+                });
+                return {
+                    headObject: (param, opt) => {
+                        const {key} = param;
+                        const {rej, res} = opt;
+                        oss.head(key).then(data => {
+                            console.log('阿里云 head data:', data);
+                            logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
+                            res(data);
+                        }).catch(err => {
+                            console.log('阿里云 head err:', err);
+                            rej({statusCode: 404});
+                        });
+                    },
+                    pubObject: (param, opt) => {
+                        const {key, body} = param;
+                        const {rej, res} = opt;
+                        oss.put(key, body).then(data => {
+                            res(data);
+                            logToRenderer(`上传 ${key} 成功！`);
+                        }).catch(err => {
+                            if (err) {
+                                rej(err);
+                                logToRenderer(`上传 ${key} 失败！e:`, err);
+                                return;
+                            }
+                        });
+                    }
+                }
+            }
+            case 'aws': {
+                const oss = new S3Client({
+                    
+                });
+            }
+        }
+    };
+    
     
     // Note: 这个装饰器用法怎么跟官网的 https://www.tslang.cn/docs/handbook/decorators.html 方法装饰器不一样啊？
     //  第一个指向原型，第二个是属性名，第三个是描述符

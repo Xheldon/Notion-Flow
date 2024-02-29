@@ -152,7 +152,7 @@ function App() {
             if (options) {
                 const _publisherOptions = {
                     github: options.publisher.github,
-                    notion: options.publisher.notion,
+                    notion: options.notion,
                     oss: options.oss[options.oss.name],
                 };
                 req.current = new Req(_publisherOptions);
@@ -185,7 +185,7 @@ function App() {
             options: (opt) => {
                 console.log('options:', opt);
                 const {
-                    newValue: { language, 'heading-style': headingStyle, publisher, oss, aigc, plugin },
+                    newValue: { language, 'heading-style': headingStyle, publisher, oss, aigc, plugin, notion},
                     oldValue: { language: preLanguage},
                 } = opt;
                 if (language !== preLanguage) {
@@ -200,7 +200,7 @@ function App() {
                 if (publisher.enable) {
                     const _publisherOptions = {
                         github: publisher?.github,
-                        notion: publisher?.notion,
+                        notion: notion,
                         oss: oss?.[oss?.name],
                     };
                     req.current = new Req(_publisherOptions);

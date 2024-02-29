@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
+    "@aws-sdk/client-s3": "^3.523.0",
     "@notionhq/client": "^2.2.14",
     "@plasmohq/messaging": "^0.6.1",
     "@plasmohq/storage": "^1.9.0",
     "@reduxjs/toolkit": "^2.0.1",
+    "ali-oss": "^6.20.0",
     "antd": "^5.12.7",
     "axios": "^1.6.4",
     "browser-image-compression": "^2.0.2",

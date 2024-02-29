@@ -50,7 +50,7 @@ let LocaleConfig;
 
 (async () => {
     config = await storage.get('options');
-    LocaleConfig = Lang[config?.language || 'en'];
+    LocaleConfig = Lang[config?.language || 'cn'];
 })();
 
 const {
@@ -78,6 +78,7 @@ const publisherFormItems = (Locale) => {
             },
             message: Locale.Options.Publisher.Github.Token.Message,
             name: ['github', 'token'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Github.Repo.Label,
@@ -126,7 +127,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.TX.SecretId.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.TX.SecretId.Message,
-            name: ['secretId']
+            name: ['secretId'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.TX.SecretKey.Label,
@@ -135,7 +137,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.TX.SecretKey.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.TX.SecretKey.Message,
-            name: ['secretKey']
+            name: ['secretKey'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.TX.Bucket.Label,
@@ -144,7 +147,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.TX.Bucket.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.TX.Bucket.Message,
-            name: ['bucket']
+            name: ['bucket'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.TX.Region.Label,
@@ -153,7 +157,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.TX.Region.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.TX.Region.Message,
-            name: ['region']
+            name: ['region'],
+            secret: true,
         }, {
             label: Locale.Options.Publisher.Oss.TX.CDN.Label,
             tooltips: {
@@ -178,7 +183,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.ALI.SecretId.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.ALI.SecretId.Message,
-            name: ['secretId']
+            name: ['secretId'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.ALI.SecretKey.Label,
@@ -187,7 +193,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.ALI.SecretKey.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.ALI.SecretKey.Message,
-            name: ['secretKey']
+            name: ['secretKey'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.ALI.Bucket.Label,
@@ -196,7 +203,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.ALI.Bucket.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.ALI.Bucket.Message,
-            name: ['bucket']
+            name: ['bucket'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.ALI.Region.Label,
@@ -205,7 +213,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.ALI.Region.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.ALI.Region.Message,
-            name: ['region']
+            name: ['region'],
+            secret: true,
         }, {
             label: Locale.Options.Publisher.Oss.ALI.CDN.Label,
             tooltips: {
@@ -230,7 +239,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.AWS.SecretId.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.AWS.SecretId.Message,
-            name: ['secretId']
+            name: ['secretId'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.AWS.SecretKey.Label,
@@ -239,7 +249,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.AWS.SecretKey.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.AWS.SecretKey.Message,
-            name: ['secretKey']
+            name: ['secretKey'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.AWS.Bucket.Label,
@@ -248,7 +259,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.AWS.Bucket.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.AWS.Bucket.Message,
-            name: ['bucket']
+            name: ['bucket'],
+            secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.AWS.Region.Label,
@@ -257,7 +269,8 @@ const ossFormItems = (Locale) => {
                 text: Locale.Options.Publisher.Oss.AWS.Region.Tooltips,
             },
             message: Locale.Options.Publisher.Oss.AWS.Region.Message,
-            name: ['region']
+            name: ['region'],
+            secret: true,
         }, {
             label: Locale.Options.Publisher.Oss.AWS.CDN.Label,
             tooltips: {
@@ -308,11 +321,11 @@ function OptionsIndex() {
             autoAddLastUpdateTime: true,
             frontMatter: '',
             headerImgName: 'header-img',
-            'trans-image': true,
-            'trans-bookmark': true,
-            'trans-callout': true,
-            'trans-video': true,
-            'trans-quote': true,
+            'trans-image': false,
+            'trans-bookmark': false,
+            'trans-callout': false,
+            'trans-video': false,
+            'trans-quote': false,
         },
         wechat: {
             enable: false,
@@ -368,10 +381,19 @@ function OptionsIndex() {
             (async () => {
                 await storage.set('options', allValues);
             })();
-            messageApi.open({
-                type: 'success',
-                content: LocaleConfig.Options.Common.Message.OptionsSaveSucc,
-            });
+            const errors = form.getFieldsError();
+            console.log('error:', errors);
+            if (errors.some(e => e.errors.length > 0)) {
+                messageApi.open({
+                    type: 'error',
+                    content: LocaleConfig.Options.Common.Message.OptionsSaveErr,
+                });
+            } else {
+                messageApi.open({
+                    type: 'success',
+                    content: LocaleConfig.Options.Common.Message.OptionsSaveSucc,
+                });
+            }
             if (language) {
                 window.location.reload();
             }
@@ -458,10 +480,10 @@ function OptionsIndex() {
                         <Form.Item
                             key={'language'}
                             style={{ marginBottom: 20 }}
-                            label='Language'
+                            label={LocaleConfig.Options.Basic.Language}
                             extra={
                                 <Paragraph>
-                                    <Text>{LocaleConfig.Options.Basic.ReloadRxplain}</Text>
+                                    <Text strong>{LocaleConfig.Options.Basic.ReloadRxplain}</Text>
                                 </Paragraph>
                             }
                             name='language'>
@@ -495,7 +517,7 @@ function OptionsIndex() {
                             name={['notion', 'token']}
                             label={LocaleConfig.Options.Notion.Label}
                             extra={LocaleConfig.Options.Notion.Desc}>
-                            <Input />
+                            <Input.Password />
                         </Form.Item>
                         <Divider />
                         <Form.Item
@@ -517,11 +539,11 @@ function OptionsIndex() {
                                 name={['publisher', 'enableFrontMatter']}
                                 label={LocaleConfig.Options.Publisher.Common.EnableFrontMatter.Label}
                                 extra={LocaleConfig.Options.Publisher.Common.EnableFrontMatter.Desc}>
-                                <Input />
+                                <Switch />
                             </Form.Item>
                             {publisherFormItems(LocaleConfig).map((item, key) => {
                                 console.log('LocaleConfig', LocaleConfig, item);
-                                const { label, tooltips: _tooltips, message, name } = item;
+                                const { label, tooltips: _tooltips, message, name, secret } = item;
                                 const _name = name.slice();
                                 _name.unshift('publisher');
                                 return (
@@ -529,11 +551,11 @@ function OptionsIndex() {
                                         key={name.toString()}
                                         style={{ marginBottom: 20 }}
                                         labelAlign='right'
-                                        tooltip={tooltips(_tooltips)}
+                                        // tooltip={tooltips(_tooltips)}
                                         rules={[{ required: true, message }]}
                                         name={_name}
                                         label={label}>
-                                        <Input />
+                                        {secret ? <Input.Password /> : <Input />}
                                     </Form.Item>
                                 );
                             })}
@@ -550,7 +572,7 @@ function OptionsIndex() {
                             </Form.Item>
                             <div style={{ display: (ossName && ossFormItems(LocaleConfig)[ossName]) ? 'block' : 'none' }}>
                                 {ossName && ossFormItems(LocaleConfig)[ossName].map((item, key) => {
-                                    const { label, tooltips: _tooltips, message, name } = item;
+                                    const { label, tooltips: _tooltips, message, name, secret } = item;
                                     const _name = name.slice();
                                     _name.unshift(form.getFieldValue(['oss', 'name']));
                                     _name.unshift('oss');
@@ -559,11 +581,11 @@ function OptionsIndex() {
                                             key={name.toString()}
                                             style={{ marginBottom: 20 }}
                                             labelAlign='right'
-                                            tooltip={tooltips(_tooltips)}
+                                            // tooltip={tooltips(_tooltips)}
                                             rules={[{ required: true, message }]}
                                             name={_name}
                                             label={label}>
-                                            <Input />
+                                            {secret ? <Input.Password /> : <Input />}
                                         </Form.Item>
                                     );
                                 })}
@@ -574,10 +596,10 @@ function OptionsIndex() {
                                 labelAlign='right'
                                 style={{ marginBottom: 20 }}
                                 rules={[{ required: true, message: LocaleConfig.Options.Publisher.Github.FilePath.Message }]}
-                                tooltip={tooltips({
+                                /* tooltip={tooltips({
                                     link: 'https://www.xheldon.com',
                                     text: LocaleConfig.Options.Publisher.Github.FilePath.Tooltips,
-                                })}
+                                })} */
                                 extra={LocaleConfig.Options.Publisher.Github.FilePath.Extra}
                                 label={LocaleConfig.Options.Publisher.Github.FilePath.Label}>
                                 <Input placeholder={LocaleConfig.Options.Publisher.Github.FilePath.Placeholder} />
