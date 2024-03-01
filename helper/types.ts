@@ -25,14 +25,13 @@ export interface OssConfig {
     secretKey: string;
     bucket: string;
     region: string;
-    cdn?: string;
-    mediaPath?: string;
 }
 
 export interface PublisherRequestConfig {
     github: GithubConfig;
     notion: NotionConfig;
     oss: OssConfig;
+    ossName: OSSName;
 }
 
 export interface PublisherConfig {
@@ -41,6 +40,7 @@ export interface PublisherConfig {
     logFold?: boolean;
 }
 
+export type OSSName = 'tx' | 'ali' | 'aws';
 export interface PublisherOptions {
     aigc: {
         enable: boolean;
@@ -51,8 +51,12 @@ export interface PublisherOptions {
     'heading-style': string;
     oss: {
         enable: boolean;
-        name: 'tx' | 'ali';
-        tx: OssConfig;
+        name: OSSName;
+        tx?: OssConfig;
+        ali?: OssConfig;
+        aws?: OssConfig;
+        cdn?: string;
+        mediaPath?: string;
     };
     notion: NotionConfig;
     publisher: {

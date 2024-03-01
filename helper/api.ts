@@ -47,6 +47,7 @@ async function updateConfigDeco (that: Req) {
         github: _.publisher.github,
         notion: _.notion,
         oss: _.oss[_.oss.name],
+        ossName: _.oss.name,
     });
 }
 
@@ -63,10 +64,10 @@ export default class Req {
         repo: string;
         branch: string;
     };
-    ossCommon: {
+/*     ossCommon: {
         Bucket: string;
         Region: string;
-    };
+    }; */
     // ossDirCache: COS.CosObject[]; // Note: 第一次获取资源目录后缓存起来
     config: PublisherRequestConfig;
     constructor(props: PublisherRequestConfig) {
@@ -109,9 +110,14 @@ export default class Req {
                 return Promise.reject(null);
             }
             const {oss, publisher} = await storage.get('options') as PublisherOptions;
-            const cdn = oss[oss.name].cdn;
+            const cdn = oss.cdn;
             if (!cdn) {
                 logToRenderer('uploadNotionImageToOSS 错误，CDN 未配置');
+                return Promise.reject(null);
+            }
+            const mediaPath = oss.mediaPath;
+            if (!mediaPath) {
+                logToRenderer('uploadNotionImageToOSS 错误，图片路径未配置');
                 return Promise.reject(null);
             }
             const {url, meta, id, debug, uuid = ''} = props;
@@ -119,27 +125,15 @@ export default class Req {
             const suffixArr = pathname.split('.');
             const suffix = suffixArr.length > 1 && suffixArr[suffixArr.length - 1];
             const hasSuffix = imgSuffix.includes(suffix);
-            const cosPath = parserProperty(oss[oss.name].mediaPath, {meta});
+            const cosPath = parserProperty(mediaPath, {meta});
             // Note: 我的 mediaPath 设置就应该是 img/in-post/{{YYYY}}/{{name}}
             const key = `${cosPath}/${uuid ? btoa(uuid) + '-' : ''}${id}.${(suffix && hasSuffix) ? suffix : 'webp'}`;
             try {
                 await new Promise((res, rej) => {
                     setTimeout(() => {
                         this.oss.headObject({
-                            ...this.ossCommon,
-                            Key: key,
-                        }, (err, data) => {
-                            if (err) {
-                                rej(err);
-                                return;
-                            }
-                            if (data) {
-                                logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
-                                // console.log('res data:', data);
-                                res(data);
-                                return;
-                            }
-                        });
+                            key: key,
+                        }, {rej, res});
                     }, 5000 * Math.random());
                 });
                 // FIXME: 设置自定义 cdn 参数
@@ -169,18 +163,9 @@ export default class Req {
                                 await new Promise((res, rej) => {
                                     setTimeout(() => {
                                         this.oss.putObject({
-                                            ...this.ossCommon,
-                                            Key: key,
-                                            Body: blob
-                                        }, (err, data) => {
-                                            if (err) {
-                                                rej(err);
-                                                logToRenderer(`上传 ${key} 失败！e:`, err);
-                                                return;
-                                            }
-                                            res(data);
-                                            logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${cdn}/${key}`);
-                                        })
+                                            key,
+                                            body: blob
+                                        }, {rej, res})
                                     }, 5000 * Math.random());
                                 });
                                 // logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
@@ -386,7 +371,7 @@ export default class Req {
                     logToRenderer('[debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
                     return `[debug] github 文件「更新」成功`;
                 } else {
-                    const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                    // const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
                     logToRenderer('更新文件成功:', res);
                     return res;
                 }
@@ -394,8 +379,8 @@ export default class Req {
                 logToRenderer('更新文件失败:', err.status, err);
             }
         } catch (err) {
-            logToRenderer('文件可能不存在（正常）err:', err);
             if (err.status === 404) {
+                logToRenderer('Github 文件不存在，即将新建');
                 const createOrUpdateConfig = {
                     ...this.githubCommon,
                     path: _path,
@@ -407,71 +392,83 @@ export default class Req {
                         logToRenderer('[debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
                         return `[debug] github 文件「创建」成功`;
                     } else {
-                        const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
-                        logToRenderer('创建文件成功:', res);
-                        return res;
+                        // const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                        // logToRenderer('创建文件成功:', res);
+                        logToRenderer('创建文件成功');
+                        return '创建文件成功';
+                        // return res;
                     }
                 } catch (err) {
                     logToRenderer('创建文件失败:', err.status, err);
                     return Promise.reject(null);
                 }
+            } else {
+                logToRenderer('尝试获取 Github 文件时出错，请检查网络，如确认无问题，请反馈给开发者，谢谢！');
+                return Promise.reject(null);
             }
         }
     }
     // Note: 动态修改配置
     updateConfig(props: PublisherRequestConfig) {
         if (props) {
-            const {
-                notion: {
-                    token: notionToken
-                },
-                github: {
-                    owner: githubOwner,
-                    repo: githubRepo,
-                    branch: githubBranch,
-                    token: githubToken,
-                },
-                oss: {
-                    region: ossRegion,
-                    bucket: ossBucket,
-                    secretId: ossSecretId,
-                    secretKey: ossSecretKey,
-                }
-            } = props || {};
-            if (notionToken) {
-                this.notion = new Client({auth: notionToken});
-            }
-            if (ossRegion && ossBucket && ossSecretId && ossSecretKey) {
-                this.oss = new COS({
-                    SecretId: ossSecretId,
-                    SecretKey: ossSecretKey,
-                });
-                // Note: 用于刷新 cdn 缓存，但是这个接口不支持浏览器环境，所以暂时不用
-                /* this.cdn = new tencentcloud.cdn.v20180606.Client({
-                    credential: {
+            // Note: 在未配置完毕插件的过程中，(如填写一半的时候自动报错) 会触发 updataConfig，所以这里 try catch 一下
+            try {
+                const {
+                    notion: {
+                        token: notionToken
+                    },
+                    github: {
+                        owner: githubOwner,
+                        repo: githubRepo,
+                        branch: githubBranch,
+                        token: githubToken,
+                    },
+                    oss: {
+                        region: ossRegion,
+                        bucket: ossBucket,
                         secretId: ossSecretId,
                         secretKey: ossSecretKey,
                     },
-                    region: '',
-                    profile: {
-                        httpProfile: {
-                            endpoint: 'cdn.tencentcloudapi.com',
+                    ossName,
+                } = props || {};
+                if (notionToken) {
+                    this.notion = new Client({auth: notionToken});
+                }
+                if (ossRegion && ossBucket && ossSecretId && ossSecretKey) {
+                    /* this.oss = new COS({
+                        SecretId: ossSecretId,
+                        SecretKey: ossSecretKey,
+                    }); */
+                    this.oss = this.OSSPolyfill(ossName, props.oss);
+                    // Note: 用于刷新 cdn 缓存，但是这个接口不支持浏览器环境，所以暂时不用
+                    /* this.cdn = new tencentcloud.cdn.v20180606.Client({
+                        credential: {
+                            secretId: ossSecretId,
+                            secretKey: ossSecretKey,
+                        },
+                        region: '',
+                        profile: {
+                            httpProfile: {
+                                endpoint: 'cdn.tencentcloudapi.com',
+                            }
                         }
-                    }
-                }); */
-                this.ossCommon = {
-                    Bucket: ossBucket,
-                    Region: ossRegion,
-                };
-            }
-            // Note: todo 通知 renderer 信息不完整，禁用发布等按钮
-            if (githubOwner && githubRepo && githubBranch && githubToken) {
-                this.github = new Octokit({auth: githubToken});
-                this.githubCommon = {
-                    owner: githubOwner,
-                    repo: githubRepo,
-                    branch: githubBranch,
-                };
+                    }); */
+                    /* this.ossCommon = {
+                        Bucket: ossBucket,
+                        Region: ossRegion,
+                    }; */
+                }
+                // Note: todo 通知 renderer 信息不完整，禁用发布等按钮
+                if (githubOwner && githubRepo && githubBranch && githubToken) {
+                    this.github = new Octokit({auth: githubToken});
+                    this.githubCommon = {
+                        owner: githubOwner,
+                        repo: githubRepo,
+                        branch: githubBranch,
+                    };
+                }
+            } catch (e) {
+                // console.log('updateConfig 出错（可能是插件配置中途的正常情况）');
             }
         }
     }
@@ -506,7 +503,7 @@ export default class Req {
                             logToRenderer(`资源 ${key} 数据异常，请检查是否上传成功`);
                         });
                     },
-                    pubObject: (param, opt) => {
+                    putObject: (param, opt) => {
                         const {key, body} = param;
                         const {rej, res} = opt;
                         oss.putObject({
@@ -538,6 +535,9 @@ export default class Req {
                         const {key} = param;
                         const {rej, res} = opt;
                         oss.head(key).then(data => {
+                            /**
+                             * data 格式为：{meta,res: {data,headers,requestUrls,rt,status,statusCode},status:200}
+                             */
                             console.log('阿里云 head data:', data);
                             logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
                             res(data);
@@ -546,7 +546,7 @@ export default class Req {
                             rej({statusCode: 404});
                         });
                     },
-                    pubObject: (param, opt) => {
+                    putObject: (param, opt) => {
                         const {key, body} = param;
                         const {rej, res} = opt;
                         oss.put(key, body).then(data => {
@@ -564,8 +564,53 @@ export default class Req {
             }
             case 'aws': {
                 const oss = new S3Client({
-                    
+                    region,
+                    credentials: {
+                        accessKeyId: secretId,
+                        secretAccessKey: secretKey,
+                    }
                 });
+                return {
+                    headObject: (param, opt) => {
+                        const {key} = param;
+                        const {rej, res} = opt;
+                        oss.send(new HeadObjectCommand({
+                            Bucket: bucket,
+                            Key: key,
+                        })).then(data => {
+                            console.log('AWS head data:', data);
+                            logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
+                            res(data);
+                        }).catch(err => {
+                            // Note: 这里提示我 UnknownError 奇了怪了，不应该是 NotFoundError 吗？
+                            console.log('AWS head err:', err);
+                            rej({statusCode: 404});
+                        });
+                    },
+                    putObject: (param, opt) => {
+                        const {key, body} = param;
+                        const {rej, res} = opt;
+                        oss.send(new PutObjectCommand({
+                            Bucket: bucket,
+                            Key: key,
+                            Body: body,
+                        })).then(data => {
+                            /**
+                             * data 数据结构形如：{$metadata:{httpStatusCode}, Etag, ServerSideEncryption}
+                             */
+                            console.log('AWS put data:', data);
+                            res(data);
+                            logToRenderer(`上传 ${key} 成功！`);
+                        }).catch(err => {
+                            if (err) {
+                                console.log('AWS put err:', err);
+                                rej(err);
+                                logToRenderer(`上传 ${key} 失败！e:`, err);
+                                return;
+                            }
+                        });
+                    }
+                };
             }
         }
     };

@@ -115,8 +115,10 @@ const Publisher = (props: any) => {
                                             const setNotionLastUpdateTime = publisher?.setNotionLastUpdateTime;
                                             messageApi.open({
                                                 type: 'success',
-                                                content: `发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion Page Property 信息' : ''}'`,
+                                                content: `发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion Page Property 信息' : ''}`,
                                             });
+                                            setLoading(false);
+                                            return;
                                             if (setNotionLastUpdateTime) {
                                                 req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
                                                     if (!updateMetaResult) {
@@ -161,7 +163,7 @@ const Publisher = (props: any) => {
                 }
             });
         };
-    }, []);
+    }, [req]);
 
     const onPublish = onDebug(false);
 

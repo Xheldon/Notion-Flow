@@ -162,33 +162,19 @@ export default {
                     Label: '腾讯云',
                     SecretId: {
                         Label: 'SecretId',
-                        Tooltips: '如何获取腾讯云 SecretId',
                         Message: '请输入腾讯云 SecretId'
                     },
                     SecretKey: {
                         Label: 'SecretKey',
-                        Tooltips: '如何获取腾讯云 SecretKey',
                         Message: '请输入腾讯云 SecretKey'
                     },
                     Bucket: {
                         Label: 'Bucket',
-                        Tooltips: '如何获取腾讯云 Bucket',
                         Message: '请输入腾讯云 Bucket'
                     },
                     Region: {
                         Label: 'Region',
-                        Tooltips: '如何获取腾讯云 Region',
                         Message: '请输入腾讯云 Region'
-                    },
-                    CDN: {
-                        Label: 'CDN 地址',
-                        Tooltips: '如何设置 CDN 地址',
-                        Message: '请输入 CDN 地址'
-                    },
-                    MediaPath: {
-                        Label: '图片路径',
-                        Tooltips: '如何设置 CDN 地址',
-                        Message: '请输入 CDN 地址'
                     },
                 },
                 ALI: {
@@ -200,62 +186,43 @@ export default {
                     },
                     SecretKey: {
                         Label: 'AccessKey Secret',
-                        Tooltips: '如何获取阿里云 AccessKey Secret',
                         Message: '请输入阿里云 AccessKey Secret'
                     },
                     Bucket: {
                         Label: 'Bucket',
-                        Tooltips: '如何获取阿里云 Bucket',
                         Message: '请输入阿里云 Bucket'
                     },
                     Region: {
                         Label: 'Region',
-                        Tooltips: '如何获取阿里云 Region',
                         Message: '请输入阿里云 Region'
-                    },
-                    CDN: {
-                        Label: 'CDN 地址',
-                        Tooltips: '如何设置 CDN 地址',
-                        Message: '请输入 CDN 地址'
-                    },
-                    MediaPath: {
-                        Label: '图片路径',
-                        Tooltips: '如何设置 CDN 地址',
-                        Message: '请输入 CDN 地址'
                     },
                 },
                 AWS: {
                     Label: 'AWS',
                     SecretId: {
                         Label: 'Access key',
-                        Tooltips: '如何获取 AWS Access key',
                         Message: '请输入 AWS Access key'
                     },
                     SecretKey: {
                         Label: 'Secret Access Key',
-                        Tooltips: '如何获取 AWS Secret Access Key',
                         Message: '请输入 AWS Secret Access Key'
                     },
                     Bucket: {
                         Label: 'Bucket',
-                        Tooltips: '如何获取 AWS Bucket',
                         Message: '请输入 AWS Bucket'
                     },
                     Region: {
                         Label: 'Region',
-                        Tooltips: '如何获取 AWS Region',
                         Message: '请输入 AWS Region'
                     },
-                    CDN: {
-                        Label: 'CDN 地址',
-                        Tooltips: '如何设置 CDN 地址',
-                        Message: '请输入 CDN 地址'
-                    },
-                    MediaPath: {
-                        Label: '图片路径',
-                        Tooltips: '如何设置 CDN 地址',
-                        Message: '请输入 CDN 地址'
-                    },
+                },
+                CDN: {
+                    Label: 'CDN 地址',
+                    Message: '请输入 CDN 地址'
+                },
+                MediaPath: {
+                    Label: '图片路径',
+                    Message: '请输入 CDN 地址'
                 },
             },
         },

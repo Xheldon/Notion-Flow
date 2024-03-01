@@ -154,6 +154,7 @@ function App() {
                     github: options.publisher.github,
                     notion: options.notion,
                     oss: options.oss[options.oss.name],
+                    ossName: options.oss.name,
                 };
                 req.current = new Req(_publisherOptions);
             }
@@ -202,6 +203,7 @@ function App() {
                         github: publisher?.github,
                         notion: notion,
                         oss: oss?.[oss?.name],
+                        ossName: oss?.name,
                     };
                     req.current = new Req(_publisherOptions);
                 }

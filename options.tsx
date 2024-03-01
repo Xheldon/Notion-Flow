@@ -61,49 +61,24 @@ const {
 
 const publisherFormItems = (Locale) => {
     return [
-        /* {
-            label: Locale.Options.Notion.Label,
-            tooltips: {
-                link: 'https://www.xheldon.com',
-                text: Locale.Options.Notion.Tooltips,
-            },
-            message: Locale.Options.Notion.Message,
-            name: ['notion', 'token']
-        }, */
         {
             label: Locale.Options.Publisher.Github.Token.Label,
-            tooltips: {
-                link: 'https://www.xheldon.com',
-                text: Locale.Options.Publisher.Github.Token.Tooltips,
-            },
             message: Locale.Options.Publisher.Github.Token.Message,
             name: ['github', 'token'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Github.Repo.Label,
-            tooltips: {
-                link: 'https://www.xheldon.com',
-                text: Locale.Options.Publisher.Github.Repo.Tooltips,
-            },
             message: Locale.Options.Publisher.Github.Repo.Message,
             name: ['github', 'repo']
         },
         {
             label: Locale.Options.Publisher.Github.Branch.Label,
-            tooltips: {
-                link: 'https://www.xheldon.com',
-                text: Locale.Options.Publisher.Github.Branch.Tooltips,
-            },
             message: Locale.Options.Publisher.Github.Branch.Message,
             name: ['github', 'branch']
         },
         {
             label: Locale.Options.Publisher.Github.User.Label,
-            tooltips: {
-                link: 'https://www.xheldon.com',
-                text: Locale.Options.Publisher.Github.User.Tooltips,
-            },
             message: Locale.Options.Publisher.Github.User.Message,
             name: ['github', 'owner']
         },
@@ -122,171 +97,75 @@ const ossFormItems = (Locale) => {
     return {
         tx: [{
             label: Locale.Options.Publisher.Oss.TX.SecretId.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.TX.SecretId.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.TX.SecretId.Message,
             name: ['secretId'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.TX.SecretKey.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.TX.SecretKey.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.TX.SecretKey.Message,
             name: ['secretKey'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.TX.Bucket.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.TX.Bucket.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.TX.Bucket.Message,
             name: ['bucket'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.TX.Region.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.TX.Region.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.TX.Region.Message,
             name: ['region'],
             secret: true,
-        }, {
-            label: Locale.Options.Publisher.Oss.TX.CDN.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.TX.CDN.Tooltips,
-            },
-            message: Locale.Options.Publisher.Oss.TX.CDN.Message,
-            name: ['cdn']
-        },{
-            label: Locale.Options.Publisher.Oss.TX.MediaPath.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.TX.MediaPath.Tooltips,
-            },
-            message: Locale.Options.Publisher.Oss.TX.MediaPath.Message,
-            name: ['mediaPath']
         }],
         ali: [{
             label: Locale.Options.Publisher.Oss.ALI.SecretId.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.ALI.SecretId.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.ALI.SecretId.Message,
             name: ['secretId'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.ALI.SecretKey.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.ALI.SecretKey.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.ALI.SecretKey.Message,
             name: ['secretKey'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.ALI.Bucket.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.ALI.Bucket.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.ALI.Bucket.Message,
             name: ['bucket'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.ALI.Region.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.ALI.Region.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.ALI.Region.Message,
             name: ['region'],
             secret: true,
-        }, {
-            label: Locale.Options.Publisher.Oss.ALI.CDN.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.ALI.CDN.Tooltips,
-            },
-            message: Locale.Options.Publisher.Oss.ALI.CDN.Message,
-            name: ['cdn']
-        },{
-            label: Locale.Options.Publisher.Oss.ALI.MediaPath.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.ALI.MediaPath.Tooltips,
-            },
-            message: Locale.Options.Publisher.Oss.ALI.MediaPath.Message,
-            name: ['mediaPath']
         }],
         aws: [{
             label: Locale.Options.Publisher.Oss.AWS.SecretId.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.AWS.SecretId.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.AWS.SecretId.Message,
             name: ['secretId'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.AWS.SecretKey.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.AWS.SecretKey.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.AWS.SecretKey.Message,
             name: ['secretKey'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.AWS.Bucket.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.AWS.Bucket.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.AWS.Bucket.Message,
             name: ['bucket'],
             secret: true,
         },
         {
             label: Locale.Options.Publisher.Oss.AWS.Region.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.AWS.Region.Tooltips,
-            },
             message: Locale.Options.Publisher.Oss.AWS.Region.Message,
             name: ['region'],
             secret: true,
-        }, {
-            label: Locale.Options.Publisher.Oss.AWS.CDN.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.AWS.CDN.Tooltips,
-            },
-            message: Locale.Options.Publisher.Oss.AWS.CDN.Message,
-            name: ['cdn']
-        },{
-            label: Locale.Options.Publisher.Oss.AWS.MediaPath.Label,
-            tooltips: {
-                link: 'https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#ed967849cdd047f6ac39492a6d6660c2',
-                text: Locale.Options.Publisher.Oss.AWS.MediaPath.Tooltips,
-            },
-            message: Locale.Options.Publisher.Oss.AWS.MediaPath.Message,
-            name: ['mediaPath']
         }],
     };
 };
@@ -347,17 +226,15 @@ function OptionsIndex() {
                 secretKey: '',
                 bucket: '',
                 region: '',
-                cdn: '',
-                mediaPath: '', // Note: 支持通配符如 {{year}}/{{month}}/{{name}}
             },
             aws: {
                 secretId: '',
                 secretKey: '',
                 bucket: '',
                 region: '',
-                cdn: '',
-                mediaPath: '', // Note: 支持通配符如 {{year}}/{{month}}/{{name}}
-            }
+            },
+            cdn: '',
+            mediaPath: '',
         },
         aigc: {
             enable: false
@@ -370,9 +247,9 @@ function OptionsIndex() {
     const enablePublisher = Form.useWatch(['publisher', 'enable'], form);
     const ossName = Form.useWatch(['oss', 'name'], form);
 
-    const tooltips = useCallback((tooltip: { link: string; text: string }) => {
+   /*  const tooltips = useCallback((tooltip: { link: string; text: string }) => {
         return <div>{LocaleConfig.Options.Common.More}:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
-    }, []);
+    }, []); */
 
     const onChange = useCallback((changedValues: any, allValues: any) => {
         const {language} = changedValues;
@@ -543,7 +420,7 @@ function OptionsIndex() {
                             </Form.Item>
                             {publisherFormItems(LocaleConfig).map((item, key) => {
                                 console.log('LocaleConfig', LocaleConfig, item);
-                                const { label, tooltips: _tooltips, message, name, secret } = item;
+                                const { label, message, name, secret } = item;
                                 const _name = name.slice();
                                 _name.unshift('publisher');
                                 return (
@@ -551,7 +428,6 @@ function OptionsIndex() {
                                         key={name.toString()}
                                         style={{ marginBottom: 20 }}
                                         labelAlign='right'
-                                        // tooltip={tooltips(_tooltips)}
                                         rules={[{ required: true, message }]}
                                         name={_name}
                                         label={label}>
@@ -590,6 +466,24 @@ function OptionsIndex() {
                                     );
                                 })}
                             </div>
+                            <Form.Item
+                                key={'oss.cdn'}
+                                style={{ marginBottom: 20 }}
+                                labelAlign='right'
+                                rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.CDN.Message }]}
+                                name={['oss', 'cdn']}
+                                label={LocaleConfig.Options.Publisher.Oss.CDN.Label}>
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                key={'oss.mediaPath'}
+                                style={{ marginBottom: 20 }}
+                                labelAlign='right'
+                                rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.MediaPath.Message }]}
+                                name={['oss', 'mediaPath']}
+                                label={LocaleConfig.Options.Publisher.Oss.MediaPath.Label}>
+                                <Input />
+                            </Form.Item>
                             <Form.Item
                                 key="filePath"
                                 name={['publisher', 'filePath']}
