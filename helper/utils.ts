@@ -99,7 +99,7 @@ const logToRenderer = (type, header, ..._msgs: any[]) => {
 
 const getPublisherConfig = async (storage) => {
     const config: PublisherConfig = await storage.get('publisher-config');
-    logToRenderer('get config:', config);
+    logToRenderer('info', '[Notion Flow] Get publisher config', config);
     if (!config) {
         const _config = {
             configFold: false, // Note: 配置面板是否折叠
@@ -117,7 +117,7 @@ const getAigcConfig = async (storage) => {
     // const aigc: Aigc = await window._toMain('aigc-get');
         const aigc: AigcData = await storage.get('aigc-config');
     // TODO: 从持久化存储中获取
-    logToRenderer('get aigc:', aigc);
+    logToRenderer('info', '[Notion Flow] Get aigc config', aigc);
     if (!aigc || !aigc.model) {
         const _aigc: AigcData = {
             key: {
@@ -137,14 +137,14 @@ const getAigcConfig = async (storage) => {
 
 // Note: contnet -> sidePanel
 const _toSidePanel = (name, data?, cb?) => {
-    console.log('_toSidePanel:', name, data);
+    // console.log('_toSidePanel:', name, data);
     var port = chrome.runtime.connect({name});
     port.postMessage({name, data});
     port.onMessage.addListener(cb);
 };
 
 const _toContent = (name, data?, cb?) => {
-    console.log('_toContent:', name, data);
+    // console.log('_toContent:', name, data);
     chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
         // if (!tab) {
         //     console.log('tab 不存在');
@@ -328,7 +328,7 @@ const _inline = (list: any): string => {
 // Note: indent 表示子元素缩进层级
 const notion2markdown = async function (list: any, meta: Meta, indent: number, debug: boolean,) {
     if (!Array.isArray(list)) {
-        logToRenderer('notion2markdown 第一个参数不是 block 数组！');
+        logToRenderer('error', '[Notion] Notion child need to be an array', list);
         return Promise.resolve(null);
     }
     /* if (!list.length) {
@@ -358,14 +358,14 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     
                     return new Promise((res) => {
                         if (!transBookmark) {
-                            logToRenderer('未启用内置 Bookmark 转换功能，即将输出链接格式');
+                            logToRenderer('info', '[Github] Disable Jekyll Bookmark conversion，use link Markdown style');
                             res(`[${block.url}](${block.url})\n`);
                             return;
                         }
                         _toContent('notion-bookmark-desc-get', item.id, (props) => {
                             const {title = '', desc = '', img = ''} = props;
                             if (title || desc || img) {
-                                logToRenderer('已启用内置 Bookmark 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                                logToRenderer('info', '[Github] Enable Jekyll Bookmark conversion', 'Make sure you have configured Jekyll Bookmark Ruby plugin');
                                 res(`{% render_bookmark url="${block.url}" title="${title}" img="${img}" yid="" bid="" %}\n${desc}\n{% endrender_bookmark %}\n`);
                             } else {
                                 // Note: 从 notion 获取 bookmark 信息失败，直接使用链接
@@ -381,10 +381,10 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                         const ossUrl = await this.uploadNotionImageToOSS({url, meta, id: item.id, debug});
                         const caption = _inline(block.caption);
                         if (!transImage) {
-                            logToRenderer('未启用内置图片转换功能，即将输出默认图片格式');
+                            logToRenderer('info', '[Github] Disable Jekyll Image conversion，use Image Markdown style');
                             return `![${caption}](${ossUrl})`;
                         }
-                        logToRenderer('已启用内置 Image 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                        logToRenderer('info', '[Github] Enable Jekyll Image conversion', 'Make sure you have configured Jekyll Image Ruby plugin');
                         return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                     }
                     return `[图片 url 不存在]\n`;
@@ -449,17 +449,17 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     // Note: notion 的 quote 还能设置背景色，但是我感觉太丑了，所以仅读取了 Notion 的颜色（左侧边框颜色+字体颜色）
                     // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
                     if (!transQuote) {
-                        logToRenderer('未启用内置 Blockquote 转换功能，即将输出普通引用块格式');
+                        logToRenderer('info', '[Github] Disable Jekyll Blockquote conversion，use Blockquote Markdown style');
                         return `> ${text}\n`;
                     }
-                    logToRenderer('已启用内置 Blockquote 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                    logToRenderer('info', '[Github] Enable Jekyll Blockquote conversion', 'Make sure you have configured Jekyll Blockquote Ruby plugin');
                     return `{% render_quote color="${COLORS[block.color as keyof typeof COLORS] || ''}" %}${text}{% endrender_quote %}\n`;
                 }
                 case 'callout': {
                     // Note: callout markdown 不支持，也当成 quote
                     const text = _inline(block.rich_text);
                     if (!transCallout) {
-                        logToRenderer('未启用内置 Callout 转换功能，即将输出普通引用块格式');
+                        logToRenderer('info', '[Github] Disable Jekyll Image conversion，use Blockquote Markdown style');
                         return `> ${text}\n`;
                     }
                     const icon = block.icon[block.icon.type];
@@ -469,7 +469,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                     let color = '';
                     let bgColor = '';
                     blockColor.length === 2 ? (bgColor = finalColor || '') : (color = finalColor || '');
-                    logToRenderer('已启用内置 Callout 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                    logToRenderer('info', '[Github] Enable Jekyll Callout conversion', 'Make sure you have configured Jekyll Callout Ruby plugin');
                     return `{% render_callout icon="${icon}" color="${color}" bgcolor="${bgColor}" %}${text}{% endrender_callout %}\n`;
                 }
                 case 'divider': {
@@ -490,16 +490,16 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 suffix = arr[arr.length - 1];
                             }
                             if (!transVideo) {
-                                logToRenderer('未启用内置 Video 转换功能，即将输出链接格式');
+                                logToRenderer('info', '[Github] Disable Jekyll Video conversion，use link Markdown style');
                                 return `[${_ossUrl}](${_ossUrl})\n`;
                             }
-                            logToRenderer('已启用内置 Video 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                            logToRenderer('info', '[Github] Enable Jekyll Video conversion', 'Make sure you have configured Jekyll Video Ruby plugin');
                             return `{% render_video caption="${caption}" img="${_ossUrl}" suffix="${suffix}" %}\n![${caption}](${_ossUrl})\n{% endrender_video %}\n`;
                         } else if (block.type === 'external') {
                             // Note: 目前只支持 Youtube 和 Bilibili
                             const url = new URL(_url);
                             if (!transVideo) {
-                                logToRenderer('未启用内置 Video 转换功能，即将输出链接格式');
+                                logToRenderer('info', '[Github] Disable Jekyll Video conversion，use link Markdown style');
                                 return `[${_url}](${_url})\n`;
                             }
                             let yid = '';
@@ -513,7 +513,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             } else if (url.hostname === 'www.bilibili.com') {
                                 bid = url.pathname.split('/').filter(Boolean)[1];
                             }
-                            logToRenderer('已启用内置 Video 转换功能，请提前配置 Jekyll Ruby 处理插件');
+                            logToRenderer('info', '[Github] Enable Jekyll Video conversion', 'Make sure you have configured Jekyll Video Ruby plugin');
                             return `{% render_bookmark url="${_url}" title="${caption || ''}" img="" yid="${yid}" bid="${bid}" %}{% endrender_bookmark %}\n`;
                         }
                     }
@@ -577,7 +577,7 @@ const notionMeta2string = async (meta: Meta): Promise<string> => {
                 fM += `${item.trim()}${key === arr.length - 1 ? '' : '\n'}`;
             });
         } catch (e) {
-            logToRenderer('Front Matter 配置错误，请检查配置项，不影响继续构建，但会忽略设置值');
+            logToRenderer('error', '[Flow] Front Matter config error, it will be ignored', e);
         }
     }
     // Note: 数组会被表示为 name: \n -item1\n -item2\n，典型的有 tags

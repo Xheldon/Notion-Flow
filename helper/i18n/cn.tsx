@@ -226,12 +226,6 @@ export default {
                 },
             },
         },
-        Wechat: {
-            Common: {
-                PublishToWechat: '发布到微信公众号',
-                Desc: <Text type="secondary">如果你有微信公众号（一种仅在中国的大陆运营、覆盖率极高的封闭媒体平台），还可以将 Notion 内容以几种固定可选的 HTML 格式发送到该平台。</Text>,
-            }
-        },
         AIGC: {
             Label: 'AI（敬请期待）',
             Extra: (

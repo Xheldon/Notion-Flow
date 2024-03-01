@@ -206,10 +206,6 @@ function OptionsIndex() {
             'trans-video': false,
             'trans-quote': false,
         },
-        wechat: {
-            enable: false,
-            
-        },
         oss: {
             // enable: true,
             name: 'tx',
@@ -599,14 +595,6 @@ function OptionsIndex() {
                                 </Col>
                             </Row>
                         </div>
-                        <Form.Item
-                            key={'wechat.enable'}
-                            style={{ marginBottom: 20 }}
-                            name={['wechat', 'enable']}
-                            label={LocaleConfig.Options.Wechat.Common.PublishToWechat}
-                            extra={LocaleConfig.Options.Wechat.Common.Desc}>
-                            <Switch />
-                        </Form.Item>
                         {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Divider />
                             <Form.Item

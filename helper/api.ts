@@ -180,11 +180,11 @@ export default class Req {
                             return uri;
                         } catch (err) {
                             // dialog.showErrorBox('处理图片错误', `上传 ${key} 时遇到错误！e: ${err}`);
-                            logToRenderer('处理图片错误:上传', key, '时遇到错误！e:', err);
+                            logToRenderer('error', '[OSS] Upload media faild', err);
                             throw new Error(err);
                         }
                     } else {
-                        logToRenderer('获取 Notion 图片错误:', res);
+                        logToRenderer('error', '[Notion] Get Notion image error', res);
                         // dialog.showErrorBox('处理图片错误', `获取 Notion 图片错误: ${res}`);
                     }
                 } else {
@@ -192,7 +192,7 @@ export default class Req {
                 }
             }
         } catch (err) {
-            logToRenderer(`upload image err: ${err}`);
+            logToRenderer('error', `[OSS] Try upload media err`, err);
             throw new Error(err);
         }
     }
@@ -201,7 +201,7 @@ export default class Req {
         try {
             await updateConfigDeco.bind(this);
             if (!this.notion) {
-                logToRenderer('getNotionMeta 错误，Notion Token 未配置');
+                logToRenderer('error', '[Notion] Notion ingetration token not config');
                 return Promise.reject(null);
             }
             const response = await this.notion.pages.retrieve({ page_id: blockId });
@@ -297,20 +297,20 @@ export default class Req {
             });
             return meta;
         } catch (e) {
-            logToRenderer('获取页面 meta 信息错误:', e);
+            logToRenderer('error', '[Notion] Get Notion page properties error', e);
         }
     }
 
     async updateNotionLastUpdateTime(props: {blockId: string; debug: boolean}): Promise<boolean> {
         await updateConfigDeco.bind(this);
         if (!this.notion) {
-            logToRenderer('updateNotionLastUpdateTime 错误， Notion Token 未配置');
+            logToRenderer('error', '[Notion] Notion ingetration token not config');
             return Promise.reject(null);
         }
         const { blockId, debug } = props;
         const date = getISODateTime(new Date());
         if (debug) {
-            logToRenderer('更新 Notion 属性成功:', date);
+            logToRenderer('info', '[Notion] Update Notion「lastUpdateTime」success', date);
             return true;
         } else {
             return await this.notion.pages.update({
@@ -331,14 +331,14 @@ export default class Req {
     async send2Github(props: {meta: Meta, content: string, debug: boolean}):Promise<any> {
         await updateConfigDeco.bind(this);
         if (!this.github) {
-            logToRenderer('send2Github 错误， Github Token 未配置');
+            logToRenderer('error', '[Github] Github Personal Token not config');
             return Promise.reject(null);
         }
         const {publisher} = await storage.get('options') as PublisherOptions;
         // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
         const _path = parserProperty(publisher.filePath, {meta: props.meta});
         if (!_path) {
-            logToRenderer('send2Github 错误， 上传文件路径配置错误');
+            logToRenderer('error', '[Github] File path not config or invalid');
             return Promise.reject(null);
         }
         const {meta, content, debug} = props;
@@ -352,7 +352,7 @@ export default class Req {
             const res = await this.github.rest.repos.getContent(getContentConfig);
             // Note: content 是 base64 编码的，输出太占空间，所以不打印了
             const {content, ..._res} = res as any;
-            logToRenderer('get info success:', _res);
+            logToRenderer('info', '[Github] Get github content success', _res);
             
             const createOrUpdateConfig = {
                 ...this.githubCommon,
@@ -366,42 +366,42 @@ export default class Req {
             };
             try {
                 if (debug) {
-                    logToRenderer('[debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
+                    logToRenderer('info', '[Debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
                     return `[debug] github 文件「更新」成功`;
                 } else {
-                    // const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
-                    logToRenderer('更新文件成功:', res);
+                    const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                    logToRenderer('info', '[Github] Update file success', res);
                     return res;
                 }
             } catch (err) {
-                logToRenderer('更新文件失败:', err.status, err);
+                logToRenderer('info', '[Github] Update file faild', err);
             }
         } catch (err) {
             if (err.status === 404) {
-                logToRenderer('Github 文件不存在，即将新建');
+                logToRenderer('info', '[Github] Github file not exist, create one now');
                 const createOrUpdateConfig = {
                     ...this.githubCommon,
                     path: _path,
-                    message: `创建 ${meta.title} !`,
+                    message: `Create ${meta.title} !`,
                     content: contentBase64,
                 };
                 try {
                     if (debug) {
-                        logToRenderer('[debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
+                        logToRenderer('info', '[Debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
                         return `[debug] github 文件「创建」成功`;
                     } else {
-                        // const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                        const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
                         // logToRenderer('创建文件成功:', res);
-                        logToRenderer('创建文件成功');
-                        return '创建文件成功';
-                        // return res;
+                        logToRenderer('info', '[Github] Create file success', res);
+                        // return '创建文件成功';
+                        return res;
                     }
                 } catch (err) {
-                    logToRenderer('创建文件失败:', err.status, err);
+                    logToRenderer('error', '[Github] Create file faild', err);
                     return Promise.reject(null);
                 }
             } else {
-                logToRenderer('尝试获取 Github 文件时出错，请检查网络，如确认无问题，请反馈给开发者，谢谢！');
+                logToRenderer('error', '[Github] Try get github file error, check the network or report it to developer', err);
                 return Promise.reject(null);
             }
         }
@@ -490,15 +490,12 @@ export default class Req {
                             Key: key,
                         }, (err, data) => {
                             if (err) {
+                                logToRenderer('error', `[OSS TX] File not exist ${key}，ready to upload`, err);
                                 rej(err);
                                 return;
                             }
-                            if (data) {
-                                logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
-                                res(data);
-                                return;
-                            }
-                            logToRenderer(`资源 ${key} 数据异常，请检查是否上传成功`);
+                            logToRenderer('error', `[OSS TX] File exist ${key}，return it directly`, data);
+                            res(data);
                         });
                     },
                     putObject: (param, opt) => {
@@ -511,12 +508,12 @@ export default class Req {
                             Body: body,
                         }, (err, data) => {
                             if (err) {
+                                logToRenderer('error', `[OSS TX] Upload faild ${key}`, err);
                                 rej(err);
-                                logToRenderer(`上传 ${key} 失败！e:`, err);
                                 return;
                             }
+                            logToRenderer('info', `[OSS TX] Upload success ${key}`, data);
                             res(data);
-                            logToRenderer(`上传 ${key} 成功！`);
                         });
                     }
                 }
@@ -536,11 +533,10 @@ export default class Req {
                             /**
                              * data 格式为：{meta,res: {data,headers,requestUrls,rt,status,statusCode},status:200}
                              */
-                            console.log('阿里云 head data:', data);
-                            logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
+                            logToRenderer('info', `[OSS ALI] File exist ${key}，return it directly`, data);
                             res(data);
                         }).catch(err => {
-                            console.log('阿里云 head err:', err);
+                            logToRenderer('info', `[OSS ALI] File not exist ${key}，ready to upload`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -548,13 +544,12 @@ export default class Req {
                         const {key, body} = param;
                         const {rej, res} = opt;
                         oss.put(key, body).then(data => {
+                            logToRenderer('info', `[OSS ALI] Upload success ${key}`, data);
                             res(data);
-                            logToRenderer(`上传 ${key} 成功！`);
                         }).catch(err => {
                             if (err) {
+                                logToRenderer('error', `[OSS ALI] Upload faild ${key}`, err);
                                 rej(err);
-                                logToRenderer(`上传 ${key} 失败！e:`, err);
-                                return;
                             }
                         });
                     }
@@ -576,12 +571,11 @@ export default class Req {
                             Bucket: bucket,
                             Key: key,
                         })).then(data => {
-                            console.log('AWS head data:', data);
-                            logToRenderer(`资源 ${key} 已存在，不再上传，直接返回地址`);
+                            logToRenderer('info', `[OSS ALI] File exist ${key}，return it directly`, data);
                             res(data);
                         }).catch(err => {
                             // Note: 这里提示我 UnknownError 奇了怪了，不应该是 NotFoundError 吗？
-                            console.log('AWS head err:', err);
+                            logToRenderer('info', `[OSS ALI] File not exist ${key}，ready to upload`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -596,14 +590,12 @@ export default class Req {
                             /**
                              * data 数据结构形如：{$metadata:{httpStatusCode}, Etag, ServerSideEncryption}
                              */
-                            console.log('AWS put data:', data);
+                            logToRenderer('info', `[OSS AWS] Upload success ${key}`, data);
                             res(data);
-                            logToRenderer(`上传 ${key} 成功！`);
                         }).catch(err => {
                             if (err) {
-                                console.log('AWS put err:', err);
+                                logToRenderer('error', `[OSS AWS] Upload faild ${key}`, err);
                                 rej(err);
-                                logToRenderer(`上传 ${key} 失败！e:`, err);
                                 return;
                             }
                         });
