@@ -79,7 +79,7 @@ export default class Req {
         try {
             await updateConfigDeco.bind(this);
             if (!this.notion) {
-                logToRenderer('getNotionContent Notion Token 未配置');
+                logToRenderer('error', '[Notion] Notion ingetration token not config');
                 return Promise.reject(null);
             }
             return new Promise((res, rej) => {
@@ -91,7 +91,7 @@ export default class Req {
             });
             
         } catch (e) {
-            logToRenderer('getNotionContent 函数错误:', e);
+            logToRenderer('error', '[Notion] Get Notion content error', e);
             // store.set('log', e);
             return null;
         }
@@ -106,18 +106,18 @@ export default class Req {
         try {
             await updateConfigDeco.bind(this);
             if (!this.oss) {
-                logToRenderer('uploadNotionImageToOSS 错误，OSS 未配置');
+                logToRenderer('error', '[OSS] OSS service not config');
                 return Promise.reject(null);
             }
             const {oss, publisher} = await storage.get('options') as PublisherOptions;
             const cdn = oss.cdn;
             if (!cdn) {
-                logToRenderer('uploadNotionImageToOSS 错误，CDN 未配置');
+                logToRenderer('error', '[OSS] CDN address not config');
                 return Promise.reject(null);
             }
             const mediaPath = oss.mediaPath;
             if (!mediaPath) {
-                logToRenderer('uploadNotionImageToOSS 错误，图片路径未配置');
+                logToRenderer('error', '[OSS] Media path not config');
                 return Promise.reject(null);
             }
             const {url, meta, id, debug, uuid = ''} = props;
@@ -158,7 +158,7 @@ export default class Req {
                         try {
                             const uri = `${cdn}/${key}`;
                             if (!debug) {
-                                logToRenderer('准备上传', key);
+                                logToRenderer('info', '[OSS] Ready to upload', {key, cdn, full: uri});
                                 // Note: 不搞那么复杂，加个随机的延时就行
                                 await new Promise((res, rej) => {
                                     setTimeout(() => {
@@ -175,9 +175,7 @@ export default class Req {
                                 });
                                 logToRenderer(`刷新 ${key} 结果:`, res); */
                             } else {
-                                logToRenderer('[debug]准备上传', key);
-                                logToRenderer(`[debug] 上传 ${key} 成功！，准备刷新缓存！`);
-                                logToRenderer(`[debug] 刷新 ${key} 结果:`, '成功');
+                                logToRenderer('info', '[Debug OSS] Upload success', key);
                             }
                             return uri;
                         } catch (err) {

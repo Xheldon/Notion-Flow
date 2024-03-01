@@ -109,7 +109,13 @@ export interface AigcState {
 }
 
 export interface LogsState {
-    data: string[];
+    data: LogItem[];
+}
+
+export interface LogItem {
+    type: 'error' | 'info' | 'warn';
+    header: string; // Note: 简短的 log 通知
+    msgs: string; // Note: log 内容，允许 html 标签渲染，为了显示 json 格式内容
 }
 
 export interface Meta {

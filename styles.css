@@ -62,3 +62,21 @@ body {
   color: #0a85d1;
   text-decoration: underline;
 }
+.publisher-log .ant-collapse-item .ant-collapse-header {
+  padding: 2px 0px;
+}
+.publisher-log .ant-collapse-item .ant-collapse-header .ant-collapse-expand-icon {
+  padding-right: 5px;
+}
+.publisher-log .ant-collapse-item .ant-collapse-header .ant-collapse-header-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.publisher-log .ant-collapse-item .ant-collapse-content {
+  padding-left: 22px;
+}
+.publisher-log .ant-collapse-item .ant-collapse-content .ant-collapse-content-box {
+  padding: 0;
+  word-break: break-all;
+}

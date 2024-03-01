@@ -7,7 +7,7 @@ import { Storage } from "@plasmohq/storage"
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
 import type { State, Meta, PublisherOptions } from '$types';
-import { notion2markdown, notionMeta2string, logToRenderer, _toContent } from '$utils';
+import { notion2markdown, notionMeta2string, logToRenderer, _toContent, logTypeMap } from '$utils';
 
 const { Panel } = Collapse;
 
@@ -63,7 +63,7 @@ const Publisher = (props: any) => {
                     try {
                         // Note: meta 信息中可以拿到 cover 信息，对应 header-img 属性
                         req?.getNotionMeta(blockId, debug).then((meta: Meta) => {
-                            logToRenderer('获取 meta 信息:', meta);
+                            logToRenderer('info', '[Notion] Get Notion Page Properties', meta);
                             if (!meta) {
                                 messageApi.open({
                                     type: 'error',
@@ -100,7 +100,7 @@ const Publisher = (props: any) => {
                                             setLoading(false);
                                             return;
                                         }
-                                        logToRenderer('正文 Markdown 内容:<br/>', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
+                                        logToRenderer('info', '[Notion] Get Markdown content', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
                                         // console.log(metaString + markdown.join('\n'));
                                         req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(async result => {
                                             if (!result) {
@@ -117,7 +117,6 @@ const Publisher = (props: any) => {
                                                 type: 'success',
                                                 content: `发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion Page Property 信息' : ''}`,
                                             });
-                                            setLoading(false);
                                             return;
                                             if (setNotionLastUpdateTime) {
                                                 req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
@@ -129,10 +128,13 @@ const Publisher = (props: any) => {
                                                         setLoading(false);
                                                         return;
                                                     }
-                                                    logToRenderer('更新 Notion meta 结果:', updateMetaResult);
-                                                    logToRenderer('更新到 github 结果:', result);
+                                                    logToRenderer('info', '[Notion] Update lastUpdateTime Page Properties', updateMetaResult);
+                                                    logToRenderer('info', '[Github] Send content to github', result);
                                                     setLoading(false);
                                                 });
+                                            } else {
+                                                logToRenderer('info', '[Github] Send content to github', result);
+                                                setLoading(false);
                                             }
                                         });
                                     });
@@ -142,7 +144,7 @@ const Publisher = (props: any) => {
                                         message: '转换 Notion 内容失败',
                                         description: e.toString()
                                     });
-                                    logToRenderer('转换 Notion 内容失败:', e);
+                                    logToRenderer('error', '[Notion] Notion content to Markdown error', e);
                                 }
                             });
                         });
@@ -152,7 +154,7 @@ const Publisher = (props: any) => {
                             message: '获取 block id 失败',
                             description: e.toString()
                         });
-                        logToRenderer('renderer 出错:', e);
+                        logToRenderer('error', '[Notion] Get Notion block id error', e);
                     }
                 } else {
                     setLoading(false);
@@ -184,9 +186,16 @@ const Publisher = (props: any) => {
                 </Row>
             </Panel>
             <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
-                <div style={{wordWrap: 'break-word', wordBreak: 'break-all'}}>{logs.map(log => {
+                <Collapse ghost size='small' className='publisher-log'>
+                    {logs.map((log, key) => {
+                        return (<Panel key={key} header={`${logTypeMap[log.type]} ${log.header}`} collapsible={!!log.msgs ? 'disabled' : 'header'}>
+                            <div dangerouslySetInnerHTML={{__html: log.msgs}} />
+                        </Panel>);
+                    })}
+                </Collapse>
+                {/* <div style={{wordWrap: 'break-word', wordBreak: 'break-all'}}>{logs.map(log => {
                     return (<div style={{marginBottom: 5}} key={`${log}+${Math.random() * 10000}`} dangerouslySetInnerHTML={{ __html: `❯ ${log}` }} />);
-                })}</div>
+                })}</div> */}
             </Panel>
         </>
     );

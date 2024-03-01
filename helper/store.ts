@@ -1,5 +1,5 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
-import type { PublisherState, TocState, TocItem, PublisherConfig, AigcState, AigcData } from '$types';
+import type { PublisherState, TocState, TocItem, PublisherConfig, AigcState, AigcData, LogItem } from '$types';
 
 // TODO: 在 Pannel 中展开的部分也持久化一下
 export const publisherConfigSlice = createSlice({
@@ -54,7 +54,7 @@ export const logsSlice = createSlice({
     name: 'logs',
     initialState: {},
     reducers: {
-        setLogs: (state: any, action: {payload: string | []}) => {
+        setLogs: (state: any, action: {payload: LogItem | []}) => {
             const {payload} = action;
             if (Array.isArray(payload)) {
                 state.data = payload;

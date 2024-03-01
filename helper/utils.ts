@@ -45,22 +45,56 @@ const AIGC_BLOCKS = [
     'text',
 ];
 
+// Note: 美化现实对象
+function prettyFormat(str) {
+    try {
+        // 设置缩进为2个空格
+        str = JSON.stringify(JSON.parse(str), null, 2);
+        str = str
+            .replace(/&/g, '&')
+            .replace(/</g, '<')
+            .replace(/>/g, '>');
+        return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    } catch (e) {
+        alert("异常信息:" + e);
+    }
+}
+
+
 // Note: 为了保持 main 和 render 接口一致
-const logToRenderer = (..._msgs: any[]) => {
+const logToRenderer = (type, header, ..._msgs: any[]) => {
     // console.log('_msgs::', _msgs);
     const msgs = _msgs.filter(Boolean).map(msg => {
         try {
             if (msg.toString() === '[object Object]') {
-                return JSON.stringify(msg);
+                return (`<pre>${prettyFormat(JSON.stringify(msg))}</pre>`);
             }
             // return JSON.stringify(msg);
-            return msg;
+            return msg.toString();
         } catch (err) {
             console.log('log error:', err);
             return ` [[log err: ${err.message}]] `;
         }
     }).join('');
-    reduxStore.dispatch(setLogs(msgs));
+    reduxStore.dispatch(setLogs({
+        type,
+        header,
+        msgs,
+    }));
 };
 
 const getPublisherConfig = async (storage) => {
@@ -622,6 +656,13 @@ const getPropertyCompuValue = (obj: any) => {
 };
 
 
+const logTypeMap = {
+    'info': 'ℹ️',
+    'warn': '⚠️',
+    'error': '❌',
+};
+
+
 export {
     getPublisherConfig,
     getToc,
@@ -641,4 +682,5 @@ export {
     parserProperty,
     _toSidePanel,
     _toContent,
+    logTypeMap,
 }
