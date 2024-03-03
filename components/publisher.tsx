@@ -91,7 +91,7 @@ const Publisher = (props: any) => {
                                 }
                                 const metaString = await notionMeta2string(meta);
                                 try {
-                                    notion2markdown.bind(req)(blocks, meta, 0, debug).then(markdown => {
+                                    notion2markdown.bind(req)(blocks, meta, 0, debug).then(async (markdown) => {
                                         if (!markdown) {
                                             messageApi.open({
                                                 type: 'error',
@@ -102,11 +102,14 @@ const Publisher = (props: any) => {
                                         }
                                         logToRenderer('info', '[Notion] Get Markdown content', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
                                         // console.log(metaString + markdown.join('\n'));
-                                        req?.send2Github({meta, content: metaString + markdown.join('\n'), debug}).then(async result => {
+                                        logToRenderer('info', '[Github] Ready to send content to github');
+                                        const {publisher} = await storage.get('options') as PublisherOptions;
+                                        logToRenderer('info', `[Github] FrontMatter is ${publisher?.enableFrontMatter ? 'enabled' : 'disabled'}`);
+                                        req?.send2Github({meta, content: (publisher?.enableFrontMatter ? metaString : '') + markdown.join('\n'), debug}).then(async result => {
                                             if (!result) {
                                                 messageApi.open({
                                                     type: 'error',
-                                                    content: 'send2Github 方法错误',
+                                                    content: 'Send to Github error, see log',
                                                 });
                                                 setLoading(false);
                                                 return;
@@ -117,23 +120,22 @@ const Publisher = (props: any) => {
                                                 type: 'success',
                                                 content: `发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion Page Property 信息' : ''}`,
                                             });
-                                            return;
+                                            logToRenderer('info', '[Github] Send content to github success', result);
                                             if (setNotionLastUpdateTime) {
+                                                logToRenderer('info', '[Notion] Ready to update「lastUpdateTime」properties');
                                                 req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
                                                     if (!updateMetaResult) {
                                                         messageApi.open({
                                                             type: 'error',
-                                                            content: 'updateNotionLastUpdateTime 方法错误，未更新 lastUpdateTime 字段',
+                                                            content: 'Update「lastUpdateTime」Page Properties error, see log',
                                                         });
                                                         setLoading(false);
                                                         return;
                                                     }
-                                                    logToRenderer('info', '[Notion] Update lastUpdateTime Page Properties', updateMetaResult);
-                                                    logToRenderer('info', '[Github] Send content to github', result);
+                                                    logToRenderer('info', '[Notion] Update lastUpdateTime Page Properties success', updateMetaResult);
                                                     setLoading(false);
                                                 });
                                             } else {
-                                                logToRenderer('info', '[Github] Send content to github', result);
                                                 setLoading(false);
                                             }
                                         });

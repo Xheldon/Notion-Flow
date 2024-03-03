@@ -214,8 +214,6 @@ function OptionsIndex() {
                 secretKey: '',
                 bucket: '',
                 region: '',
-                cdn: '',
-                mediaPath: '', // Note: 支持通配符如 {{year}}/{{month}}/{{name}}
             },
             ali: {
                 secretId: '',

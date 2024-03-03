@@ -61,13 +61,14 @@ export interface PublisherOptions {
     notion: NotionConfig;
     publisher: {
         enable: boolean;
+        enableFrontMatter: boolean;
         github: GithubConfig;
         'trans-image': boolean;
         'trans-video': boolean;
         'trans-bookmark': boolean;
         'trans-callout': boolean;
         'trans-quote': boolean;
-        'headerImgName': string;
+        headerImgName: string;
         frontMatter: string;
         autoAddLastUpdateTime: boolean;
         setNotionLastUpdateTime: boolean;

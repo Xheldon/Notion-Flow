@@ -99,7 +99,6 @@ const logToRenderer = (type, header, ..._msgs: any[]) => {
 
 const getPublisherConfig = async (storage) => {
     const config: PublisherConfig = await storage.get('publisher-config');
-    logToRenderer('info', '[Notion Flow] Get publisher config', config);
     if (!config) {
         const _config = {
             configFold: false, // Note: 配置面板是否折叠
@@ -107,10 +106,10 @@ const getPublisherConfig = async (storage) => {
             logFold: false, // Note: 日志面板是否折叠
         };
         reduxStore.dispatch(setPublisher(_config));
-
     } else {
         reduxStore.dispatch(setPublisher(config));
     }
+    logToRenderer('info', '[Notion Flow] Get publisher config', config);
 };
 
 const getAigcConfig = async (storage) => {
@@ -585,10 +584,10 @@ const notionMeta2string = async (meta: Meta): Promise<string> => {
     const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
     let _lastUpdateTime = '';
     if (publisher.autoAddLastUpdateTime) {
+        logToRenderer('info', '[Github] Add「lastUpdateTime」frontmatter');
         const _ = new Date();
         _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
     }
-    const restLength = Object.keys(rest).length;
     return `---
 title: ${title}
 date: ${dateString}${_lastUpdateTime ? '\nlastUpdateTime: ' + _lastUpdateTime : ''}
@@ -598,34 +597,6 @@ ${Object.keys(rest).reduce((prev, curr) => {
     }, '')}---
 
 `;
-
-
-
-    // const tagsString = `${tags.map((tag, k) => '    - ' + tag + (k === tags.length - 1 ? '' : '\n')).join('')}`
-    // const _date = new Date(date);
-    // const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`
-    // const _lastUpdateTime = lastUpdateTime ? new Date(lastUpdateTime) : '';
-    // const lastUpdateString = _lastUpdateTime && `${_lastUpdateTime.getFullYear()}-${_lastUpdateTime.getMonth() + 1}-${_lastUpdateTime.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
-//     return `---
-// title: ${title}
-// layout: post
-// date: ${dateString}
-// cos: ${cos}
-// path: ${path}
-// header-mask: ${headerMask}
-// header-style: ${headerStyle}
-// callout: ${callout}
-// categories: ${categories}
-// reference: ${reference}
-// no-catalog: ${noCatalog}
-// lastUpdateTime: ${lastUpdateString}
-// header-img: ${headerImg}
-// notion: ${notion}
-// tags:
-// ${tagsString}
-// ---
-
-// `;
 };
 
 const normalizeNum = (num: number) => {
