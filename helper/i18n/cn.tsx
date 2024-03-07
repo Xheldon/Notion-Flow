@@ -32,7 +32,7 @@ export default {
             ScrollAnimation: '分级标题定位动画',
             Language: '语言',
             ReloadRxplain: '修改此处将会刷新本页面和插件界面',
-            MoreFeature: '后续将开放更多可配置选项，如是否滚动 Notion 时候使用动画、滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。',
+            MoreFeature: '后续将开放更多可配置选项，如滚动 Notion 时的动画滚动速度、通知类型、主题颜色、Markdown 语法风格等，敬请期待。',
         },
         Notion: {
             Label: 'Notion API Token',

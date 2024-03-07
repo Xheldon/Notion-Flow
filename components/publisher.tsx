@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Row, Collapse, notification, message } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
@@ -175,16 +175,29 @@ const Publisher = (props: any) => {
         e.stopPropagation();
         reduxStore.dispatch(reduxSetLogs([]));
     }, []);
+
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    useEffect(() => {
+        window.addEventListener("message", (event) => {
+            console.log("EVAL output: " + event.data)
+        })
+    }, []);
+
+    const onMessage = useCallback((event: MouseEvent) => {
+        iframeRef.current?.contentWindow?.postMessage({ block: '[{name: "bookmark"}]', func: 'function(block){console.log("blockkk:", block);}' }, '*');
+    }, []);
     
     return (
         <>
             {contextHolder}
             {contextHolder2}
+            <iframe src="sandbox.html" ref={iframeRef} style={{ display: "none" }} />
             <Panel {...restProps} isActive={activeFunc} onItemClick={onItemClick('Func')} header="功能" key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>
                     <Button disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>日志</Button>
                     <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布到 Github</Button>
-                    {/* <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>生成微信公众号格式</Button> */}
+                    <Button type={'primary'} size={'small'} onClick={onMessage}>发消息咯</Button>
                 </Row>
             </Panel>
             <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
