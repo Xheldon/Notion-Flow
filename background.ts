@@ -1,11 +1,12 @@
 export { }
 
 // Note：点击图标时，打开 sidepanel
-chrome.sidePanel
+/* chrome.sidePanel
     .setPanelBehavior({ openPanelOnActionClick: true })
-    .catch((error) => console.error(error));
+    .catch((error) => console.error(error)); */
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    console.log('onActivated: ', activeInfo);
     const tabId = activeInfo.tabId;
     const tab = await chrome.tabs.get(tabId);
     if (!tab.url) {
@@ -31,6 +32,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     }
 });
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+    console.log('onUpdated: ', tabId, info, tab);
     if (!tab.url) {
         await chrome.sidePanel.setOptions({
             tabId,
@@ -50,6 +52,30 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
         await chrome.sidePanel.setOptions({
             tabId,
             enabled: false
+        });
+    }
+});
+
+// Note: 点击图标时，打开 sidepanel，如果不在 notion 页面上，通知
+chrome.action.onClicked.addListener(async (tab) => {
+    console.log('onClicked: ', tab);
+    if (!tab.url) {
+        return;
+    };
+    const url = new URL(tab.url);
+    const tabId = tab.id;
+    if (url.origin === 'https://www.notion.so' || url.origin.endsWith('.notion.site')) {
+        await chrome.sidePanel.open({
+            tabId,
+        });
+    } else {
+        // Note: 显示一个弹窗说 Notion Flow 插件仅在 Notion 页面上可用以保持适当的边界感
+        chrome.notifications.create({
+            contextMessage: 'this will make your data safe',
+            type: 'basic',
+            iconUrl: 'icon.png',
+            title: 'Notion Flow',
+            message: 'Notion Flow only work on Notion Page',
         });
     }
 });

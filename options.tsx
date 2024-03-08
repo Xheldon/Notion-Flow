@@ -48,10 +48,11 @@ const storage = new Storage();
 let config;
 let LocaleConfig;
 
-(async () => {
+/* (async () => {
     config = await storage.get('options');
+    console.log('init config:', config, Lang);
     LocaleConfig = Lang[config?.language || 'cn'];
-})();
+})(); */
 
 const {
     Paragraph,
@@ -179,6 +180,8 @@ let timer: any = 0;
 function OptionsIndex() {
     const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
+    const [config, setConfig] = React.useState(null);
+    const [LocaleConfig, setLocaleConfig] = React.useState(null);
     const initialValues = config || {
         language: 'en', // Note: 默认英文界面
         'heading-style': 'none', // Note: 默认是不显示分级标题
@@ -238,12 +241,17 @@ function OptionsIndex() {
         },
     };
 
+    useEffect(() => {
+        async function getConfig() {
+            const _config: any = await storage.get('options');
+            setConfig(_config);
+            setLocaleConfig(Lang[_config?.language || 'cn']);
+        }
+        getConfig();
+    }, []);
+
     const enablePublisher = Form.useWatch(['publisher', 'enable'], form);
     const ossName = Form.useWatch(['oss', 'name'], form);
-
-   /*  const tooltips = useCallback((tooltip: { link: string; text: string }) => {
-        return <div>{LocaleConfig.Options.Common.More}:<a href={tooltip.link} target="_blank">{tooltip.text}</a></div>
-    }, []); */
 
     const onChange = useCallback((changedValues: any, allValues: any) => {
         const {language} = changedValues;
@@ -323,6 +331,8 @@ function OptionsIndex() {
         });
         inputElement.click();
     }, []);
+
+    if (!LocaleConfig) return null;
 
     return (
         <>
@@ -413,7 +423,6 @@ function OptionsIndex() {
                                 <Switch />
                             </Form.Item>
                             {publisherFormItems(LocaleConfig).map((item, key) => {
-                                console.log('LocaleConfig', LocaleConfig, item);
                                 const { label, message, name, secret } = item;
                                 const _name = name.slice();
                                 _name.unshift('publisher');
