@@ -1,3 +1,5 @@
+// import { logToRenderer } from '$utils';
+
 /**
  * 本文件用来执行插件机制，输入为用户提供的插件（js 代码），返回为 markdown 插件
  */
@@ -8,6 +10,12 @@ window.addEventListener("message", async function (event) {
     }
     const { block: _block, func } = event.data;
     block = _block;
-    const result = new Function('block', `return ${func}`)(block);
-    source.window.postMessage(result, event.origin);
+    try {
+        const result = new Function(`return ${func}`)()(block);
+        console.log('result:', result);
+        source.window.postMessage(result, event.origin);
+    } catch (e) {
+        // logToRenderer('error', '[Notion Flow] Plugin code run error', e);
+        console.log('error', '[Notion Flow] Plugin code run error', e);
+    }
 })

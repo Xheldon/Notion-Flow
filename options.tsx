@@ -45,15 +45,6 @@ window.matchMedia('(prefers-color-scheme: light)').addListener(function (mediaQu
 
 const storage = new Storage();
 
-let config;
-let LocaleConfig;
-
-/* (async () => {
-    config = await storage.get('options');
-    console.log('init config:', config, Lang);
-    LocaleConfig = Lang[config?.language || 'cn'];
-})(); */
-
 const {
     Paragraph,
     Text,
@@ -182,69 +173,73 @@ function OptionsIndex() {
     const [form] = Form.useForm();
     const [config, setConfig] = React.useState(null);
     const [LocaleConfig, setLocaleConfig] = React.useState(null);
-    const initialValues = config || {
-        language: 'en', // Note: 默认英文界面
-        'heading-style': 'none', // Note: 默认是不显示分级标题
-        'scroll-animation': true, // Note: 默认是开启滚动动画
-        notion: {
-            token: '',
-        },
-        publisher: {
-            enable: false,
-            enableFrontMatter: true,
-            github: {
-                token: '',
-                repo: '',
-                branch: '',
-                owner: '',
-            },
-            filePath: '',
-            setNotionLastUpdateTime: true,
-            autoAddLastUpdateTime: true,
-            frontMatter: '',
-            headerImgName: 'header-img',
-            'trans-image': false,
-            'trans-bookmark': false,
-            'trans-callout': false,
-            'trans-video': false,
-            'trans-quote': false,
-        },
-        oss: {
-            // enable: true,
-            name: 'tx',
-            tx: {
-                secretId: '',
-                secretKey: '',
-                bucket: '',
-                region: '',
-            },
-            ali: {
-                secretId: '',
-                secretKey: '',
-                bucket: '',
-                region: '',
-            },
-            aws: {
-                secretId: '',
-                secretKey: '',
-                bucket: '',
-                region: '',
-            },
-            cdn: '',
-            mediaPath: '',
-        },
-        aigc: {
-            enable: false
-        },
-        plugin: {
-            enable: false
-        },
-    };
+    // const initialValues = config || ;
 
     useEffect(() => {
         async function getConfig() {
             const _config: any = await storage.get('options');
-            setConfig(_config);
+            if (_config) {
+                setConfig(_config);
+            } else {
+                setConfig({
+                    language: 'cn', // Note: 默认英文界面
+                    'heading-style': 'none', // Note: 默认是不显示分级标题
+                    'scroll-animation': true, // Note: 默认是开启滚动动画
+                    notion: {
+                        token: '',
+                    },
+                    publisher: {
+                        enable: false,
+                        enableFrontMatter: true,
+                        github: {
+                            token: '',
+                            repo: '',
+                            branch: '',
+                            owner: '',
+                        },
+                        filePath: '',
+                        setNotionLastUpdateTime: true,
+                        autoAddLastUpdateTime: true,
+                        frontMatter: '',
+                        headerImgName: 'header-img',
+                        'trans-image': false,
+                        'trans-bookmark': false,
+                        'trans-callout': false,
+                        'trans-video': false,
+                        'trans-quote': false,
+                    },
+                    oss: {
+                        // enable: true,
+                        name: 'tx',
+                        tx: {
+                            secretId: '',
+                            secretKey: '',
+                            bucket: '',
+                            region: '',
+                        },
+                        ali: {
+                            secretId: '',
+                            secretKey: '',
+                            bucket: '',
+                            region: '',
+                        },
+                        aws: {
+                            secretId: '',
+                            secretKey: '',
+                            bucket: '',
+                            region: '',
+                        },
+                        cdn: '',
+                        mediaPath: '',
+                    },
+                    aigc: {
+                        enable: false
+                    },
+                    plugin: {
+                        enable: false
+                    },
+                });
+            }
             setLocaleConfig(Lang[_config?.language || 'cn']);
         }
         getConfig();
@@ -356,7 +351,7 @@ function OptionsIndex() {
                         name='basic'
                         {...formItemLayout}
                         labelAlign='left'
-                        initialValues={initialValues}
+                        initialValues={config}
                     >
                         <Form.Item
                             key={'language'}

@@ -101,7 +101,7 @@ const getPublisherConfig = async (storage) => {
     const config: PublisherConfig = await storage.get('publisher-config');
     if (!config) {
         const _config = {
-            configFold: false, // Note: 配置面板是否折叠
+            pluginFold: false, // Note: 插件面板是否折叠
             functionFold: false, // Note: 功能面板是否折叠
             logFold: false, // Note: 日志面板是否折叠
         };

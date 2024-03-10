@@ -35,9 +35,10 @@ export interface PublisherRequestConfig {
 }
 
 export interface PublisherConfig {
-    configFold?: boolean;
     functionFold?: boolean;
+    pluginFold?: boolean;
     logFold?: boolean;
+    pluginCode?: string;
 }
 
 export type OSSName = 'tx' | 'ali' | 'aws';

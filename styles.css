@@ -80,3 +80,6 @@ body {
   padding: 0;
   word-break: break-all;
 }
+.editor-container {
+  /* min-height: 500px; */
+}

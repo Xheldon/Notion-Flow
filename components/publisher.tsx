@@ -3,7 +3,13 @@ import { Button, Row, Collapse, notification, message } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
-import { Storage } from "@plasmohq/storage"
+import { Storage } from "@plasmohq/storage";
+
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/themes/prism.css'
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
 import type { State, Meta, PublisherOptions } from '$types';
@@ -19,14 +25,14 @@ const Publisher = (props: any) => {
     const logs = useSelector((state: State) => state.logs.data);
     // Note: 默认打开状态通过配置读取，记录上次打开状态
     const [activeFunc, setActiveFunc] = useState(config.functionFold);
+    const [activePlugin, setActivePlugin] = useState(config.pluginFold);
     const [activeLog, setActiveLog] = useState(config.logFold);
+    const [pluginCode, setPluginCode] = useState(config.pluginCode || '/*请按照固定格式书写模块处理函数，详情请见: www.xheldon.com */\n');
     const [loading, setLoading] = useState(false);
     const [noti, contextHolder] = notification.useNotification();
     const [messageApi, contextHolder2] = message.useMessage();
-    // const [logs, setLogs] = useState(_logs);
 
-
-    const onItemClick = useCallback((itemName: 'Func' | 'Log') => {
+    const onItemClick = useCallback((itemName: 'Func' | 'Plugin' | 'Log') => {
         return () => {
             if (loading) {
                 return;
@@ -39,6 +45,13 @@ const Publisher = (props: any) => {
                     setActiveFunc(!activeFunc);
                     break;
                 }
+                case 'Plugin': {
+                    reduxStore.dispatch(setPublisher({
+                        pluginFold: !activePlugin,
+                    }));
+                    setActivePlugin(!activePlugin);
+                    break;
+                }
                 case 'Log': {
                     reduxStore.dispatch(setPublisher({
                         logFold: !activeLog,
@@ -49,13 +62,15 @@ const Publisher = (props: any) => {
             }
 
         };
-    }, [activeFunc, activeLog, loading]);
+    }, [activeFunc, activePlugin, activeLog, loading]);
 
     const onDebug = useCallback((debug: boolean) => {
         return async () => {
             if (loading) {
                 return;
             }
+            console.log('config:', req?.pluginCode);
+            return;
             setLoading(true);
             _toContent('notion-block-id-get', null, (blockId) => {
                 // console.log('获取当前 block id:', blockId);
@@ -180,12 +195,25 @@ const Publisher = (props: any) => {
 
     useEffect(() => {
         window.addEventListener("message", (event) => {
-            console.log("EVAL output: " + event.data)
+            console.log("EVAL output: " + event.data);
         })
     }, []);
 
+    let timer = 0;
+    const _setPluginCode = useCallback((code: string) => {
+        setPluginCode(code);
+        clearTimeout(timer);
+        timer = window.setTimeout(() => {
+            reduxStore.dispatch(setPublisher({
+                pluginCode: code,
+            }));
+            console.log('code:', code);
+        }, 2000);
+    }, []);
+
+
     const onMessage = useCallback((event: MouseEvent) => {
-        iframeRef.current?.contentWindow?.postMessage({ block: '[{name: "bookmark"}]', func: 'function(block){console.log("blockkk:", block);}' }, '*');
+        iframeRef.current?.contentWindow?.postMessage({ block: '[{name: "bookmark"}]', func: 'function(block){console.log("blockkk:", block);return "牛逼咯~"}' }, '*');
     }, []);
     
     return (
@@ -199,6 +227,21 @@ const Publisher = (props: any) => {
                     <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布到 Github</Button>
                     <Button type={'primary'} size={'small'} onClick={onMessage}>发消息咯</Button>
                 </Row>
+            </Panel>
+            <Panel {...restProps} isActive={activePlugin} onItemClick={onItemClick('Plugin')} header="模块处理插件" key='plugin'>
+                <span style={{fontSize: 12, color: '#aaa', }}>*内容被修改 2s 后将自动保存，无需手动操作</span>
+                <div className='editor-container'>
+                    <Editor
+                        value={pluginCode}
+                        onValueChange={code => _setPluginCode(code)}
+                        highlight={code => highlight(code, languages.js)}
+                        padding={10}
+                        style={{
+                            fontFamily: '"Fira code", "Fira Mono", monospace',
+                            fontSize: 12,
+                        }}
+                    />
+                </div>
             </Panel>
             <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
                 <Collapse ghost size='small' className='publisher-log'>

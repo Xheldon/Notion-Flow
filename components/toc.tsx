@@ -24,7 +24,7 @@ const Toc = (props: any) => {
   const _locateHeading = useCallback((key: string) => {
     return async () => {
       const options = await storage.get('options');
-      _toContent('toc-locate', {key, smooth: options['scroll-animation']});
+      _toContent('toc-locate', {key, smooth: options?.['scroll-animation'] || true});
     };
   }, []);
 

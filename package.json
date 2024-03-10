@@ -23,9 +23,11 @@
     "cos-js-sdk-v5": "^1.5.0",
     "octokit": "^3.1.2",
     "plasmo": "0.84.0",
+    "prismjs": "^1.29.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "^9.0.4",
+    "react-simple-code-editor": "^0.13.1",
     "react-sticky-box": "^2.0.5"
   },
   "devDependencies": {
@@ -40,6 +42,19 @@
   "manifest": {
     "host_permissions": [
       "https://*/*"
+    ],
+    "permissions": [
+      "notifications"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "assets/*"
+        ],
+        "matches": [
+          "<all_urls>"
+        ]
+      }
     ]
   }
 }

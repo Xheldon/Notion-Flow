@@ -70,10 +70,13 @@ chrome.action.onClicked.addListener(async (tab) => {
         });
     } else {
         // Note: 显示一个弹窗说 Notion Flow 插件仅在 Notion 页面上可用以保持适当的边界感
+        /* chrome.scripting.executeScript({
+            target: {tabId: tab.id},
+            files: [chrome.runtime.getURL('notify.js')]
+          }); */
         chrome.notifications.create({
-            contextMessage: 'this will make your data safe',
             type: 'basic',
-            iconUrl: 'icon.png',
+            iconUrl: chrome.runtime.getURL('assets/icon.png'),
             title: 'Notion Flow',
             message: 'Notion Flow only work on Notion Page',
         });

@@ -44,10 +44,10 @@ const storage = new Storage();
 async function updateConfigDeco (that: Req) {
         const _: PublisherOptions = await storage.get('options');
     this.updateConfig({
-        github: _.publisher.github,
+        github: _.publisher?.github,
         notion: _.notion,
-        oss: _.oss[_.oss.name],
-        ossName: _.oss.name,
+        oss: _.oss?.[_.oss?.name],
+        ossName: _.oss?.name,
     });
 }
 

@@ -151,10 +151,10 @@ function App() {
             };
             if (options) {
                 const _publisherOptions = {
-                    github: options.publisher.github,
+                    github: options.publisher?.github,
                     notion: options.notion,
-                    oss: options.oss[options.oss.name],
-                    ossName: options.oss.name,
+                    oss: options.oss?.[options.oss?.name],
+                    ossName: options.oss?.name,
                 };
                 req.current = new Req(_publisherOptions);
             }
