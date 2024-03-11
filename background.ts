@@ -6,7 +6,7 @@ export { }
     .catch((error) => console.error(error)); */
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
-    console.log('onActivated: ', activeInfo);
+    // console.log('onActivated: ', activeInfo);
     const tabId = activeInfo.tabId;
     const tab = await chrome.tabs.get(tabId);
     if (!tab.url) {
@@ -32,7 +32,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     }
 });
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
-    console.log('onUpdated: ', tabId, info, tab);
+    // console.log('onUpdated: ', tabId, info, tab);
     if (!tab.url) {
         await chrome.sidePanel.setOptions({
             tabId,
@@ -58,7 +58,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
 // Note: 点击图标时，打开 sidepanel，如果不在 notion 页面上，通知
 chrome.action.onClicked.addListener(async (tab) => {
-    console.log('onClicked: ', tab);
+    // console.log('onClicked: ', tab);
     if (!tab.url) {
         return;
     };

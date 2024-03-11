@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Row, Collapse, notification, message } from "antd";
+import { Button, Row, Collapse, notification, message, Typography } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
@@ -16,6 +16,7 @@ import type { State, Meta, PublisherOptions } from '$types';
 import { notion2markdown, notionMeta2string, logToRenderer, _toContent, logTypeMap } from '$utils';
 
 const { Panel } = Collapse;
+const {Link} = Typography;
 
 const storage = new Storage();
 
@@ -69,7 +70,7 @@ const Publisher = (props: any) => {
             if (loading) {
                 return;
             }
-            console.log('config:', req?.pluginCode);
+            // console.log('config:', req?.pluginCode);
             setLoading(true);
             _toContent('notion-block-id-get', null, (blockId) => {
                 // console.log('获取当前 block id:', blockId);
@@ -236,11 +237,6 @@ const Publisher = (props: any) => {
         req.pluginCode = pluginCode;
     }, [pluginCode]);
 
-
-    // const onMessage = useCallback((event: MouseEvent) => {
-    //     iframeRef.current?.contentWindow?.postMessage({ block: '[{name: "bookmark"}]', func: 'function(block){console.log("blockkk:", block);return "牛逼咯~"}' }, '*');
-    // }, []);
-    
     return (
         <>
             {contextHolder}
@@ -250,11 +246,10 @@ const Publisher = (props: any) => {
                 <Row justify={'space-around'} gutter={[16, 16]}>
                     <Button key="log" disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>日志</Button>
                     <Button key="publish" disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布到 Github</Button>
-                    {/* <Button type={'primary'} size={'small'} onClick={onMessage}>发消息咯</Button> */}
                 </Row>
             </Panel>
             <Panel {...restProps} isActive={activePlugin} onItemClick={onItemClick('Plugin')} header="模块处理插件" key='plugin'>
-                <span style={{fontSize: 12, color: '#aaa', }} key='intro'>*内容被修改 2s 后将自动保存，无需手动操作</span>
+                <span style={{fontSize: 12, color: '#aaa', }} key='intro'>*内容被修改 2s 后将自动保存，无需手动操作。请按照固定格式书写模块处理函数，详情请见: <Link href="www.xheldon.com" target="_blank" style={{fontSize: 12}}>说明</Link></span>
                 <div className='editor-container' key="editor">
                     <Editor
                         value={pluginCode}
@@ -271,14 +266,11 @@ const Publisher = (props: any) => {
             <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
                 <Collapse ghost size='small' className='publisher-log'>
                     {logs.map((log, key) => {
-                        return (<Panel key={key} header={`${logTypeMap[log.type]} ${log.header}`} /* collapsible={!!log.msgs ? 'disabled' : 'header'} */>
+                        return (<Panel key={key} header={`${logTypeMap[log.type]} ${log.header}`}>
                             <div style={{overflow: 'scroll'}} dangerouslySetInnerHTML={{__html: log.msgs}} />
                         </Panel>);
                     })}
                 </Collapse>
-                {/* <div style={{wordWrap: 'break-word', wordBreak: 'break-all'}}>{logs.map(log => {
-                    return (<div style={{marginBottom: 5}} key={`${log}+${Math.random() * 10000}`} dangerouslySetInnerHTML={{ __html: `❯ ${log}` }} />);
-                })}</div> */}
             </Panel>
         </>
     );

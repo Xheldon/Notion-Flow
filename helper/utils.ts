@@ -776,7 +776,7 @@ const notionMeta2string = async (meta: Meta): Promise<string> => {
     const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
     let _lastUpdateTime = '';
     if (publisher.autoAddLastUpdateTime) {
-        logToRenderer('info', '[Github] Add「lastUpdateTime」frontmatter');
+        logToRenderer('info', '[Github] Will add「lastUpdateTime」frontmatter');
         const _ = new Date();
         _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
     }
@@ -820,7 +820,7 @@ const getPropertyCompuValue = (obj: any) => {
 
 
 const logTypeMap = {
-    'info': 'ℹ️',
+    'info': '✅',
     'warn': '⚠️',
     'error': '❌',
 };
