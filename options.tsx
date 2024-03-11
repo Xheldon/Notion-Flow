@@ -272,7 +272,7 @@ function OptionsIndex() {
                 window.location.reload();
             }
         }, 1000);
-    }, [form]);
+    }, [form, LocaleConfig]);
 
     const onDownloadConfig = useCallback(() => {
         try {
@@ -296,7 +296,7 @@ function OptionsIndex() {
                 content: LocaleConfig.Options.Common.Message.OptionsExportFail,
             });
         }
-    }, []);
+    }, [LocaleConfig]);
 
     const onUploadConfig = useCallback(() => {
         const inputElement = document.createElement('input');
@@ -325,7 +325,7 @@ function OptionsIndex() {
             reader.readAsText(file);
         });
         inputElement.click();
-    }, []);
+    }, [LocaleConfig]);
 
     if (!LocaleConfig) return null;
 

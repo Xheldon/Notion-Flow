@@ -187,7 +187,7 @@ function App() {
                 console.log('options:', opt);
                 const {
                     newValue: { language, 'heading-style': headingStyle, publisher, oss, aigc, plugin, notion},
-                    oldValue: { language: preLanguage},
+                    oldValue: { language: preLanguage} = {},
                 } = opt;
                 if (language !== preLanguage) {
                     window.location.reload();

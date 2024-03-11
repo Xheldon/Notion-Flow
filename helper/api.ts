@@ -80,7 +80,7 @@ export default class Req {
             await updateConfigDeco.bind(this);
             if (!this.notion) {
                 logToRenderer('error', '[Notion] Notion ingetration token not config');
-                return Promise.reject(null);
+                return Promise.resolve(null);
             }
             return new Promise((res, rej) => {
                 setTimeout(() => {
@@ -107,18 +107,18 @@ export default class Req {
             await updateConfigDeco.bind(this);
             if (!this.oss) {
                 logToRenderer('error', '[OSS] OSS service not config');
-                return Promise.reject(null);
+                return Promise.resolve(null);
             }
             const {oss, publisher} = await storage.get('options') as PublisherOptions;
             const cdn = oss.cdn;
             if (!cdn) {
                 logToRenderer('error', '[OSS] CDN address not config');
-                return Promise.reject(null);
+                return Promise.resolve(null);
             }
             const mediaPath = oss.mediaPath;
             if (!mediaPath) {
                 logToRenderer('error', '[OSS] Media path not config');
-                return Promise.reject(null);
+                return Promise.resolve(null);
             }
             const {url, meta, id, debug, uuid = ''} = props;
             const pathname = new URL(url).pathname;
@@ -202,7 +202,7 @@ export default class Req {
             await updateConfigDeco.bind(this);
             if (!this.notion) {
                 logToRenderer('error', '[Notion] Notion ingetration token not config');
-                return Promise.reject(null);
+                return Promise.resolve(null);
             }
             const response = await this.notion.pages.retrieve({ page_id: blockId });
             const {
@@ -305,7 +305,7 @@ export default class Req {
         await updateConfigDeco.bind(this);
         if (!this.notion) {
             logToRenderer('error', '[Notion] Notion ingetration token not config');
-            return Promise.reject(null);
+            return Promise.resolve(null);
         }
         const { blockId, debug } = props;
         const date = getISODateTime(new Date());
@@ -332,14 +332,14 @@ export default class Req {
         await updateConfigDeco.bind(this);
         if (!this.github) {
             logToRenderer('error', '[Github] Github Personal Token not config');
-            return Promise.reject(null);
+            return Promise.resolve(null);
         }
         const {publisher} = await storage.get('options') as PublisherOptions;
         // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
         const _path = parserProperty(publisher.filePath, {meta: props.meta});
         if (!_path) {
             logToRenderer('error', '[Github] File path not config or invalid');
-            return Promise.reject(null);
+            return Promise.resolve(null);
         }
         const {meta, content, debug} = props;
         // Note: path 需要 parserProperty 处理一下
@@ -398,11 +398,11 @@ export default class Req {
                     }
                 } catch (err) {
                     logToRenderer('error', '[Github] Create file faild', err);
-                    return Promise.reject(null);
+                    return Promise.resolve(null);
                 }
             } else {
                 logToRenderer('error', '[Github] Try get github file error, check the network or report it to developer', err);
-                return Promise.reject(null);
+                return Promise.resolve(null);
             }
         }
     }

@@ -70,7 +70,6 @@ const Publisher = (props: any) => {
                 return;
             }
             console.log('config:', req?.pluginCode);
-            return;
             setLoading(true);
             _toContent('notion-block-id-get', null, (blockId) => {
                 // console.log('获取当前 block id:', blockId);
@@ -154,6 +153,13 @@ const Publisher = (props: any) => {
                                                 setLoading(false);
                                             }
                                         });
+                                    }).catch(e => {
+                                        setLoading(false);
+                                        noti.error({
+                                            message: '转换 Notion 内容失败',
+                                            description: e.toString()
+                                        });
+                                        logToRenderer('error', '[Notion] Notion content to Markdown error', e);    
                                     });
                                 } catch(e) {
                                     setLoading(false);
@@ -194,10 +200,25 @@ const Publisher = (props: any) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     useEffect(() => {
-        window.addEventListener("message", (event) => {
-            console.log("EVAL output: " + event.data);
-        })
-    }, []);
+        // Note: 将 postMessage 方法绑定到 req 上方便使用
+        req.postMessage = (config) => {
+            const _config = {
+                func: pluginCode,
+                ...config,
+            };
+            const id = config.id;
+            return new Promise((resolve, reject) => {
+                function onMessage(event) {
+                    if (typeof event.data?.[id] ===  'string') {
+                        resolve(event.data);
+                        window.removeEventListener("message", onMessage);
+                    }
+                }
+                window.addEventListener("message", onMessage);
+                iframeRef.current?.contentWindow?.postMessage(_config, '*');
+            });
+        };
+    }, [pluginCode]);
 
     let timer = 0;
     const _setPluginCode = useCallback((code: string) => {
@@ -211,10 +232,14 @@ const Publisher = (props: any) => {
         }, 2000);
     }, []);
 
+    useEffect(() => {
+        req.pluginCode = pluginCode;
+    }, [pluginCode]);
 
-    const onMessage = useCallback((event: MouseEvent) => {
-        iframeRef.current?.contentWindow?.postMessage({ block: '[{name: "bookmark"}]', func: 'function(block){console.log("blockkk:", block);return "牛逼咯~"}' }, '*');
-    }, []);
+
+    // const onMessage = useCallback((event: MouseEvent) => {
+    //     iframeRef.current?.contentWindow?.postMessage({ block: '[{name: "bookmark"}]', func: 'function(block){console.log("blockkk:", block);return "牛逼咯~"}' }, '*');
+    // }, []);
     
     return (
         <>
@@ -223,14 +248,14 @@ const Publisher = (props: any) => {
             <iframe src="sandbox.html" ref={iframeRef} style={{ display: "none" }} />
             <Panel {...restProps} isActive={activeFunc} onItemClick={onItemClick('Func')} header="功能" key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>
-                    <Button disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>日志</Button>
-                    <Button disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布到 Github</Button>
-                    <Button type={'primary'} size={'small'} onClick={onMessage}>发消息咯</Button>
+                    <Button key="log" disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>日志</Button>
+                    <Button key="publish" disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>发布到 Github</Button>
+                    {/* <Button type={'primary'} size={'small'} onClick={onMessage}>发消息咯</Button> */}
                 </Row>
             </Panel>
             <Panel {...restProps} isActive={activePlugin} onItemClick={onItemClick('Plugin')} header="模块处理插件" key='plugin'>
-                <span style={{fontSize: 12, color: '#aaa', }}>*内容被修改 2s 后将自动保存，无需手动操作</span>
-                <div className='editor-container'>
+                <span style={{fontSize: 12, color: '#aaa', }} key='intro'>*内容被修改 2s 后将自动保存，无需手动操作</span>
+                <div className='editor-container' key="editor">
                     <Editor
                         value={pluginCode}
                         onValueChange={code => _setPluginCode(code)}
@@ -246,8 +271,8 @@ const Publisher = (props: any) => {
             <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header="实时日志" key='log'>
                 <Collapse ghost size='small' className='publisher-log'>
                     {logs.map((log, key) => {
-                        return (<Panel key={key} header={`${logTypeMap[log.type]} ${log.header}`} collapsible={!!log.msgs ? 'disabled' : 'header'}>
-                            <div dangerouslySetInnerHTML={{__html: log.msgs}} />
+                        return (<Panel key={key} header={`${logTypeMap[log.type]} ${log.header}`} /* collapsible={!!log.msgs ? 'disabled' : 'header'} */>
+                            <div style={{overflow: 'scroll'}} dangerouslySetInnerHTML={{__html: log.msgs}} />
                         </Panel>);
                     })}
                 </Collapse>
