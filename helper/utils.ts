@@ -5,6 +5,8 @@ import reduxStore, { setPublisher, setAigc, setLogs } from '$store';
 import type { PublisherConfig, TocItem, Meta, AigcData, PublisherOptions } from '$types';
 import { Storage, } from "@plasmohq/storage"
 
+import * as Lang from '$lang';
+
 // import api from '$api';
 
 // Note: callout/blockquote 颜色映射，其实 list 也能（其他可能也能？）设置颜色，但是没必要
@@ -68,20 +70,18 @@ function prettyFormat(str) {
             return '<span class="' + cls + '">' + match + '</span>';
         });
     } catch (e) {
-        alert("异常信息:" + e);
+        alert("Error Message:" + e);
     }
 }
 
 
 // Note: 为了保持 main 和 render 接口一致
 const logToRenderer = (type, header, ..._msgs: any[]) => {
-    // console.log('_msgs::', _msgs);
     const msgs = _msgs.filter(Boolean).map(msg => {
         try {
             if (msg.toString() === '[object Object]') {
                 return (`<pre>${prettyFormat(JSON.stringify(msg))}</pre>`);
             }
-            // return JSON.stringify(msg);
             return msg.toString();
         } catch (err) {
             console.log('log error:', err);
@@ -111,7 +111,6 @@ const getPublisherConfig = async (storage) => {
 };
 
 const getAigcConfig = async (storage) => {
-    // const aigc: Aigc = await window._toMain('aigc-get');
         const aigc: AigcData = await storage.get('aigc-config');
     // TODO: 从持久化存储中获取
     logToRenderer('info', '[Notion Flow] Get aigc config', aigc);
@@ -134,39 +133,17 @@ const getAigcConfig = async (storage) => {
 
 // Note: contnet -> sidePanel
 const _toSidePanel = (name, data?, cb?) => {
-    // console.log('_toSidePanel:', name, data);
     var port = chrome.runtime.connect({name});
     port.postMessage({name, data});
     port.onMessage.addListener(cb);
 };
 
 const _toContent = (name, data?, cb?) => {
-    // console.log('_toContent:', name, data);
     chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
-        // if (!tab) {
-        //     console.log('tab 不存在');
-        //     return
-        // };
         const port = chrome.tabs.connect(tab.id, {name});
         port.postMessage({name, data});
         port.onMessage.addListener(cb);
     });
-};
-
-// Note: sidePanel -> content 要求更新 toc
-const getToc = () => {
-    // Note: 仅触发通知
-    // window._toMain('toc-get');
-    // _toContent('toc-update');
-};
-
-// Note: sidePanel -> content 要求定位到给定 heading
-const locateHeading = (key: string) => {
-    // _toContent('toc-locate', key);
-    // window._toMain('toc-locate', {
-    //     key,
-    //     shouldNoti: true,
-    // });
 };
 
 const notionGetToc = (cb: (type: 'toc' | 'selection', toc: TocItem[] | string) => void) => {
@@ -329,17 +306,16 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
         return Promise.resolve(null);
     }
     const storage = new Storage();
-    /* if (!list.length) {
-        return Promise.resolve('');
-    } */
     // FIXME: 我时常在想，既然都写 render_xxx 的 Jekyll ruby 插件了，为啥不直接写 html 标签呢？我是不是傻 =_=
-    const {publisher: {
+   /*  const {publisher: {
         'trans-image': transImage,
         'trans-video': transVideo,
         'trans-bookmark': transBookmark,
         'trans-callout': transCallout,
         'trans-quote': transQuote,
-    }} = (await storage.get('options') || {publisher: {}}) as Pick<PublisherOptions, 'publisher'>;
+    }} = (await storage.get('options') || {publisher: {}}) as Pick<PublisherOptions, 'publisher'>; */
+    const {language} = (await storage.get('options')  || {}) as Pick<PublisherOptions, 'language'>;
+    const Locale = Lang[language || 'cn'];
     return Promise.all(list.filter(item => item.object === 'block').map(item => {
         return (async (): Promise<any> => {
             const type = item.type;
@@ -828,9 +804,7 @@ const logTypeMap = {
 
 export {
     getPublisherConfig,
-    getToc,
     getAigcConfig,
-    locateHeading,
     notionGetToc,
     _inline,
     notionMutation,

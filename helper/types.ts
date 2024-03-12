@@ -43,6 +43,7 @@ export interface PublisherConfig {
 
 export type OSSName = 'tx' | 'ali' | 'aws';
 export interface PublisherOptions {
+    language: 'en' | 'cn';
     aigc: {
         enable: boolean;
     };
