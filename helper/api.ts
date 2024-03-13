@@ -41,13 +41,14 @@ const imgSuffix = [
 
 const storage = new Storage();
 
-async function updateConfigDeco (that: Req) {
-        const _: PublisherOptions = await storage.get('options');
-    this.updateConfig({
-        github: _.publisher?.github,
-        notion: _.notion,
-        oss: _.oss?.[_.oss?.name],
-        ossName: _.oss?.name,
+function updateConfigDeco () {
+    return storage.get<PublisherOptions>('options').then(_ => {
+        return this.updateConfig({
+            github: _.publisher?.github,
+            notion: _.notion,
+            oss: _.oss?.[_.oss?.name],
+            ossName: _.oss?.name,
+        });
     });
 }
 
@@ -75,26 +76,35 @@ export default class Req {
         this.updateConfig(props);
     }
 
-    async getNotionContent(block_id: string) {
-        try {
-            await updateConfigDeco.bind(this);
-            if (!this.notion) {
-                logToRenderer('error', '[Notion] Notion ingetration token not config');
-                return Promise.resolve(null);
-            }
-            return new Promise((res, rej) => {
-                setTimeout(() => {
-                    res(collectPaginatedAPI<{[key: string]: string}, any>(this.notion.blocks.children.list, {
-                        block_id,
-                    }).catch(err => {rej(err)}));
-                }, 3000 * Math.random());
+    getNotionContent(block_id: string) {
+        return storage.get<PublisherOptions>('options').then((props) => {
+            const {language: lang} = props || {};
+            const cn = lang === 'cn';
+            return updateConfigDeco.call(this).then(() => {
+                if (!this.notion) {
+                    logToRenderer('error',
+                        cn ? '[Notion] Notion API Token 未配置' : '[Notion] Notion ingetration token not config');
+                    return Promise.reject(null);
+                }
+                return new Promise((res, rej) => {
+                    setTimeout(() => {
+                        res(collectPaginatedAPI<{[key: string]: string}, any>(this.notion.blocks.children.list, {
+                            block_id,
+                        }).catch(err => {
+                            logToRenderer('error',
+                            cn ? '[Notion] collectPaginatedAPI 接口发生错误:' : '[Notion] collectPaginatedAPI API error:', err);
+                            rej(null);
+                        }));
+                    }, 3000 * Math.random());
+                });
+            }).catch((err) => {
+                if (err) {
+                    logToRenderer('error',
+                            cn ? '[Notion Flow] 接口初始化过程发生错误' : '[Notion Flow] Init API error', err);
+                }
+                return Promise.reject(null);
             });
-            
-        } catch (e) {
-            logToRenderer('error', '[Notion] Get Notion content error', e);
-            // store.set('log', e);
-            return null;
-        }
+        });
     }
 
     // FIXME: 腾讯云限制每秒 20 个请求，节流一下.
@@ -103,21 +113,26 @@ export default class Req {
         // FIXMED: 因为存在同步更新 github 后写入 publish 为 true 的逻辑（即使之前已经是 true 了），导致 last_edited_time 会变，结果就是每更新一次，头图的地址都
         //  会变化一次...先不管了
         // Note: 上层 fix 了 uuid 问题，取 url 的 pathname 作为 uuid 而不是 last_edited_time
+        const {language: lang} = await storage.get('options') as PublisherOptions || {};
+        const cn = lang === 'cn';
         try {
             await updateConfigDeco.bind(this);
             if (!this.oss) {
-                logToRenderer('error', '[OSS] OSS service not config');
+                logToRenderer('error',
+                    cn ? '[OSS] OSS 服务未配置' : '[OSS] OSS service not config');
                 return Promise.resolve(null);
             }
-            const {oss, publisher} = await storage.get('options') as PublisherOptions;
-            const cdn = oss.cdn;
+            const {oss} = await storage.get('options') as PublisherOptions || {};
+            const cdn = oss?.cdn;
             if (!cdn) {
-                logToRenderer('error', '[OSS] CDN address not config');
+                logToRenderer('error',
+                    cn ? '[OSS] CDN 地址未配置' : '[OSS] CDN address not config');
                 return Promise.resolve(null);
             }
             const mediaPath = oss.mediaPath;
             if (!mediaPath) {
-                logToRenderer('error', '[OSS] Media path not config');
+                logToRenderer('error',
+                    cn ? '[OSS] 媒体上传路径未配置' : '[OSS] Media path not config');
                 return Promise.resolve(null);
             }
             const {url, meta, id, debug, uuid = ''} = props;
@@ -158,7 +173,8 @@ export default class Req {
                         try {
                             const uri = `${cdn}/${key}`;
                             if (!debug) {
-                                logToRenderer('info', '[OSS] Ready to upload', {key, cdn, full: uri});
+                                logToRenderer('info',
+                                    cn ? `[OSS] 准备上传 ${id}` : `[OSS] Ready to upload ${id}`, {key, cdn, full: uri});
                                 // Note: 不搞那么复杂，加个随机的延时就行
                                 await new Promise((res, rej) => {
                                     setTimeout(() => {
@@ -168,23 +184,19 @@ export default class Req {
                                         }, {rej, res})
                                     }, 5000 * Math.random());
                                 });
-                                // logToRenderer(`上传 ${key} 成功！，刷新缓存暂时需要手动！，地址是 ${url}`);
-                                // FIXME: 先获取其中图片总数，然后在最后一次性刷新，而不是上传一次刷新一次
-                                /* const res = await this.cdn.PurgeUrlsCache({
-                                    Urls: [uri]
-                                });
-                                logToRenderer(`刷新 ${key} 结果:`, res); */
                             } else {
-                                logToRenderer('info', '[Debug OSS] Upload success', key);
+                                logToRenderer('info',
+                                    cn ? `[Debug OSS] 上传 ${id} 成功` : `[Debug OSS] Upload ${id} success`, key);
                             }
                             return uri;
                         } catch (err) {
-                            // dialog.showErrorBox('处理图片错误', `上传 ${key} 时遇到错误！e: ${err}`);
-                            logToRenderer('error', '[OSS] Upload media faild', err);
+                            logToRenderer('error',
+                                cn ? `[OSS] 上传 ${id} 出错` : `[OSS] Upload ${id} faild`, err);
                             throw new Error(err);
                         }
                     } else {
-                        logToRenderer('error', '[Notion] Get Notion image error', res);
+                        logToRenderer('error',
+                            cn ? '[Notion] 获取 Notion 图片错误' : '[Notion] Get Notion image error', res);
                         // dialog.showErrorBox('处理图片错误', `获取 Notion 图片错误: ${res}`);
                     }
                 } else {
@@ -192,125 +204,133 @@ export default class Req {
                 }
             }
         } catch (err) {
-            logToRenderer('error', `[OSS] Try upload media err`, err);
+            logToRenderer('error',
+                cn ? '[OSS] 上传媒体过程中发生错误' : `[OSS] Try upload media err`, err);
             throw new Error(err);
         }
     }
 
-    async getNotionMeta(blockId: string, debug: boolean): Promise<Meta> {
-        try {
-            await updateConfigDeco.bind(this);
-            if (!this.notion) {
-                logToRenderer('error', '[Notion] Notion ingetration token not config');
-                return Promise.resolve(null);
-            }
-            const response = await this.notion.pages.retrieve({ page_id: blockId });
-            const {
-                // tags,
-                // categories,
-                // cos,
-                // reference,
-                // headerStyle,
-                // headerMask,
-                // path,
-                // callout,
-                // noCatalog,
-                title,
-                name,
-                date,
-                // lastUpdateTime,
-                // notion,
-                ...rest // Note: 用户自定义 Page Property 会放在这里
-            } = response.properties;
-            // Note: 其他的根据插件配置生成的部分，如果页面配置了，则用页面写死的，否则根据规则生成，且不写到 Markdown 文件中:
-            // 1. cos 根据配置生成，支持引用页面的其他 property 变量，内置的变量有（取自必填项 date 属性） YYYY、YY、MM、DD，如 {{YYYY}}/{{MM}}/{{DD}}/{{title}}/{{name}} 这种
-            // 2. 文件 path 同理，Jekyll 博客强制 post 位于 _posts 目录下，因此这个可以不用配置，剩余的变量同上
-
-            // 目前 Property 只支持单选框 checkbox、多选 multi_select、文本 rich_text、日期 date、链接格式 url、formula
-            // 如果有头图，默认是 cover 属性
-
-            let cover = '';
-            if (response.cover) {
-                cover = response.cover[response.cover.type]?.url;
-            }
-            let meta = {
-                title: _inline(getPropertyValue(title)),
-                name: _inline(getPropertyValue(name)),
-                date: getPropertyValue(date)?.start,
-            };
-            Object.keys(rest).forEach(key => {
-                const obj = rest[key];
-                if (!obj) return;
-                switch (obj.type) {
-                    case 'rich_text':
-                        meta[key] = _inline(getPropertyValue(obj));
-                        break;
-                    case 'multi_select':
-                        meta[key] = getPropertyValue(obj).map((tag: {name: string;}) => tag.name) || [];
-                        break;
-                    case 'select':
-                        meta[key] = getPropertyValue(obj).name;
-                        break;
-                    case 'date':
-                        meta[key] = getPropertyValue(obj)?.start;
-                        break;
-                    case 'url':
-                        meta[key] = getPropertyValue(obj);
-                        break;
-                    case 'formula':
-                        meta[key] = getPropertyCompuValue(obj);
-                        break;
-                    default:
-                        break;
+    getNotionMeta(blockId: string, debug: boolean): Promise<Meta> {
+        return storage.get<PublisherOptions>('options').then((props) => {
+            const {language: lang, publisher} = props || {};
+            const cn = lang === 'cn';
+            return updateConfigDeco.call(this).then(() => {
+                if (!this.notion) {
+                    logToRenderer('error',
+                        cn ? '[Notion] Notion API Token 未配置' : '[Notion] Notion ingetration token not config');
+                    return Promise.reject(null);
                 }
-            });
-            /* const meta = {
-                tags: getValue(tags).map((tag: {name: string;}) => tag.name),
-                categories: getCompuValue(categories),
-                cos: getCompuValue(cos),
-                reference: getValue(reference) || '',
-                headerStyle: getCompuValue(headerStyle),
-                headerMask: getCompuValue(headerMask),
-                path: getCompuValue(path),
-                callout: _inline(getValue(callout)) || '',
-                noCatalog: getValue(noCatalog) || '',
-                title: _inline(getValue(title)),
-                date: getValue(date)?.start || '',
-                lastUpdateTime: getValue(lastUpdateTime)?.start || '',
-                notion: getValue(notion) || '',
-                headerImg: '',
-            }; */
-            // Note: 将其上传到 oss 后拿到 url, 图片 id 就以 pageId（blockId 即可）
-            const {publisher} = await storage.get('options') as PublisherOptions;
-            // Note: 既然走到这里，publisher 一定是启用的，所以不判断了 enable 了
-            // Note: 处理一下 上传的 path
-            if (cover && publisher['headerImgName']) {
-                const pathname = new URL(cover).pathname;
-                const coverUrl = await this.uploadNotionImageToOSS({url: cover, meta, id: blockId, debug, uuid: pathname});
-                    meta[publisher['headerImgName']] = coverUrl;
-            }
-            // Note: 过滤掉空属性
-            Object.keys(meta).forEach(key => {
-                if (!meta[key]) {
-                    delete meta[key];
+                return this.notion.pages.retrieve({ page_id: blockId }).then(response => {
+                    const {
+                        title,
+                        name,
+                        date,
+                        ...rest // Note: 用户自定义 Page Property 会放在这里
+                    } = response.properties;
+                    // Note: 其他的根据插件配置生成的部分，如果页面配置了，则用页面写死的，否则根据规则生成，且不写到 Markdown 文件中:
+                    // 1. cos 根据配置生成，支持引用页面的其他 property 变量，内置的变量有（取自必填项 date 属性） YYYY、YY、MM、DD，如 {{YYYY}}/{{MM}}/{{DD}}/{{title}}/{{name}} 这种
+                    // 2. 文件 path 同理，Jekyll 博客强制 post 位于 _posts 目录下，因此这个可以不用配置，剩余的变量同上
+        
+                    // 目前 Property 只支持单选框 checkbox、多选 multi_select、文本 rich_text、日期 date、链接格式 url、formula
+                    // 如果有头图，默认是 cover 属性
+        
+                    let cover = '';
+                    if (response.cover) {
+                        cover = response.cover[response.cover.type]?.url;
+                    }
+                    let meta = {
+                        title: _inline(getPropertyValue(title)),
+                        name: _inline(getPropertyValue(name)),
+                        date: getPropertyValue(date)?.start,
+                    };
+                    Object.keys(rest).forEach(key => {
+                        const obj = rest[key];
+                        if (!obj) return;
+                        switch (obj.type) {
+                            case 'rich_text':
+                                meta[key] = _inline(getPropertyValue(obj));
+                                break;
+                            case 'multi_select':
+                                meta[key] = getPropertyValue(obj).map((tag: {name: string;}) => tag.name) || [];
+                                break;
+                            case 'select':
+                                meta[key] = getPropertyValue(obj).name;
+                                break;
+                            case 'date':
+                                meta[key] = getPropertyValue(obj)?.start;
+                                break;
+                            case 'url':
+                                meta[key] = getPropertyValue(obj);
+                                break;
+                            case 'formula':
+                                meta[key] = getPropertyCompuValue(obj);
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                    // Note: 将其上传到 oss 后拿到 url, 图片 id 就以 pageId（blockId 即可）
+                    // Note: 既然走到这里，publisher 一定是启用的，所以不判断了 enable 了
+                    // Note: 处理一下 上传的 path
+                    if (cover && publisher?.['headerImgName']) {
+                        const pathname = new URL(cover).pathname;
+                        return this.uploadNotionImageToOSS({url: cover, meta, id: blockId, debug, uuid: pathname}).then(coverUrl => {
+                            meta[publisher['headerImgName']] = coverUrl;
+                            // Note: 过滤掉空属性
+                            Object.keys(meta).forEach(key => {
+                                if (!meta[key]) {
+                                    delete meta[key];
+                                }
+                            });
+                            return meta;
+                        }).catch((err) => {
+                            logToRenderer('error',
+                                cn ? '[OSS] 上传头图到 OSS 出错, 忽略该属性' : '[OSS] Upload cover to OSS error, ignore it', err);
+                            Object.keys(meta).forEach(key => {
+                                if (!meta[key]) {
+                                    delete meta[key];
+                                }
+                            });
+                            return meta;
+                        });
+                    } else {
+                        // Note: 过滤掉空属性
+                        Object.keys(meta).forEach(key => {
+                            if (!meta[key]) {
+                                delete meta[key];
+                            }
+                        });
+                        return meta;
+                    }
+                }).catch((err) => {
+                    logToRenderer('error',
+                        cn ? '[Notion] Notion pages.retrieve 接口报错' : '[Notion] Notion pages.retrieve API Error', err);
+                    return Promise.reject(null);
+                });
+            }).catch((err) => {
+                if (err) {
+                    logToRenderer('error',
+                            cn ? '[Notion Flow] 接口初始化过程发生错误' : '[Notion Flow] Init API error', err);
                 }
+                return Promise.reject(null);
             });
-            return meta;
-        } catch (e) {
-            logToRenderer('error', '[Notion] Get Notion page properties error', e);
-        }
+        });
     }
 
     async updateNotionLastUpdateTime(props: {blockId: string; debug: boolean}): Promise<boolean> {
         await updateConfigDeco.bind(this);
+        const {language: lang} = await storage.get('options') as PublisherOptions || {};
+        const cn = lang === 'cn';
         if (!this.notion) {
-            logToRenderer('error', '[Notion] Notion ingetration token not config');
+            logToRenderer('error',
+                cn ? '[Notion] Notion API Token 未配置' : '[Notion] Notion ingetration token not config');
             return Promise.resolve(null);
         }
         const { blockId, debug } = props;
         const date = getISODateTime(new Date());
         if (debug) {
-            logToRenderer('info', '[Notion] Update Notion「lastUpdateTime」success', date);
+            logToRenderer('info',
+                cn ? '[Notion] 更新 「lastUpdateTime」 属性成功' : '[Notion] Update Notion「lastUpdateTime」success', date);
             return true;
         } else {
             return await this.notion.pages.update({
@@ -328,83 +348,101 @@ export default class Req {
         }
     }
 
-    async send2Github(props: {meta: Meta, content: string, debug: boolean}):Promise<any> {
-        await updateConfigDeco.bind(this);
-        if (!this.github) {
-            logToRenderer('error', '[Github] Github Personal Token not config');
-            return Promise.resolve(null);
-        }
-        const {publisher} = await storage.get('options') as PublisherOptions;
-        // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
-        const _path = parserProperty(publisher.filePath, {meta: props.meta});
-        if (!_path) {
-            logToRenderer('error', '[Github] File path not config or invalid');
-            return Promise.resolve(null);
-        }
-        const {meta, content, debug} = props;
-        // Note: path 需要 parserProperty 处理一下
-        const getContentConfig = {
-            ...this.githubCommon,
-            path: _path,
-        };
-        const contentBase64 = Buffer.from(content).toString('base64');
-        try {
-            const res = await this.github.rest.repos.getContent(getContentConfig);
-            // Note: content 是 base64 编码的，输出太占空间，所以不打印了
-            const {content, ..._res} = res as any;
-            logToRenderer('info', '[Github] Get github content success', _res);
-            
-            const createOrUpdateConfig = {
-                ...this.githubCommon,
-                path: _path,
-                message: `更新 ${meta.title} !`,
-                // Note: 显然这是一个 octokit 的 bug，它的类型定义里面 data 只能是数组（目录），但实际还可以是对象
-                //  见：https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
-                //  和：https://octokit.github.io/rest.js/v20 （搜索 getContent)
-                sha: !Array.isArray(res.data) && res.data?.sha,
-                content: contentBase64,
-            };
-            try {
-                if (debug) {
-                    logToRenderer('info', '[Debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
-                    return `[debug] github 文件「更新」成功`;
-                } else {
-                    const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
-                    logToRenderer('info', '[Github] Update file success', res);
-                    return res;
-                }
-            } catch (err) {
-                logToRenderer('info', '[Github] Update file faild', err);
-            }
-        } catch (err) {
-            if (err.status === 404) {
-                logToRenderer('info', '[Github] Github file not exist, create one now');
-                const createOrUpdateConfig = {
-                    ...this.githubCommon,
-                    path: _path,
-                    message: `Create ${meta.title} !`,
-                    content: contentBase64,
-                };
-                try {
-                    if (debug) {
-                        logToRenderer('info', '[Debug] createOrUpdateFileContents 方法调用，配置为:', createOrUpdateConfig)
-                        return `[debug] github 文件「创建」成功`;
-                    } else {
-                        const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
-                        // logToRenderer('创建文件成功:', res);
-                        logToRenderer('info', '[Github] Create file success', res);
-                        // return '创建文件成功';
-                        return res;
-                    }
-                } catch (err) {
-                    logToRenderer('error', '[Github] Create file faild', err);
+    send2Github(props: {meta: Meta, content: string, debug: boolean}):Promise<any> {
+        return updateConfigDeco.call(this).then(() => {
+            return storage.get<PublisherOptions>('options').then((options) => {
+                const {language: lang, publisher} = options || {};
+                const cn = lang === 'cn';
+                if (!this.github) {
+                    logToRenderer('error',
+                        cn ? '[Github] Github Personal Token 未配置' : '[Github] Github Personal Token not config');
                     return Promise.resolve(null);
                 }
-            } else {
-                logToRenderer('error', '[Github] Try get github file error, check the network or report it to developer', err);
-                return Promise.resolve(null);
-            }
-        }
+                if (!publisher) {
+                    return Promise.resolve(null);
+                }
+                // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
+                const _path = parserProperty(publisher.filePath, {meta: props.meta});
+                if (!_path) {
+                    logToRenderer('error',
+                        cn ? '[Github] Github 文件上传路径未配置或不可用' : '[Github] File path not config or invalid');
+                    return Promise.resolve(null);
+                }
+                const {meta, content, debug} = props;
+                // Note: path 需要 parserProperty 处理一下
+                const getContentConfig = {
+                    ...this.githubCommon,
+                    path: _path,
+                };
+                const contentBase64 = Buffer.from(content).toString('base64');
+                try {
+                    const res = await this.github.rest.repos.getContent(getContentConfig);
+                    // Note: content 是 base64 编码的，输出太占空间，所以不打印了
+                    const {content, ..._res} = res as any;
+                    logToRenderer('info',
+                        cn ? '[Github] Github 指定文件已存在，即将更新' : '[Github] File exist, update it now', _res);
+                    
+                    const createOrUpdateConfig = {
+                        ...this.githubCommon,
+                        path: _path,
+                        message: `${cn ? '更新' : 'Update'} ${meta.title} !`,
+                        // Note: 显然这是一个 octokit 的 bug，它的类型定义里面 data 只能是数组（目录），但实际还可以是对象
+                        //  见：https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
+                        //  和：https://octokit.github.io/rest.js/v20 （搜索 getContent)
+                        sha: !Array.isArray(res.data) && res.data?.sha,
+                        content: contentBase64,
+                    };
+                    try {
+                        if (debug) {
+                            logToRenderer('info',
+                                cn ? '[Debug] createOrUpdateFileContents 方法调用，配置为:' : '[Debug] Call function createOrUpdateFileContents, params is:', createOrUpdateConfig)
+                            return cn ? `[Debug] Github 文件「更新」成功` : `[Debug] Github file update success`;
+                        } else {
+                            const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                            logToRenderer('info',
+                                cn ? '[Github] Github 更新文件成功' : '[Github] Update file success', res);
+                            return res;
+                        }
+                    } catch (err) {
+                        logToRenderer('info',
+                            cn ? '[Github] Github 更新文件失败' : '[Github] Update file faild', err);
+                        return Promise.resolve(null);
+                    }
+                } catch (err) {
+                    if (err.status === 404) {
+                        logToRenderer('info',
+                            cn ? '[Github] Github 文件不存在，即将新建' : '[Github] Github file not exist, create one now');
+                        const createOrUpdateConfig = {
+                            ...this.githubCommon,
+                            path: _path,
+                            message: `${cn ? '创建' : 'Create'} ${meta.title} !`,
+                            content: contentBase64,
+                        };
+                        try {
+                            if (debug) {
+                                logToRenderer('info',
+                                    cn ? '[Debug] createOrUpdateFileContents 方法调用，配置为:' : '[Debug] Call function createOrUpdateFileContents, params is:', createOrUpdateConfig)
+                                    return cn ? `[Debug] Github 文件「创建」成功` : `[Debug] Github file create success`;
+                            } else {
+                                const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                                logToRenderer('info',
+                                    cn ? '[Github] Github 文件创建成功' : '[Github] Create file success', res);
+                                // return '创建文件成功';
+                                return res;
+                            }
+                        } catch (err) {
+                            logToRenderer('error',
+                                cn ? '[Github] Github 文件创建失败' : '[Github] Create file faild', err);
+                            return Promise.resolve(null);
+                        }
+                    } else {
+                        logToRenderer('error',
+                            cn ? '[Github] 尝试获取 Github 文件失败，请检查网络环境是否正常或提 issue 给开发者' : '[Github] Try get github file error, check the network or report it to developer', err);
+                        return Promise.resolve(null);
+                    }
+                }
+            });
+        });
     }
     // Note: 动态修改配置
     updateConfig(props: PublisherRequestConfig) {
@@ -412,6 +450,7 @@ export default class Req {
             // Note: 在未配置完毕插件的过程中，(如填写一半的时候自动报错) 会触发 updataConfig，所以这里 try catch 一下
             try {
                 const {
+                    language: lang,
                     notion: {
                         token: notionToken
                     },
@@ -437,7 +476,7 @@ export default class Req {
                         SecretId: ossSecretId,
                         SecretKey: ossSecretKey,
                     }); */
-                    this.oss = this.OSSPolyfill(ossName, props.oss);
+                    this.oss = this.OSSPolyfill(ossName, props.oss, lang === 'cn');
                     // Note: 用于刷新 cdn 缓存，但是这个接口不支持浏览器环境，所以暂时不用
                     /* this.cdn = new tencentcloud.cdn.v20180606.Client({
                         credential: {
@@ -472,7 +511,7 @@ export default class Req {
     }
     // Note: 根据 oss 服务的名字，对外提供统一的接口
     //  因为先接入的腾讯云，就以他作为标准了
-    OSSPolyfill(name, ossConfig) {
+    OSSPolyfill(name, ossConfig, cn) {
         const {region, bucket, secretId, secretKey} = ossConfig;
         switch (name) {
             case 'tx': {
@@ -490,11 +529,13 @@ export default class Req {
                             Key: key,
                         }, (err, data) => {
                             if (err) {
-                                logToRenderer('error', `[OSS TX] File not exist ${key}，ready to upload`, err);
+                                logToRenderer('error',
+                                    cn ? `[OSS TX] 准备上传 ${key}` : `[OSS TX] Ready to upload ${key}`, err);
                                 rej(err);
                                 return;
                             }
-                            logToRenderer('error', `[OSS TX] File exist ${key}，return it directly`, data);
+                            logToRenderer('error',
+                                cn ? `[OSS TX] 文件已存在，直接返回 ${key}` : `[OSS TX] File exist，return it directly ${key}`, data);
                             res(data);
                         });
                     },
@@ -508,11 +549,13 @@ export default class Req {
                             Body: body,
                         }, (err, data) => {
                             if (err) {
-                                logToRenderer('error', `[OSS TX] Upload faild ${key}`, err);
+                                logToRenderer('error',
+                                    cn ? `[OSS TX] 上传文件失败 ${key}` : `[OSS TX] Upload faild ${key}`, err);
                                 rej(err);
                                 return;
                             }
-                            logToRenderer('info', `[OSS TX] Upload success ${key}`, data);
+                            logToRenderer('info',
+                                cn ? `[OSS TX] 上传文件成功 ${key}` : `[OSS TX] Upload success ${key}`, data);
                             res(data);
                         });
                     }
@@ -533,10 +576,12 @@ export default class Req {
                             /**
                              * data 格式为：{meta,res: {data,headers,requestUrls,rt,status,statusCode},status:200}
                              */
-                            logToRenderer('info', `[OSS ALI] File exist ${key}，return it directly`, data);
+                            logToRenderer('error',
+                                cn ? `[OSS ALI] 文件已存在，直接返回 ${key}` : `[OSS ALI] File exist，return it directly ${key}`, data);
                             res(data);
                         }).catch(err => {
-                            logToRenderer('info', `[OSS ALI] File not exist ${key}，ready to upload`, err);
+                            logToRenderer('error',
+                                    cn ? `[OSS ALI] 准备上传 ${key}` : `[OSS ALI] Ready to upload ${key}`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -544,11 +589,13 @@ export default class Req {
                         const {key, body} = param;
                         const {rej, res} = opt;
                         oss.put(key, body).then(data => {
-                            logToRenderer('info', `[OSS ALI] Upload success ${key}`, data);
+                            logToRenderer('info',
+                                cn ? `[OSS ALI] 上传文件成功 ${key}` : `[OSS ALI] Upload success ${key}`, data);
                             res(data);
                         }).catch(err => {
                             if (err) {
-                                logToRenderer('error', `[OSS ALI] Upload faild ${key}`, err);
+                                logToRenderer('error',
+                                    cn ? `[OSS ALI] 上传文件失败 ${key}` : `[OSS ALI] Upload faild ${key}`, err);
                                 rej(err);
                             }
                         });
@@ -571,11 +618,13 @@ export default class Req {
                             Bucket: bucket,
                             Key: key,
                         })).then(data => {
-                            logToRenderer('info', `[OSS ALI] File exist ${key}，return it directly`, data);
+                            logToRenderer('error',
+                                cn ? `[OSS AWS] 文件已存在，直接返回 ${key}` : `[OSS AWS] File exist，return it directly ${key}`, data);
                             res(data);
                         }).catch(err => {
                             // Note: 这里提示我 UnknownError 奇了怪了，不应该是 NotFoundError 吗？
-                            logToRenderer('info', `[OSS ALI] File not exist ${key}，ready to upload`, err);
+                            logToRenderer('error',
+                                    cn ? `[OSS AWS] 准备上传 ${key}` : `[OSS AWS] Ready to upload ${key}`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -590,11 +639,13 @@ export default class Req {
                             /**
                              * data 数据结构形如：{$metadata:{httpStatusCode}, Etag, ServerSideEncryption}
                              */
-                            logToRenderer('info', `[OSS AWS] Upload success ${key}`, data);
+                            logToRenderer('info',
+                                cn ? `[OSS AWS] 上传文件成功 ${key}` : `[OSS AWS] Upload success ${key}`, data);
                             res(data);
                         }).catch(err => {
                             if (err) {
-                                logToRenderer('error', `[OSS AWS] Upload faild ${key}`, err);
+                                logToRenderer('error',
+                                    cn ? `[OSS AWS] 上传文件失败 ${key}` : `[OSS AWS] Upload faild ${key}`, err);
                                 rej(err);
                                 return;
                             }

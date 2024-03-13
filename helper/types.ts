@@ -28,6 +28,7 @@ export interface OssConfig {
 }
 
 export interface PublisherRequestConfig {
+    language: 'en' | 'cn';
     github: GithubConfig;
     notion: NotionConfig;
     oss: OssConfig;

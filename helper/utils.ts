@@ -301,403 +301,450 @@ const _inline = (list: any): string => {
 // TODO: 引入插件系统，支持用户自定义 notion block 转换函数处理 markdown；增强健壮性。
 // Note: indent 表示子元素缩进层级
 const notion2markdown = async function (list: any, meta: Meta, indent: number, debug: boolean,) {
-    if (!Array.isArray(list)) {
-        logToRenderer('error', '[Notion] Notion child need to be an array', list);
-        return Promise.resolve(null);
-    }
     const storage = new Storage();
-    // FIXME: 我时常在想，既然都写 render_xxx 的 Jekyll ruby 插件了，为啥不直接写 html 标签呢？我是不是傻 =_=
-   /*  const {publisher: {
-        'trans-image': transImage,
-        'trans-video': transVideo,
-        'trans-bookmark': transBookmark,
-        'trans-callout': transCallout,
-        'trans-quote': transQuote,
-    }} = (await storage.get('options') || {publisher: {}}) as Pick<PublisherOptions, 'publisher'>; */
-    const {language} = (await storage.get('options')  || {}) as Pick<PublisherOptions, 'language'>;
-    const Locale = Lang[language || 'cn'];
-    return Promise.all(list.filter(item => item.object === 'block').map(item => {
-        return (async (): Promise<any> => {
-            const type = item.type;
-            const id = item.id;
-            const block: {
-                [key: string]: any;
-            } = item[item.type];
-            switch (type) {
-                case 'paragraph': {
-                    const text = _inline(block.rich_text);
-                    return new Promise((res) => {
-                        block.text = text;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then((results) => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom paragraph conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default paragraph style');
-                                res(`${text}\n`);
-                            }
-                        });
-                    });
-                }
-                case 'bookmark': {
-                    // Note: API 接口本身不含 bookmark 的图片信息，所以需要调用 api 直接查询 notion 的 dom
-                    return new Promise((res) => {
-                        _toContent('notion-bookmark-desc-get', id, (props) => {
-                            const {title = '', desc = '', img = ''} = props;
-                            block.title = title;
-                            block.desc = desc;
-                            block.img = img;
-                            if (title || desc || img) {
-                                this.postMessage({
-                                    type,
-                                    block,
-                                    id,
-                                }).then(results => {
-                                    if (results?.[id]) {
-                                        logToRenderer('info', '[Notion Flow] Enable custom bookmark conversion');
-                                        res(results[id] + '\n');
-                                    } else {
-                                        logToRenderer('info', '[Notion Flow] Use default bookmark style');
-                                        res(`[${block.url}](${block.url})\n`);
-                                    }
-                                });
-                                // res(`{% render_bookmark url="${block.url}" title="${title}" img="${img}" yid="" bid="" %}\n${desc}\n{% endrender_bookmark %}\n`);
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Get inof from page error, use default bookmark style');
-                                // Note: 从 notion 获取 bookmark 信息失败，直接使用链接
-                                res(`[${block.url}](${block.url})\n`);
-                            }
-                        });
-                    });
-                }
-                case 'image': {
-                    // Note: unsplash 图片是 block.external，自己上传的是 block.file
-                    const url = block[block.type]?.url;
-                    if (url) {
-                        const ossUrl = await this.uploadNotionImageToOSS({url, meta, id, debug});
-                        const caption = _inline(block.caption);
+    return storage.get<PublisherOptions>('options').then((props) => {
+        const {language: lang} = props;
+        const cn = lang === 'cn';
+        if (!Array.isArray(list)) {
+            logToRenderer('error',
+                cn ? '[Notion] Notion 子元素需要是个数组' : '[Notion] Notion child need to be an array', list);
+            return Promise.reject(null);
+        }
+        return Promise.all(list.filter(item => item.object === 'block').map(item => {
+            return (async () => {
+                const type = item.type;
+                const id = item.id;
+                const block: {
+                    [key: string]: any;
+                } = item[item.type];
+                switch (type) {
+                    case 'paragraph': {
+                        const text = _inline(block.rich_text);
                         return new Promise((res) => {
-                            block.url = ossUrl;
-                            block.caption = caption;
-                            this.postMessage({
+                            block.text = text;
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then((results) => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「段落」 转换' : '[Notion Flow] Enable custom paragraph conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                    cn ? '[Notion Flow] 使用默认段落格式' : '[Notion Flow] Use default paragraph style');
+                                    res(`${text}\n`);
+                                }
+                            });
+                        });
+                    }
+                    case 'bookmark': {
+                        // Note: API 接口本身不含 bookmark 的图片信息，所以需要调用 api 直接查询 notion 的 dom
+                        return new Promise((res) => {
+                            _toContent('notion-bookmark-desc-get', id, (props) => {
+                                const {title = '', desc = '', img = ''} = props;
+                                block.title = title;
+                                block.desc = desc;
+                                block.img = img;
+                                if (title || desc || img) {
+                                    return this.postMessage({
+                                        type,
+                                        block,
+                                        id,
+                                    }).then(results => {
+                                        if (results?.[id]) {
+                                            logToRenderer('info',
+                                                cn ? '[Notion Flow] 启用自定义 「Bookmark」 转换' : '[Notion Flow] Enable custom bookmark conversion');
+                                            res(results[id] + '\n');
+                                        } else {
+                                            logToRenderer('info',
+                                                cn ? '[Notion Flow] 使用默认 Bookmark 格式（链接）' : '[Notion Flow] Use default bookmark style');
+                                            res(`[${block.url}](${block.url})\n`);
+                                        }
+                                    });
+                                    // res(`{% render_bookmark url="${block.url}" title="${title}" img="${img}" yid="" bid="" %}\n${desc}\n{% endrender_bookmark %}\n`);
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 从页面中获取 Bookmark 信息错误，将使用默认链接格式' : '[Notion Flow] Get info from page error, use default bookmark style');
+                                    // Note: 从 notion 获取 bookmark 信息失败，直接使用链接
+                                    res(`[${block.url}](${block.url})\n`);
+                                }
+                            });
+                        });
+                    }
+                    case 'image': {
+                        // Note: unsplash 图片是 block.external，自己上传的是 block.file
+                        const url = block[block.type]?.url;
+                        if (url) {
+                            return this.uploadNotionImageToOSS({url, meta, id, debug}).then(ossUrl => {
+                                const caption = _inline(block.caption);
+                                return new Promise((res) => {
+                                    block.url = ossUrl;
+                                    block.caption = caption;
+                                    return this.postMessage({
+                                        type,
+                                        block,
+                                        id,
+                                    }).then(results => {
+                                        if (results?.[id]) {
+                                            logToRenderer('info',
+                                                cn ? '[Notion Flow] 启用自定义 「图片」 转换' : '[Notion Flow] Enable custom image conversion');
+                                            res(results[id] + '\n');
+                                        } else {
+                                            logToRenderer('info',
+                                                cn ? '[Notion Flow] 使用默认图片格式' : '[Notion Flow] Use default image style');
+                                            res(`![${caption}](${ossUrl})\n`);
+                                        }
+                                    });
+                                });
+                            });
+                            // return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
+                        }
+                        return `[NO image url]\n`;
+                    }
+                    case 'heading_1': {
+                        const text = _inline(block.rich_text);
+                        return new Promise((res) => {
+                            block.text = text;
+                            return this.postMessage({
                                 type,
                                 block,
                                 id,
                             }).then(results => {
                                 if (results?.[id]) {
-                                    logToRenderer('info', '[Notion Flow] Enable custom image conversion');
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「Heading_1」 转换' : '[Notion Flow] Enable custom heading_1 conversion');
                                     res(results[id] + '\n');
                                 } else {
-                                    logToRenderer('info', '[Notion Flow] Use default image style');
-                                    res(`![${caption}](${ossUrl})\n`);
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 heading_1 格式' : '[Notion Flow] Use default heading_1 style');
+                                    res(`# ${text}\n`);
                                 }
                             });
                         });
-                        // return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                     }
-                    return `[NO image url]\n`;
-                }
-                case 'heading_1': {
-                    const text = _inline(block.rich_text);
-                    return new Promise((res) => {
-                        block.text = text;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then(results => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom heading_1 conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default heading_1 style');
-                                res(`# ${text}\n`);
-                            }
-                        });
-                    });
-                }
-                case 'heading_2': {
-                    const text = _inline(block.rich_text);
-                    return new Promise((res) => {
-                        block.text = text;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then(results => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom heading_2 conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default heading_2 style');
-                                res(`## ${text}\n`);
-                            }
-                        });
-                    });
-                }
-                case 'heading_3': {
-                    const text = _inline(block.rich_text);
-                    return new Promise((res) => {
-                        block.text = text;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then(results => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom heading_3 conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default heading_3 style');
-                                res(`### ${text}\n`);
-                            }
-                        });
-                    });
-                }
-                case 'table': {
-                    // FIXME: 需要递归查找 table 元素内容 table_row
-                    const tableRows = await this.getNotionContent(id);
-                    // Note: 构建一个表格
-                    return new Promise((res) => {
-                        block.rows = tableRows;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then(results => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom table conversion');
-                                return res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default table style');
-                                res(tableRows.reduce((prev: any, curr: any, index: number) => {
-                                    const cells = curr[curr.type].cells;
-                                    let divider = '';
-                                    const cellsString = cells.map((cell: any, key: number) => {
-                                        const str = `| ${_inline(cell)} `;
-                                        if (key === cells.length - 1) {
-                                            divider += `| ---------- |\n`;
-                                            return `${str}|`
-                                        }
-                                        divider += `| ---------- `;
-                                        return str;
-                                    }).join('');
-                                    return prev += `${cellsString}\n${index === 0 ? divider : ''}`;
-                                }, ''));
-                            }
-                        });
-                    });
-                }
-                case 'to_do': {
-                    // Note: 又是一个富文本，注意需要 item.checked 来确定是否为 checked 了
-                    // Note: 这几个 list 的后代也是 list，但是并不直接显示，需要查找子元素（无语了）
-                    let children = [];
-                    let _indent = indent;
-                    if (item.has_children) {
-                        children = await this.getNotionContent(id);
-                    }
-                    const isChecked = block.checked;     
-                    return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
-                }
-                case 'numbered_list_item': {
-                    let children = [];
-                    let _indent = indent;
-                    if (item.has_children) {
-                        children = await this.getNotionContent(id);
-                    }
-                    return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
-                }
-                case 'bulleted_list_item': {
-                    let children = [];
-                    let _indent = indent;
-                    if (item.has_children) {
-                        children = await this.getNotionContent(id);
-                    }
-                    return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
-                }
-                case 'quote': {
-                    const text = _inline(block.rich_text);
-                    block.text = text;
-                    // Note: notion 的 quote 还能设置背景色，但是我感觉太丑了，所以仅读取了 Notion 的颜色（左侧边框颜色+字体颜色）
-                    // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
-                    return new Promise((res) => {
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then((results) => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom quote conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default quote style');
-                                res(`> ${text}\n`);
-                            }
-                        });
-                    });
-                    /* if (!transQuote) {
-                        logToRenderer('info', '[Github] Disable Jekyll Blockquote conversion，use Blockquote Markdown style');
-                        return `> ${text}\n`;
-                    } */
-                    // return `{% render_quote color="${COLORS[block.color as keyof typeof COLORS] || ''}" %}${text}{% endrender_quote %}\n`;
-                }
-                case 'callout': {
-                    // Note: callout markdown 不支持，也当成 quote
-                    const text = _inline(block.rich_text);
-                    /* if (!transCallout) {
-                        logToRenderer('info', '[Github] Disable Jekyll Image conversion，use Blockquote Markdown style');
-                        return `> ${text}\n`;
-                    } */
-                    const icon = block.icon[block.icon.type];
-                    // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
-                    const blockColor = block.color.split('_');
-                    const finalColor = COLORS[block.color as keyof typeof COLORS];
-                    let color = '';
-                    let bgColor = '';
-                    blockColor.length === 2 ? (bgColor = finalColor || '') : (color = finalColor || '');
-                    return new Promise((res) => {
-                        block.icon = icon;
-                        block.text = text;
-                        block.color = color;
-                        block.bgColor = bgColor;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then((results) => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom callout conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default callout style');
-                                res(`> ${text}\n`);
-                            }
-                        });
-                    });
-                    // return `{% render_callout icon="${icon}" color="${color}" bgcolor="${bgColor}" %}${text}{% endrender_callout %}\n`;
-                }
-                case 'divider': {
-                    return new Promise((res) => {
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then((results) => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom divider conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default divider style');
-                                res(`---\n`);
-                            }
-                        });
-                    });
-                }
-                case 'video': {
-                    // Note: 分两种，一种是嵌入的在线视频如 Youtube，一种是自己上传的视频
-                    const _url = block[block.type]?.url;
-                    const caption = _inline(block.caption);
-                    if (_url) {
-                        if (block.type === 'file') {
-                            // Note: 获取文件后缀
-                            const _ossUrl = await this.uploadNotionImageToOSS({url: _url, meta, id: item.id, debug});
-                            let suffix = '';
-                            const ossUrl = new URL(_ossUrl);
-                            const arr = ossUrl.pathname.split('.');
-                            if (arr.length > 1) {
-                                suffix = arr[arr.length - 1];
-                            }
-                            return new Promise((res) => {
-                                block.url = _ossUrl;
-                                block.caption = caption;
-                                block.suffix = suffix;
-                                this.postMessage({
-                                    type,
-                                    block,
-                                    id,
-                                }).then((results) => {
-                                    if (results?.[id]) {
-                                        logToRenderer('info', '[Notion Flow] Enable custom video conversion');
-                                        res(results[id] + '\n');
-                                    } else {
-                                        logToRenderer('info', '[Notion Flow] Use default video style');
-                                        return `[${_ossUrl}](${_ossUrl})\n`;
-                                    }
-                                });;
-                            });
-                            // return `{% render_video caption="${caption}" img="${_ossUrl}" suffix="${suffix}" %}\n![${caption}](${_ossUrl})\n{% endrender_video %}\n`;
-                        } else if (block.type === 'external') {
-                            // Note: 目前只支持 Youtube 和 Bilibili
-                            const url = new URL(_url);
-                            let yid = '';
-                            let bid = '';
-                            if (url.hostname === 'www.youtube.com') {
-                                for (const i of url.searchParams) {
-                                    if (i[0] === 'v') {
-                                        yid = i[1];
-                                    }
+                    case 'heading_2': {
+                        const text = _inline(block.rich_text);
+                        return new Promise((res) => {
+                            block.text = text;
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then(results => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「Heading_2」 转换' : '[Notion Flow] Enable custom heading_2 conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 heading_2 格式' : '[Notion Flow] Use default heading_2 style');
+                                    res(`## ${text}\n`);
                                 }
-                            } else if (url.hostname === 'www.bilibili.com') {
-                                bid = url.pathname.split('/').filter(Boolean)[1];
-                            }
+                            });
+                        });
+                    }
+                    case 'heading_3': {
+                        const text = _inline(block.rich_text);
+                        return new Promise((res) => {
+                            block.text = text;
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then(results => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「Heading_3」 转换' : '[Notion Flow] Enable custom heading_3 conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 heading_3 格式' : '[Notion Flow] Use default heading_3 style');
+                                    res(`### ${text}\n`);
+                                }
+                            });
+                        });
+                    }
+                    case 'table': {
+                        // FIXME: 需要递归查找 table 元素内容 table_row
+                        return this.getNotionContent(id).then(tableRows => {
                             return new Promise((res) => {
-                                block.bid = bid;
-                                block.yid = yid;
-                                block.caption = caption;
-                                block.url = _url;
-                                this.postMessage({
+                                block.rows = tableRows;
+                                return this.postMessage({
                                     type,
                                     block,
                                     id,
-                                }).then((results) => {
+                                }).then(results => {
                                     if (results?.[id]) {
-                                        logToRenderer('info', '[Notion Flow] Enable custom video conversion');
+                                        logToRenderer('info',
+                                            cn ? '[Notion Flow] 启用自定义 「表格」 转换' : '[Notion Flow] Enable custom table conversion');
                                         res(results[id] + '\n');
                                     } else {
-                                        logToRenderer('info', '[Notion Flow] Use default external video style');
-                                        return `[${_url}](${_url})\n`;
+                                        logToRenderer('info',
+                                            cn ? '[Notion Flow] 使用默认表格格式' : '[Notion Flow] Use default table style');
+                                        res(tableRows.reduce((prev: any, curr: any, index: number) => {
+                                            const cells = curr[curr.type].cells;
+                                            let divider = '';
+                                            const cellsString = cells.map((cell: any, key: number) => {
+                                                const str = `| ${_inline(cell)} `;
+                                                if (key === cells.length - 1) {
+                                                    divider += `| ---------- |\n`;
+                                                    return `${str}|`
+                                                }
+                                                divider += `| ---------- `;
+                                                return str;
+                                            }).join('');
+                                            return prev += `${cellsString}\n${index === 0 ? divider : ''}`;
+                                        }, ''));
                                     }
-                                });;
+                                });
                             });
-                            // return `{% render_bookmark url="${_url}" title="${caption || ''}" img="" yid="${yid}" bid="${bid}" %}{% endrender_bookmark %}\n`;
+                        });
+                    }
+                    case 'to_do': {
+                        // Note: 又是一个富文本，注意需要 item.checked 来确定是否为 checked 了
+                        // Note: 这几个 list 的后代也是 list，但是并不直接显示，需要查找子元素（无语了）
+                        let children = [];
+                        let _indent = indent;
+                        if (item.has_children) {
+                            children = await this.getNotionContent(id);
+                        }
+                        const isChecked = block.checked;    
+                        try {
+                            return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
+                        } catch (e) {
+                            logToRenderer('error', 
+                                cn ? '[Notion Flow] to_do to markdown 发生错误' : '[Notion Flow] Error happen when to_do to markdown', e);
+                            return Promise.reject(null);
+                        } 
+                    }
+                    case 'numbered_list_item': {
+                        let children = [];
+                        let _indent = indent;
+                        if (item.has_children) {
+                            children = await this.getNotionContent(id);
+                        }
+                        try {
+                            return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
+                        } catch (e) {
+                            logToRenderer('error', 
+                                cn ? '[Notion Flow] numbered_list_item to markdown 发生错误' : '[Notion Flow] Error happen when numbered_list_item to markdown', e);
+                            return Promise.reject(null);
                         }
                     }
-                    return '[NO video url]\n';
-                }
-                case 'code': {
-                    const text = _inline(block.rich_text);
-                    return new Promise((res) => {
+                    case 'bulleted_list_item': {
+                        let children = [];
+                        let _indent = indent;
+                        if (item.has_children) {
+                            children = await this.getNotionContent(id);
+                        }
+                        try {
+                            return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
+                        } catch (e) {
+                            logToRenderer('error', 
+                                cn ? '[Notion Flow] bulleted_list_item to markdown 发生错误' : '[Notion Flow] Error happen when bulleted_list_item to markdown', e);
+                            return Promise.reject(null);
+                        }
+                    }
+                    case 'quote': {
+                        const text = _inline(block.rich_text);
                         block.text = text;
-                        this.postMessage({
-                            type,
-                            block,
-                            id,
-                        }).then((results) => {
-                            if (results?.[id]) {
-                                logToRenderer('info', '[Notion Flow] Enable custom blockcode conversion');
-                                res(results[id] + '\n');
-                            } else {
-                                logToRenderer('info', '[Notion Flow] Use default blockcode style');
-                                res(`\`\`\`${block.language}\n${text}\n\`\`\`\n`);
-                            }
+                        // Note: notion 的 quote 还能设置背景色，但是我感觉太丑了，所以仅读取了 Notion 的颜色（左侧边框颜色+字体颜色）
+                        // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
+                        return new Promise((res) => {
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then((results) => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「blockquote」 转换' : '[Notion Flow] Enable custom quote conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 blockquote 格式' : '[Notion Flow] Use default quote style');
+                                    res(`> ${text}\n`);
+                                }
+                            });
                         });
-                    });
-                    // return `\`\`\`${block.language}\n${text}\n\`\`\`\n`;
+                        /* if (!transQuote) {
+                            logToRenderer('info', '[Github] Disable Jekyll Blockquote conversion，use Blockquote Markdown style');
+                            return `> ${text}\n`;
+                        } */
+                        // return `{% render_quote color="${COLORS[block.color as keyof typeof COLORS] || ''}" %}${text}{% endrender_quote %}\n`;
+                    }
+                    case 'callout': {
+                        // Note: callout markdown 不支持，也当成 quote
+                        const text = _inline(block.rich_text);
+                        /* if (!transCallout) {
+                            logToRenderer('info', '[Github] Disable Jekyll Image conversion，use Blockquote Markdown style');
+                            return `> ${text}\n`;
+                        } */
+                        const icon = block.icon[block.icon.type];
+                        // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
+                        const blockColor = block.color.split('_');
+                        const finalColor = COLORS[block.color as keyof typeof COLORS];
+                        let color = '';
+                        let bgColor = '';
+                        blockColor.length === 2 ? (bgColor = finalColor || '') : (color = finalColor || '');
+                        return new Promise((res) => {
+                            block.icon = icon;
+                            block.text = text;
+                            block.color = color;
+                            block.bgColor = bgColor;
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then((results) => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「Callout」 转换' : '[Notion Flow] Enable custom callout conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 Callout 格式' : '[Notion Flow] Use default callout style');
+                                    res(`> ${text}\n`);
+                                }
+                            });
+                        });
+                        // return `{% render_callout icon="${icon}" color="${color}" bgcolor="${bgColor}" %}${text}{% endrender_callout %}\n`;
+                    }
+                    case 'divider': {
+                        return new Promise((res) => {
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then((results) => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「分隔线」 转换' : '[Notion Flow] Enable custom divider conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认分隔线样式' : '[Notion Flow] Use default divider style');
+                                    res(`---\n`);
+                                }
+                            });
+                        });
+                    }
+                    case 'video': {
+                        // Note: 分两种，一种是嵌入的在线视频如 Youtube，一种是自己上传的视频
+                        const _url = block[block.type]?.url;
+                        const caption = _inline(block.caption);
+                        if (_url) {
+                            if (block.type === 'file') {
+                                // Note: 获取文件后缀
+                                try {
+                                    const _ossUrl = await this.uploadNotionImageToOSS({url: _url, meta, id: item.id, debug});
+                                    let suffix = '';
+                                    const ossUrl = new URL(_ossUrl);
+                                    const arr = ossUrl.pathname.split('.');
+                                    if (arr.length > 1) {
+                                        suffix = arr[arr.length - 1];
+                                    }
+                                    return new Promise((res) => {
+                                        block.url = _ossUrl;
+                                        block.caption = caption;
+                                        block.suffix = suffix;
+                                        return this.postMessage({
+                                            type,
+                                            block,
+                                            id,
+                                        }).then((results) => {
+                                            if (results?.[id]) {
+                                                logToRenderer('info',
+                                                    cn ? '[Notion Flow] 启用自定义 「Video」 转换' : '[Notion Flow] Enable custom video conversion');
+                                                res(results[id] + '\n');
+                                            } else {
+                                                logToRenderer('info', 
+                                                    cn ? '[Notion Flow] 使用默认 video 格式（链接）' : '[Notion Flow] Use default video style');
+                                                return `[${_ossUrl}](${_ossUrl})\n`;
+                                            }
+                                        });;
+                                    });
+                                } catch (e) {
+                                    logToRenderer('error', 
+                                        cn ? '[Notion Flow] 上传视频文件失败' : '[Notion Flow] Upload video file error', e);
+                                        return Promise.reject(null);
+                                }
+                                // return `{% render_video caption="${caption}" img="${_ossUrl}" suffix="${suffix}" %}\n![${caption}](${_ossUrl})\n{% endrender_video %}\n`;
+                            } else if (block.type === 'external') {
+                                // Note: 目前只支持 Youtube 和 Bilibili
+                                const url = new URL(_url);
+                                let yid = '';
+                                let bid = '';
+                                if (url.hostname === 'www.youtube.com') {
+                                    for (const i of url.searchParams) {
+                                        if (i[0] === 'v') {
+                                            yid = i[1];
+                                        }
+                                    }
+                                } else if (url.hostname === 'www.bilibili.com') {
+                                    bid = url.pathname.split('/').filter(Boolean)[1];
+                                }
+                                return new Promise((res) => {
+                                    block.bid = bid;
+                                    block.yid = yid;
+                                    block.caption = caption;
+                                    block.url = _url;
+                                    return this.postMessage({
+                                        type,
+                                        block,
+                                        id,
+                                    }).then((results) => {
+                                        if (results?.[id]) {
+                                            logToRenderer('info',
+                                                cn ? '[Notion Flow] 自定义外部 「Video」 转换' : '[Notion Flow] Enable custom video conversion');
+                                            res(results[id] + '\n');
+                                        } else {
+                                            logToRenderer('info',
+                                                cn ? '[Notion Flow] 使用默认外部视频格式（链接）' : '[Notion Flow] Use default external video style');
+                                            return `[${_url}](${_url})\n`;
+                                        }
+                                    });;
+                                });
+                                // return `{% render_bookmark url="${_url}" title="${caption || ''}" img="" yid="${yid}" bid="${bid}" %}{% endrender_bookmark %}\n`;
+                            }
+                        }
+                        return '[NO video url]\n';
+                    }
+                    case 'code': {
+                        const text = _inline(block.rich_text);
+                        return new Promise((res) => {
+                            block.text = text;
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then((results) => {
+                                if (results?.[id]) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义 「blockcode」 转换' : '[Notion Flow] Enable custom blockcode conversion');
+                                    res(results[id] + '\n');
+                                } else {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 blockcode 格式' : '[Notion Flow] Use default blockcode style');
+                                    res(`\`\`\`${block.language}\n${text}\n\`\`\`\n`);
+                                }
+                            });
+                        });
+                        // return `\`\`\`${block.language}\n${text}\n\`\`\`\n`;
+                    }
+                    case 'embed': {
+                        // TODO: 使用 jekyll 支持一下也不是不行
+                        return 'No support embed\n';
+                    }
+                    default: {
+                        return `No support type: ${item.type}\n`;
+                    }
                 }
-                case 'embed': {
-                    // TODO: 使用 jekyll 支持一下也不是不行
-                    return 'No support embed\n';
-                }
-                default: {
-                    return `No support type: ${item.type}\n`;
-                }
-            }
-        })();
-    }));
+            })();
+        }));
+    });
 };
 
 const parserProperty = (value, {meta}) => {
@@ -713,58 +760,51 @@ const parserProperty = (value, {meta}) => {
     });
 };
 
-const notionMeta2string = async (meta: Meta): Promise<string> => {
+const notionMeta2string = (meta: Meta): Promise<string> => {
     const {
         title = '',
-        // cos = '',
-        // tags = [],
         date = '',
         name = '',
         lastUpdateTime = '',
-        // categories = '',
-        // reference = '',
-        // headerStyle = '',
-        // headerMask = '',
-        // path = '',
-        // callout = '',
-        // noCatalog = '',
-        // lastUpdateTime = '',
-        // headerImg = '',
-        // notion = '',
         ...rest
     } = meta;
     const storage = new Storage();
-    const {publisher} = await storage.get('options') as PublisherOptions;
-    const {frontMatter} = publisher;
-    let fM = '';
-    if (frontMatter) {
-        try {
-            const arr = frontMatter.split(',');
-            arr.forEach((item, key) => {
-                fM += `${item.trim()}${key === arr.length - 1 ? '' : '\n'}`;
-            });
-        } catch (e) {
-            logToRenderer('error', '[Flow] Front Matter config error, it will be ignored', e);
+    return storage.get<PublisherOptions>('options').then((props) => {
+        const {language: lang, publisher} = props || {};
+        const cn = lang === 'cn';
+        const {frontMatter} = publisher || {};
+        let fM = '';
+        if (frontMatter) {
+            try {
+                const arr = frontMatter.split(',');
+                arr.forEach((item, key) => {
+                    fM += `${item.trim()}${key === arr.length - 1 ? '' : '\n'}`;
+                });
+            } catch (e) {
+                logToRenderer('error',
+                    cn ? '[Notion Flow] Front Matter 配置错误, 忽略之:' : '[Flow] Front Matter config error, it will be ignored:', e);
+            }
         }
-    }
-    // Note: 数组会被表示为 name: \n -item1\n -item2\n，典型的有 tags
-    const _date = new Date(date);
-    const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
-    let _lastUpdateTime = '';
-    if (publisher.autoAddLastUpdateTime) {
-        logToRenderer('info', '[Github] Will add「lastUpdateTime」frontmatter');
-        const _ = new Date();
-        _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
-    }
-    return `---
-title: ${title}
-date: ${dateString}${_lastUpdateTime ? '\nlastUpdateTime: ' + _lastUpdateTime : ''}
-name: ${name}${fM ? '\n' + fM : ''}
-${Object.keys(rest).reduce((prev, curr) => {
-        return prev += `${curr}: ${Array.isArray(rest[curr]) ? `\n${(rest[curr] as string[]).map(item => `    - ${item}`).join('\n')}` : rest[curr]}\n`;
-    }, '')}---
-
-`;
+        // Note: 数组会被表示为 name: \n -item1\n -item2\n，典型的有 tags
+        const _date = new Date(date);
+        const dateString = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()} ${_date.getHours()}:${_date.getMinutes()}:00 +0800`;
+        let _lastUpdateTime = '';
+        if (publisher.autoAddLastUpdateTime) {
+            logToRenderer('info',
+                cn ? '[Github] 添加 「lastUpdateTime」 Front Matter' : '[Github] Will add 「lastUpdateTime」 frontmatter');
+            const _ = new Date();
+            _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
+        }
+        return `---
+    title: ${title}
+    date: ${dateString}${_lastUpdateTime ? '\nlastUpdateTime: ' + _lastUpdateTime : ''}
+    name: ${name}${fM ? '\n' + fM : ''}
+    ${Object.keys(rest).reduce((prev, curr) => {
+            return prev += `${curr}: ${Array.isArray(rest[curr]) ? `\n${(rest[curr] as string[]).map(item => `    - ${item}`).join('\n')}` : rest[curr]}\n`;
+        }, '')}---
+    
+    `;
+    });
 };
 
 const normalizeNum = (num: number) => {

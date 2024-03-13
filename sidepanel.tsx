@@ -28,18 +28,13 @@ class IO {
             // Note: Pulisher 配置持久化
             const currConfigStateJson = JSON.stringify(currState.publisher);
             if (prevConfigStateJson !== currConfigStateJson) {
-                // logToRenderer('tree State:', prevConfigStateJson, currConfigStateJson);
-                // window._toMain('config-set', currState.config.data);
                 // Note: 持久化
-                // FIXME: 后面需要改成 Secure Storage，下同
                 await storage.set("publisher-config", currState.publisher.data)
                 prevConfigStateJson = currConfigStateJson;
             }
             // Note: aigc 配置持久化
             const currAigcStateJson = JSON.stringify(currState.aigc);
             if (prevAigcStateJson !== currAigcStateJson) {
-                // logToRenderer('aigc State:', prevAigcStateJson, currAigcStateJson);
-                // window._toMain('aigc-set', currState.aigc.data);
                 // Note: 持久化
                 await storage.set("aigc-config", currState.aigc.data)
                 prevAigcStateJson = currAigcStateJson;
@@ -151,6 +146,7 @@ function App() {
             };
             if (options) {
                 const _publisherOptions = {
+                    language: options.language,
                     github: options.publisher?.github,
                     notion: options.notion,
                     oss: options.oss?.[options.oss?.name],
@@ -200,6 +196,7 @@ function App() {
                 };
                 if (publisher.enable) {
                     const _publisherOptions = {
+                        language,
                         github: publisher?.github,
                         notion: notion,
                         oss: oss?.[oss?.name],

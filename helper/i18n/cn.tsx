@@ -251,8 +251,5 @@ export default {
         About: {
             Label: '关于',
         }
-    },
-    Log: {
-        
-    },
+    }
 }

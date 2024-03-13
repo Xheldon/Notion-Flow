@@ -88,10 +88,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                     pos.forEach(p => {
                         rawId.splice(p, 0, '-');
                     });
-                    // logToRenderer(`rawId:${rawId.join('')}`);
-                    // FIXME: conect 是即时的，所以不用区分 name 了？
                     port.postMessage(rawId.join(''));
-                    // return rawId.join('');
                 } catch (e) {
                     port.postMessage(null);
                 }
