@@ -106,10 +106,10 @@ const Publisher = (props: any) => {
                                                     setLoading(false);
                                                     if (!updateMetaResult) {
                                                         logToRenderer('error',
-                                                            cn ? '[Notion] 更新 「lastUpdateTime」 属性失败' : '[Notion] Update lastUpdateTime Page Properties faild', updateMetaResult);
+                                                            cn ? '[Notion] 更新 「lastUpdateTime」 属性失败:' : '[Notion] Update lastUpdateTime Page Properties faild:', updateMetaResult);
                                                     } else {
                                                         logToRenderer('info',
-                                                            cn ? '[Notion] 更新 「lastUpdateTime」 属性成功' : '[Notion] Update lastUpdateTime Page Properties success', updateMetaResult);
+                                                            cn ? '[Notion] 更新 「lastUpdateTime」 属性成功:' : '[Notion] Update lastUpdateTime Page Properties success:', updateMetaResult);
                                                     }
                                                     // Note: 不 reject，因为更新 lastUpdateTime 不是必须的，出错不影响大流程
                                                     return Promise.resolve(null);
@@ -147,6 +147,10 @@ const Publisher = (props: any) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     useEffect(() => {
+        req.pluginCode = pluginCode;
+    }, [pluginCode]);
+
+    useEffect(() => {
         // Note: 将 postMessage 方法绑定到 req 上方便使用
         req.postMessage = (config) => {
             const _config = {
@@ -156,7 +160,11 @@ const Publisher = (props: any) => {
             const id = config.id;
             return new Promise((resolve, reject) => {
                 function onMessage(event) {
+                    console.log('event.data 是:', event.data);
                     if (typeof event.data?.[id] ===  'string') {
+                        resolve(event.data);
+                        window.removeEventListener("message", onMessage);
+                    } else if (typeof event.data === 'boolean') {
                         resolve(event.data);
                         window.removeEventListener("message", onMessage);
                     }
@@ -166,6 +174,19 @@ const Publisher = (props: any) => {
             });
         };
     }, [pluginCode]);
+
+    // Note: loading 被设置为 false 的时候，重置一下 sandbox 中的各种值的状态，不然 results 有缓存
+    useEffect(() => {
+        if (!loading) {
+            req.postMessage(true).then(() => {
+                const storage = new Storage();
+                storage.get<PublisherOptions>('options').then((options) => {
+                    logToRenderer('info',
+                        options?.language === 'cn' ? '[Notion Flow] 重置缓存状态成功' : '[Notion Flow] Reset sandbox status success');
+                });
+            });
+        }
+    }, [loading, req]);
 
     let timer = 0;
     const _setPluginCode = useCallback((code: string) => {
@@ -178,10 +199,6 @@ const Publisher = (props: any) => {
             console.log('code:', code);
         }, 2000);
     }, []);
-
-    useEffect(() => {
-        req.pluginCode = pluginCode;
-    }, [pluginCode]);
 
     return (
         <>

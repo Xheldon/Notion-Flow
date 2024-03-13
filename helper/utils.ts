@@ -97,6 +97,7 @@ const logToRenderer = (type, header, ..._msgs: any[]) => {
 
 const getPublisherConfig = async (storage) => {
     const config: PublisherConfig = await storage.get('publisher-config');
+    const options: PublisherOptions = await storage.get('options');
     if (!config) {
         const _config = {
             pluginFold: false, // Note: 插件面板是否折叠
@@ -107,13 +108,15 @@ const getPublisherConfig = async (storage) => {
     } else {
         reduxStore.dispatch(setPublisher(config));
     }
-    logToRenderer('info', '[Notion Flow] Get publisher config', config);
+    logToRenderer('info', options?.language  === 'cn' ? '[Notion Flow] 获取发布 tab 配置:' : '[Notion Flow] Get publisher config:', config);
 };
 
 const getAigcConfig = async (storage) => {
-        const aigc: AigcData = await storage.get('aigc-config');
+    const aigc: AigcData = await storage.get('aigc-config');
+    const options: PublisherOptions = await storage.get('options');
     // TODO: 从持久化存储中获取
-    logToRenderer('info', '[Notion Flow] Get aigc config', aigc);
+    logToRenderer('info',
+    options?.language === 'cn' ? '[Notion Flow] 获取 AIGC 配置:' : '[Notion Flow] Get aigc config:', aigc);
     if (!aigc || !aigc.model) {
         const _aigc: AigcData = {
             key: {
@@ -307,7 +310,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
         const cn = lang === 'cn';
         if (!Array.isArray(list)) {
             logToRenderer('error',
-                cn ? '[Notion] Notion 子元素需要是个数组' : '[Notion] Notion child need to be an array', list);
+                cn ? '[Notion] Notion 子元素需要是个数组:' : '[Notion] Notion child need to be an array:', list);
             return Promise.reject(null);
         }
         return Promise.all(list.filter(item => item.object === 'block').map(item => {
@@ -515,7 +518,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             return `${Array.from({length: indent * 4}).fill(' ').join('')}${isChecked ? '- [x] ' : '- [ ] '}${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                         } catch (e) {
                             logToRenderer('error', 
-                                cn ? '[Notion Flow] to_do to markdown 发生错误' : '[Notion Flow] Error happen when to_do to markdown', e);
+                                cn ? '[Notion Flow] to_do to markdown 发生错误:' : '[Notion Flow] Error happen when to_do to markdown:', e);
                             return Promise.reject(null);
                         } 
                     }
@@ -529,7 +532,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             return `${Array.from({length: indent * 4}).fill(' ').join('')}1. ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                         } catch (e) {
                             logToRenderer('error', 
-                                cn ? '[Notion Flow] numbered_list_item to markdown 发生错误' : '[Notion Flow] Error happen when numbered_list_item to markdown', e);
+                                cn ? '[Notion Flow] numbered_list_item to markdown 发生错误:' : '[Notion Flow] Error happen when numbered_list_item to markdown:', e);
                             return Promise.reject(null);
                         }
                     }
@@ -543,13 +546,14 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             return `${Array.from({length: indent * 4}).fill(' ').join('')}* ${_inline(block.rich_text)}\n${(await notion2markdown.bind(this)(children, meta, ++_indent, debug)).join('')}`;
                         } catch (e) {
                             logToRenderer('error', 
-                                cn ? '[Notion Flow] bulleted_list_item to markdown 发生错误' : '[Notion Flow] Error happen when bulleted_list_item to markdown', e);
+                                cn ? '[Notion Flow] bulleted_list_item to markdown 发生错误:' : '[Notion Flow] Error happen when bulleted_list_item to markdown:', e);
                             return Promise.reject(null);
                         }
                     }
                     case 'quote': {
                         const text = _inline(block.rich_text);
                         block.text = text;
+                        block.color = COLORS[block.color as keyof typeof COLORS];
                         // Note: notion 的 quote 还能设置背景色，但是我感觉太丑了，所以仅读取了 Notion 的颜色（左侧边框颜色+字体颜色）
                         // Note: 顺便设置一下颜色/背景色（与 Notion 同步）
                         return new Promise((res) => {
@@ -569,10 +573,6 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 }
                             });
                         });
-                        /* if (!transQuote) {
-                            logToRenderer('info', '[Github] Disable Jekyll Blockquote conversion，use Blockquote Markdown style');
-                            return `> ${text}\n`;
-                        } */
                         // return `{% render_quote color="${COLORS[block.color as keyof typeof COLORS] || ''}" %}${text}{% endrender_quote %}\n`;
                     }
                     case 'callout': {
@@ -668,7 +668,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                     });
                                 } catch (e) {
                                     logToRenderer('error', 
-                                        cn ? '[Notion Flow] 上传视频文件失败' : '[Notion Flow] Upload video file error', e);
+                                        cn ? '[Notion Flow] 上传视频文件失败:' : '[Notion Flow] Upload video file error:', e);
                                         return Promise.reject(null);
                                 }
                                 // return `{% render_video caption="${caption}" img="${_ossUrl}" suffix="${suffix}" %}\n![${caption}](${_ossUrl})\n{% endrender_video %}\n`;

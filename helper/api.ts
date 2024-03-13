@@ -100,7 +100,7 @@ export default class Req {
             }).catch((err) => {
                 if (err) {
                     logToRenderer('error',
-                            cn ? '[Notion Flow] 接口初始化过程发生错误' : '[Notion Flow] Init API error', err);
+                            cn ? '[Notion Flow] 接口初始化过程发生错误:' : '[Notion Flow] Init API error:', err);
                 }
                 return Promise.reject(null);
             });
@@ -173,7 +173,7 @@ export default class Req {
                             const uri = `${cdn}/${key}`;
                             if (!debug) {
                                 logToRenderer('info',
-                                    cn ? `[OSS] 准备上传 ${id}` : `[OSS] Ready to upload ${id}`, {key, cdn, full: uri});
+                                    cn ? `[OSS] 准备上传 ${id}:` : `[OSS] Ready to upload ${id}:`, {key, cdn, full: uri});
                                 // Note: 不搞那么复杂，加个随机的延时就行
                                 await new Promise((res, rej) => {
                                     setTimeout(() => {
@@ -185,17 +185,17 @@ export default class Req {
                                 });
                             } else {
                                 logToRenderer('info',
-                                    cn ? `[Debug OSS] 上传 ${id} 成功` : `[Debug OSS] Upload ${id} success`, key);
+                                    cn ? `[Debug OSS] 上传 ${id} 成功:` : `[Debug OSS] Upload ${id} success:`, key);
                             }
                             return uri;
                         } catch (err) {
                             logToRenderer('error',
-                                cn ? `[OSS] 上传 ${id} 出错` : `[OSS] Upload ${id} faild`, err);
+                                cn ? `[OSS] 上传 ${id} 出错:` : `[OSS] Upload ${id} faild:`, err);
                             throw new Error(err);
                         }
                     } else {
                         logToRenderer('error',
-                            cn ? '[Notion] 获取 Notion 图片错误' : '[Notion] Get Notion image error', res);
+                            cn ? '[Notion] 获取 Notion 图片错误:' : '[Notion] Get Notion image error:', res);
                         throw new Error(err);
                     }
                 } else {
@@ -204,7 +204,7 @@ export default class Req {
             }
         } catch (err) {
             logToRenderer('error',
-                cn ? '[OSS] 上传媒体过程中发生错误' : `[OSS] Try upload media err`, err);
+                cn ? '[OSS] 上传媒体过程中发生错误:' : `[OSS] Try upload media err:`, err);
             throw new Error(err);
         }
     }
@@ -284,7 +284,7 @@ export default class Req {
                             return meta;
                         }).catch((err) => {
                             logToRenderer('error',
-                                cn ? '[OSS] 上传头图到 OSS 出错, 忽略该属性' : '[OSS] Upload cover to OSS error, ignore it', err);
+                                cn ? '[OSS] 上传头图到 OSS 出错, 忽略该属性:' : '[OSS] Upload cover to OSS error, ignore it:', err);
                             Object.keys(meta).forEach(key => {
                                 if (!meta[key]) {
                                     delete meta[key];
@@ -303,13 +303,13 @@ export default class Req {
                     }
                 }).catch((err) => {
                     logToRenderer('error',
-                        cn ? '[Notion] Notion pages.retrieve 接口报错' : '[Notion] Notion pages.retrieve API Error', err);
+                        cn ? '[Notion] Notion pages.retrieve 接口报错:' : '[Notion] Notion pages.retrieve API error:', err);
                     return Promise.reject(null);
                 });
             }).catch((err) => {
                 if (err) {
                     logToRenderer('error',
-                            cn ? '[Notion Flow] 接口初始化过程发生错误' : '[Notion Flow] Init API error', err);
+                            cn ? '[Notion Flow] 接口初始化过程发生错误:' : '[Notion Flow] Init API error:', err);
                 }
                 return Promise.reject(null);
             });
@@ -398,11 +398,11 @@ export default class Req {
                     } else {
                         return this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig).then(res => {
                             logToRenderer('info',
-                                cn ? '[Github] Github 更新文件成功' : '[Github] Update file success', res);
+                                cn ? '[Github] Github 更新文件成功:' : '[Github] Update file success:', res);
                             return res;
                         }).catch(err => {
                             logToRenderer('info',
-                            cn ? '[Github] Github 更新文件失败' : '[Github] Update file faild', err);
+                            cn ? '[Github] Github 更新文件失败:' : '[Github] Update file faild:', err);
                             return Promise.reject(null);
                         });
                     }
@@ -423,11 +423,11 @@ export default class Req {
                         } else {
                             return this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig).then(res => {
                                 logToRenderer('info',
-                                    cn ? '[Github] Github 文件创建成功' : '[Github] Create file success', res);
+                                    cn ? '[Github] Github 文件创建成功:' : '[Github] Create file success:', res);
                                 return res;
                             }).catch(err => {
                                 logToRenderer('error',
-                                    cn ? '[Github] Github 文件创建失败' : '[Github] Create file faild', err);
+                                    cn ? '[Github] Github 文件创建失败:' : '[Github] Create file faild:', err);
                                 return Promise.reject(null);
                             });
                         }
@@ -503,12 +503,12 @@ export default class Req {
                         }, (err, data) => {
                             if (err) {
                                 logToRenderer('error',
-                                    cn ? `[OSS TX] 准备上传 ${key}` : `[OSS TX] Ready to upload ${key}`, err);
+                                    cn ? `[OSS TX] 准备上传 ${key}:` : `[OSS TX] Ready to upload ${key}:`, err);
                                 rej(err);
                                 return;
                             }
                             logToRenderer('error',
-                                cn ? `[OSS TX] 文件已存在，直接返回 ${key}` : `[OSS TX] File exist，return it directly ${key}`, data);
+                                cn ? `[OSS TX] 文件已存在，直接返回 ${key}:` : `[OSS TX] File exist，return it directly ${key}:`, data);
                             res(data);
                         });
                     },
@@ -523,12 +523,12 @@ export default class Req {
                         }, (err, data) => {
                             if (err) {
                                 logToRenderer('error',
-                                    cn ? `[OSS TX] 上传文件失败 ${key}` : `[OSS TX] Upload faild ${key}`, err);
+                                    cn ? `[OSS TX] 上传文件失败 ${key}:` : `[OSS TX] Upload faild ${key}:`, err);
                                 rej(err);
                                 return;
                             }
                             logToRenderer('info',
-                                cn ? `[OSS TX] 上传文件成功 ${key}` : `[OSS TX] Upload success ${key}`, data);
+                                cn ? `[OSS TX] 上传文件成功 ${key}:` : `[OSS TX] Upload success ${key}:`, data);
                             res(data);
                         });
                     }
@@ -550,11 +550,11 @@ export default class Req {
                              * data 格式为：{meta,res: {data,headers,requestUrls,rt,status,statusCode},status:200}
                              */
                             logToRenderer('error',
-                                cn ? `[OSS ALI] 文件已存在，直接返回 ${key}` : `[OSS ALI] File exist，return it directly ${key}`, data);
+                                cn ? `[OSS ALI] 文件已存在，直接返回 ${key}:` : `[OSS ALI] File exist，return it directly ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             logToRenderer('error',
-                                    cn ? `[OSS ALI] 准备上传 ${key}` : `[OSS ALI] Ready to upload ${key}`, err);
+                                    cn ? `[OSS ALI] 准备上传 ${key}:` : `[OSS ALI] Ready to upload ${key}:`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -563,12 +563,12 @@ export default class Req {
                         const {rej, res} = opt;
                         oss.put(key, body).then(data => {
                             logToRenderer('info',
-                                cn ? `[OSS ALI] 上传文件成功 ${key}` : `[OSS ALI] Upload success ${key}`, data);
+                                cn ? `[OSS ALI] 上传文件成功 ${key}:` : `[OSS ALI] Upload success ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             if (err) {
                                 logToRenderer('error',
-                                    cn ? `[OSS ALI] 上传文件失败 ${key}` : `[OSS ALI] Upload faild ${key}`, err);
+                                    cn ? `[OSS ALI] 上传文件失败 ${key}:` : `[OSS ALI] Upload faild ${key}:`, err);
                                 rej(err);
                             }
                         });
@@ -592,12 +592,12 @@ export default class Req {
                             Key: key,
                         })).then(data => {
                             logToRenderer('error',
-                                cn ? `[OSS AWS] 文件已存在，直接返回 ${key}` : `[OSS AWS] File exist，return it directly ${key}`, data);
+                                cn ? `[OSS AWS] 文件已存在，直接返回 ${key}:` : `[OSS AWS] File exist，return it directly ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             // Note: 这里提示我 UnknownError 奇了怪了，不应该是 NotFoundError 吗？
                             logToRenderer('error',
-                                    cn ? `[OSS AWS] 准备上传 ${key}` : `[OSS AWS] Ready to upload ${key}`, err);
+                                    cn ? `[OSS AWS] 准备上传 ${key}:` : `[OSS AWS] Ready to upload ${key}:`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -613,12 +613,12 @@ export default class Req {
                              * data 数据结构形如：{$metadata:{httpStatusCode}, Etag, ServerSideEncryption}
                              */
                             logToRenderer('info',
-                                cn ? `[OSS AWS] 上传文件成功 ${key}` : `[OSS AWS] Upload success ${key}`, data);
+                                cn ? `[OSS AWS] 上传文件成功 ${key}:` : `[OSS AWS] Upload success ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             if (err) {
                                 logToRenderer('error',
-                                    cn ? `[OSS AWS] 上传文件失败 ${key}` : `[OSS AWS] Upload faild ${key}`, err);
+                                    cn ? `[OSS AWS] 上传文件失败 ${key}:` : `[OSS AWS] Upload faild ${key}:`, err);
                                 rej(err);
                                 return;
                             }
