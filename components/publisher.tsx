@@ -28,7 +28,7 @@ const Publisher = (props: any) => {
     const [activeFunc, setActiveFunc] = useState(config.functionFold);
     const [activePlugin, setActivePlugin] = useState(config.pluginFold);
     const [activeLog, setActiveLog] = useState(config.logFold);
-    const [pluginCode, setPluginCode] = useState(config.pluginCode || '/*请按照固定格式书写模块处理函数，详情请见: www.xheldon.com */\n');
+    const [pluginCode, setPluginCode] = useState(config.pluginCode || '{}');
     const [loading, setLoading] = useState(false);
     const [noti, contextHolder] = notification.useNotification();
     const [messageApi, contextHolder2] = message.useMessage();
@@ -74,8 +74,8 @@ const Publisher = (props: any) => {
             setLoading(true);
             _toContent('notion-block-id-get', null, (blockId) => {
                 // console.log('获取当前 block id:', blockId);
-                storage.get('options').then((props) => {
-                    const {language: lang, publisher} = (props || {}) as PublisherOptions;
+                storage.get<PublisherOptions>('options').then((props) => {
+                    const {language: lang, publisher} = props || {};
                     const cn = lang === 'cn';
                     if (blockId) {
                         // Note: meta 信息中可以拿到 cover 信息，对应 header-img 属性
@@ -91,92 +91,46 @@ const Publisher = (props: any) => {
                             return req?.getNotionContent(blockId).then(blocks => {
                                 return notionMeta2string(meta).then(metaString => {
                                     return notion2markdown.bind(req)(blocks, meta, 0, debug).then((markdown) => {
-                                        if (!markdown) {
-                                            messageApi.open({
-                                                type: 'error',
-                                                content: cn ? 'notion2markdown 方法错误，转换成 Markdown 格式失败' : 'notion2markdown method error, convert to Markdown format failed'
-                                            });
-                                            setLoading(false);
-                                            return Promise.reject(null);
-                                        }
                                         logToRenderer('info',
-                                            cn ?'[Notion] 获取 Markdown 内容' : '[Notion] Get Markdown Content', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
-                                        // console.log(metaString + markdown.join('\n'));
+                                            cn ?'[Notion] 获取 Markdown 内容:' : '[Notion] Get Markdown Content:', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
                                         logToRenderer('info',
                                             cn ? '[Github] 即将发送内容到 Github' : '[Github] Ready to send content to github');
                                         logToRenderer('info',
                                             cn ?`[Github] FrontMatter 已${publisher?.enableFrontMatter ? '启用' : '禁用'}` : `[Github] FrontMatter is ${publisher?.enableFrontMatter ? 'enabled' : 'disabled'}`);
-                                        return req?.send2Github({meta, content: (publisher?.enableFrontMatter ? metaString : '') + markdown.join('\n'), debug}).then(async result => {
-                                            if (!result) {
-                                                messageApi.open({
-                                                    type: 'error',
-                                                    content: cn ? '[Github] 发送到 Github 时发生错误，检查日志获取更多信息' : '[Github] Send to Github error, see log',
-                                                });
-                                                setLoading(false);
-                                                return Promise.reject(null);
-                                            }
-                                            const {publisher} = await storage.get('options') as PublisherOptions;
+                                        return req?.send2Github({meta, content: (publisher?.enableFrontMatter ? metaString : '') + markdown.join('\n'), debug}).then(result => {
                                             const setNotionLastUpdateTime = publisher?.setNotionLastUpdateTime;
-                                            messageApi.open({
-                                                type: 'success',
-                                                content: cn ? `发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion Page Property 信息' : ''}` : `Publish to Github success${setNotionLastUpdateTime ? ', ready to update Notion Page Property information' : ''}`
-                                            });
                                             logToRenderer('info',
-                                                cn ? '[Github] 内容成功发送到 Github 仓库' : '[Github] Send content to github success', result);
+                                                cn ? `[Notion] 发布到 Github 成功${setNotionLastUpdateTime ? '，即将更新 Notion lastUpdateTime 信息:' : ':'}` : `[Notion] Publish to Github success${setNotionLastUpdateTime ? ', ready to update Notion lastUpdateTime:' : ':'}`, result);
                                             if (setNotionLastUpdateTime) {
-                                                logToRenderer('info',
-                                                    cn ? '[Notion] 准备更新 Notion 的 lastUpdateTime 属性' : '[Notion] Ready to update 「lastUpdateTime」 properties of Notion');
                                                 return req?.updateNotionLastUpdateTime({blockId, debug}).then(updateMetaResult => {
-                                                    if (!updateMetaResult) {
-                                                        messageApi.open({
-                                                            type: 'error',
-                                                            content: cn ? '[Notion] 更新 「lastUpdateTime」 发生错误，检查日志获取更多信息' : '[Notion] Update「lastUpdateTime」Page Properties error, see log',
-                                                        });
-                                                        setLoading(false);
-                                                        return Promise.reject(null);
-                                                    }
-                                                    logToRenderer('info',
-                                                        cn ? '[Notion] 更新 「lastUpdateTime」 属性成功' : '[Notion] Update lastUpdateTime Page Properties success', updateMetaResult);
                                                     setLoading(false);
+                                                    if (!updateMetaResult) {
+                                                        logToRenderer('error',
+                                                            cn ? '[Notion] 更新 「lastUpdateTime」 属性失败' : '[Notion] Update lastUpdateTime Page Properties faild', updateMetaResult);
+                                                    } else {
+                                                        logToRenderer('info',
+                                                            cn ? '[Notion] 更新 「lastUpdateTime」 属性成功' : '[Notion] Update lastUpdateTime Page Properties success', updateMetaResult);
+                                                    }
+                                                    // Note: 不 reject，因为更新 lastUpdateTime 不是必须的，出错不影响大流程
+                                                    return Promise.resolve(null);
                                                 });
                                             } else {
                                                 setLoading(false);
+                                                return Promise.resolve(null);
                                             }
                                         });
                                     });
-                                    /* try {
-                                        catch(e => {
-                                            setLoading(false);
-                                            noti.error({
-                                                message: cn ? '转换 Notion 内容失败' : 'Convert Notion content failed',
-                                                description: e.toString()
-                                            });
-                                            logToRenderer('error',
-                                                cn ? '[Notion] Notion 内容转 Markdown 发生错误' : '[Notion] Notion content to Markdown error', e);    
-                                        })
-                                    } catch(e) {
-                                        setLoading(false);
-                                        noti.error({
-                                            message: cn ? '转换 Notion 内容失败' : 'Convert Notion content failed',
-                                            description: e.toString()
-                                        });
-                                        logToRenderer('error',
-                                            cn ? '[Notion] Notion 内容转 Markdown 发生错误' : '[Notion] Notion content to Markdown error', e);    
-                                    } */
                                 });
                             });
                         }).catch(() => {
                             setLoading(false);
-                            noti.error({
-                                message: cn ? '[Notion] Notion 内容处理过程中出现错误，请检查日志' : '[Notion] Error occurred during Notion content processing, see log',
-                            });
+                            logToRenderer('error',
+                                cn ? '[Notion] Notion 内容处理过程中出现错误，请检查日志' : '[Notion] Error occurred during Notion content processing, see log');
                         });
                     } else {
                         setLoading(false);
-                        noti.error({
-                            message: cn ? '[Notion] 获取 block id 失败' : '[Notion] Get Notion block id failed',
-                            description: cn ? '[Notion] 请确认当前页面为正常 Notion 页面' : '[Notion] Please confirm that the current page is a Notion page'
-                        });
+                        logToRenderer('error',
+                            cn ? '[Notion] 获取 block id 失败, 请确认当前页面为正常 Notion 页面' : '[Notion] Get Notion block id failed, please confirm that the current page is a Notion page');
                     }
                 })
             });

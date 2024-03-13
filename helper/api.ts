@@ -113,16 +113,15 @@ export default class Req {
         // FIXMED: 因为存在同步更新 github 后写入 publish 为 true 的逻辑（即使之前已经是 true 了），导致 last_edited_time 会变，结果就是每更新一次，头图的地址都
         //  会变化一次...先不管了
         // Note: 上层 fix 了 uuid 问题，取 url 的 pathname 作为 uuid 而不是 last_edited_time
-        const {language: lang} = await storage.get('options') as PublisherOptions || {};
+        const {language: lang, oss} = await storage.get<PublisherOptions>('options') || {};
         const cn = lang === 'cn';
         try {
-            await updateConfigDeco.bind(this);
+            await updateConfigDeco.call(this);
             if (!this.oss) {
                 logToRenderer('error',
                     cn ? '[OSS] OSS 服务未配置' : '[OSS] OSS service not config');
                 return Promise.resolve(null);
             }
-            const {oss} = await storage.get('options') as PublisherOptions || {};
             const cdn = oss?.cdn;
             if (!cdn) {
                 logToRenderer('error',
@@ -197,7 +196,7 @@ export default class Req {
                     } else {
                         logToRenderer('error',
                             cn ? '[Notion] 获取 Notion 图片错误' : '[Notion] Get Notion image error', res);
-                        // dialog.showErrorBox('处理图片错误', `获取 Notion 图片错误: ${res}`);
+                        throw new Error(err);
                     }
                 } else {
                     throw new Error(err);
@@ -317,35 +316,37 @@ export default class Req {
         });
     }
 
-    async updateNotionLastUpdateTime(props: {blockId: string; debug: boolean}): Promise<boolean> {
-        await updateConfigDeco.bind(this);
-        const {language: lang} = await storage.get('options') as PublisherOptions || {};
-        const cn = lang === 'cn';
-        if (!this.notion) {
-            logToRenderer('error',
-                cn ? '[Notion] Notion API Token 未配置' : '[Notion] Notion ingetration token not config');
-            return Promise.resolve(null);
-        }
-        const { blockId, debug } = props;
-        const date = getISODateTime(new Date());
-        if (debug) {
-            logToRenderer('info',
-                cn ? '[Notion] 更新 「lastUpdateTime」 属性成功' : '[Notion] Update Notion「lastUpdateTime」success', date);
-            return true;
-        } else {
-            return await this.notion.pages.update({
-                page_id: blockId,
-                properties: {
-                    lastUpdateTime: {
-                        date: {
-                            start: date,
-                            end: null,
-                            time_zone: null
+    updateNotionLastUpdateTime(props: {blockId: string; debug: boolean}) {
+        return updateConfigDeco.call(this).then(() => {
+            return storage.get<PublisherOptions>('options').then((options) => {
+                const {language: lang} = options || {};
+                const cn = lang === 'cn';
+                if (!this.notion) {
+                    logToRenderer('error',
+                        cn ? '[Notion] Notion API Token 未配置' : '[Notion] Notion ingetration token not config');
+                    // Note: 不 reject，因为更新 lastUpdateTime 不是必须的，出错不影响大流程
+                    return Promise.resolve(null);
+                }
+                const { blockId, debug } = props;
+                const date = getISODateTime(new Date());
+                if (debug) {
+                    return true;
+                } else {
+                    return this.notion.pages.update({
+                        page_id: blockId,
+                        properties: {
+                            lastUpdateTime: {
+                                date: {
+                                    start: date,
+                                    end: null,
+                                    time_zone: null
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             });
-        }
+        });
     }
 
     send2Github(props: {meta: Meta, content: string, debug: boolean}):Promise<any> {
@@ -356,17 +357,17 @@ export default class Req {
                 if (!this.github) {
                     logToRenderer('error',
                         cn ? '[Github] Github Personal Token 未配置' : '[Github] Github Personal Token not config');
-                    return Promise.resolve(null);
+                    return Promise.reject(null);
                 }
                 if (!publisher) {
-                    return Promise.resolve(null);
+                    return Promise.reject(null);
                 }
                 // Note: 我的 filePath 设置就应该是 _posts/{{categories}}/{{YYYY}}/{{YYYY}}-{{MM}}-{{DD}}-{{name}}.md
                 const _path = parserProperty(publisher.filePath, {meta: props.meta});
                 if (!_path) {
                     logToRenderer('error',
                         cn ? '[Github] Github 文件上传路径未配置或不可用' : '[Github] File path not config or invalid');
-                    return Promise.resolve(null);
+                    return Promise.reject(null);
                 }
                 const {meta, content, debug} = props;
                 // Note: path 需要 parserProperty 处理一下
@@ -375,12 +376,10 @@ export default class Req {
                     path: _path,
                 };
                 const contentBase64 = Buffer.from(content).toString('base64');
-                try {
-                    const res = await this.github.rest.repos.getContent(getContentConfig);
-                    // Note: content 是 base64 编码的，输出太占空间，所以不打印了
+                return this.github.rest.repos.getContent(getContentConfig).then((res): any => {
                     const {content, ..._res} = res as any;
                     logToRenderer('info',
-                        cn ? '[Github] Github 指定文件已存在，即将更新' : '[Github] File exist, update it now', _res);
+                        cn ? '[Github] Github 指定文件已存在，即将更新:' : '[Github] File exist, update it now:', _res);
                     
                     const createOrUpdateConfig = {
                         ...this.githubCommon,
@@ -392,24 +391,23 @@ export default class Req {
                         sha: !Array.isArray(res.data) && res.data?.sha,
                         content: contentBase64,
                     };
-                    try {
-                        if (debug) {
-                            logToRenderer('info',
-                                cn ? '[Debug] createOrUpdateFileContents 方法调用，配置为:' : '[Debug] Call function createOrUpdateFileContents, params is:', createOrUpdateConfig)
-                            return cn ? `[Debug] Github 文件「更新」成功` : `[Debug] Github file update success`;
-                        } else {
-                            const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                    if (debug) {
+                        logToRenderer('info',
+                            cn ? '[Debug] createOrUpdateFileContents 方法调用，配置为:' : '[Debug] Call function createOrUpdateFileContents, params is:', createOrUpdateConfig)
+                        return cn ? `[Debug] Github 文件「更新」成功` : `[Debug] Github file update success`;
+                    } else {
+                        return this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig).then(res => {
                             logToRenderer('info',
                                 cn ? '[Github] Github 更新文件成功' : '[Github] Update file success', res);
                             return res;
-                        }
-                    } catch (err) {
-                        logToRenderer('info',
+                        }).catch(err => {
+                            logToRenderer('info',
                             cn ? '[Github] Github 更新文件失败' : '[Github] Update file faild', err);
-                        return Promise.resolve(null);
+                            return Promise.reject(null);
+                        });
                     }
-                } catch (err) {
-                    if (err.status === 404) {
+                }).catch((err): any => {
+                    if (err?.status === 404) {
                         logToRenderer('info',
                             cn ? '[Github] Github 文件不存在，即将新建' : '[Github] Github file not exist, create one now');
                         const createOrUpdateConfig = {
@@ -418,29 +416,25 @@ export default class Req {
                             message: `${cn ? '创建' : 'Create'} ${meta.title} !`,
                             content: contentBase64,
                         };
-                        try {
-                            if (debug) {
-                                logToRenderer('info',
-                                    cn ? '[Debug] createOrUpdateFileContents 方法调用，配置为:' : '[Debug] Call function createOrUpdateFileContents, params is:', createOrUpdateConfig)
-                                    return cn ? `[Debug] Github 文件「创建」成功` : `[Debug] Github file create success`;
-                            } else {
-                                const res = await this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig);
+                        if (debug) {
+                            logToRenderer('info',
+                                cn ? '[Debug] createOrUpdateFileContents 方法调用，配置为:' : '[Debug] Call function createOrUpdateFileContents, params is:', createOrUpdateConfig)
+                                return cn ? `[Debug] Github 文件「创建」成功` : `[Debug] Github file create success`;
+                        } else {
+                            return this.github.rest.repos.createOrUpdateFileContents(createOrUpdateConfig).then(res => {
                                 logToRenderer('info',
                                     cn ? '[Github] Github 文件创建成功' : '[Github] Create file success', res);
-                                // return '创建文件成功';
                                 return res;
-                            }
-                        } catch (err) {
-                            logToRenderer('error',
-                                cn ? '[Github] Github 文件创建失败' : '[Github] Create file faild', err);
-                            return Promise.resolve(null);
+                            }).catch(err => {
+                                logToRenderer('error',
+                                    cn ? '[Github] Github 文件创建失败' : '[Github] Create file faild', err);
+                                return Promise.reject(null);
+                            });
                         }
                     } else {
-                        logToRenderer('error',
-                            cn ? '[Github] 尝试获取 Github 文件失败，请检查网络环境是否正常或提 issue 给开发者' : '[Github] Try get github file error, check the network or report it to developer', err);
-                        return Promise.resolve(null);
+                        return Promise.reject(null);
                     }
-                }
+                });
             });
         });
     }
@@ -472,28 +466,7 @@ export default class Req {
                     this.notion = new Client({auth: notionToken});
                 }
                 if (ossRegion && ossBucket && ossSecretId && ossSecretKey) {
-                    /* this.oss = new COS({
-                        SecretId: ossSecretId,
-                        SecretKey: ossSecretKey,
-                    }); */
                     this.oss = this.OSSPolyfill(ossName, props.oss, lang === 'cn');
-                    // Note: 用于刷新 cdn 缓存，但是这个接口不支持浏览器环境，所以暂时不用
-                    /* this.cdn = new tencentcloud.cdn.v20180606.Client({
-                        credential: {
-                            secretId: ossSecretId,
-                            secretKey: ossSecretKey,
-                        },
-                        region: '',
-                        profile: {
-                            httpProfile: {
-                                endpoint: 'cdn.tencentcloudapi.com',
-                            }
-                        }
-                    }); */
-                    /* this.ossCommon = {
-                        Bucket: ossBucket,
-                        Region: ossRegion,
-                    }; */
                 }
                 // Note: todo 通知 renderer 信息不完整，禁用发布等按钮
                 if (githubOwner && githubRepo && githubBranch && githubToken) {

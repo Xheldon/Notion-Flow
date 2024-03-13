@@ -202,11 +202,6 @@ function OptionsIndex() {
                         autoAddLastUpdateTime: true,
                         frontMatter: '',
                         headerImgName: 'header-img',
-                        'trans-image': false,
-                        'trans-bookmark': false,
-                        'trans-callout': false,
-                        'trans-video': false,
-                        'trans-quote': false,
                     },
                     oss: {
                         // enable: true,
@@ -532,7 +527,7 @@ function OptionsIndex() {
                                 label={LocaleConfig.Options.Publisher.Github.HeaderImgName.Label}>
                                 <Input placeholder={LocaleConfig.Options.Publisher.Github.HeaderImgName.Placeholder} />
                             </Form.Item>
-                            <Row>
+                            {/* <Row>
                                 <Col span={6}>
                                     <Paragraph style={{textAlign: 'right', marginRight: 10}}>
                                         {LocaleConfig.Options.Publisher.Github.Transform.Label}
@@ -595,7 +590,7 @@ function OptionsIndex() {
                                         <Switch />
                                     </Form.Item>
                                 </Col>
-                            </Row>
+                            </Row> */}
                         </div>
                         {/* <div style={{ display: enablePublisher ? 'block' : 'none' }}>
                             <Divider />
