@@ -13,7 +13,7 @@ import 'prismjs/themes/prism.css'
 
 import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
 import type { State, Meta, PublisherOptions } from '$types';
-import { notion2markdown, notionMeta2string, logToRenderer, _toContent, logTypeMap } from '$utils';
+import { notion2markdown, notionMeta2string, logToRenderer, _toContent, logTypeMap, EventBus } from '$utils';
 
 const { Panel } = Collapse;
 const {Link} = Typography;
@@ -151,6 +151,17 @@ const Publisher = (props: any) => {
     }, [pluginCode]);
 
     useEffect(() => {
+        const onMessage = (event) => {
+            const {data} = event;
+            EventBus.dispatch(data.id, data);
+        };
+        window.addEventListener("message", onMessage);
+        return () => {
+            window.removeEventListener("message", onMessage);
+        };
+    }, []);
+
+    useEffect(() => {
         // Note: 将 postMessage 方法绑定到 req 上方便使用
         req.postMessage = (config) => {
             const _config = {
@@ -158,35 +169,14 @@ const Publisher = (props: any) => {
                 ...config,
             };
             const id = config.id;
-            return new Promise((resolve, reject) => {
-                function onMessage(event) {
-                    console.log('event.data 是:', event.data);
-                    if (typeof event.data?.[id] ===  'string') {
-                        resolve(event.data);
-                        window.removeEventListener("message", onMessage);
-                    } else if (typeof event.data === 'boolean') {
-                        resolve(event.data);
-                        window.removeEventListener("message", onMessage);
-                    }
-                }
-                window.addEventListener("message", onMessage);
+            return new Promise((resolve) => {
+                EventBus.on(id, (data) => {
+                    resolve(data);
+                });
                 iframeRef.current?.contentWindow?.postMessage(_config, '*');
             });
         };
     }, [pluginCode]);
-
-    // Note: loading 被设置为 false 的时候，重置一下 sandbox 中的各种值的状态，不然 results 有缓存
-    useEffect(() => {
-        if (!loading) {
-            req.postMessage(true).then(() => {
-                const storage = new Storage();
-                storage.get<PublisherOptions>('options').then((options) => {
-                    logToRenderer('info',
-                        options?.language === 'cn' ? '[Notion Flow] 重置缓存状态成功' : '[Notion Flow] Reset sandbox status success');
-                });
-            });
-        }
-    }, [loading, req]);
 
     let timer = 0;
     const _setPluginCode = useCallback((code: string) => {

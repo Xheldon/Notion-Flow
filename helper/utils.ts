@@ -45,6 +45,25 @@ const AIGC_BLOCKS = [
     'text',
 ];
 
+const EventBus = {
+    events: {},
+    on(id, cb) {
+        this.events[id] = cb;
+    },
+    off(id, cb) {
+        if (!this.events[id]) {
+            return;
+        }
+        this.events[id] = null;
+    },
+    dispatch(id, ...args) {
+        if (!this.events[id]) {
+            return;
+        }
+        this.events[id](...args);
+    },
+};
+
 // Note: 美化现实对象
 function prettyFormat(str) {
     try {
@@ -329,11 +348,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then((results) => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「段落」 转换' : '[Notion Flow] Enable custom paragraph conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                     cn ? '[Notion Flow] 使用默认段落格式' : '[Notion Flow] Use default paragraph style');
@@ -355,11 +374,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                         type,
                                         block,
                                         id,
-                                    }).then(results => {
-                                        if (results?.[id]) {
+                                    }).then(({result}) => {
+                                        if (result) {
                                             logToRenderer('info',
                                                 cn ? '[Notion Flow] 启用自定义 「Bookmark」 转换' : '[Notion Flow] Enable custom bookmark conversion');
-                                            res(results[id] + '\n');
+                                            res(result + '\n');
                                         } else {
                                             logToRenderer('info',
                                                 cn ? '[Notion Flow] 使用默认 Bookmark 格式（链接）' : '[Notion Flow] Use default bookmark style');
@@ -389,11 +408,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                         type,
                                         block,
                                         id,
-                                    }).then(results => {
-                                        if (results?.[id]) {
+                                    }).then(({result}) => {
+                                        if (result) {
                                             logToRenderer('info',
                                                 cn ? '[Notion Flow] 启用自定义 「图片」 转换' : '[Notion Flow] Enable custom image conversion');
-                                            res(results[id] + '\n');
+                                            res(result + '\n');
                                         } else {
                                             logToRenderer('info',
                                                 cn ? '[Notion Flow] 使用默认图片格式' : '[Notion Flow] Use default image style');
@@ -414,11 +433,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then(results => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「Heading_1」 转换' : '[Notion Flow] Enable custom heading_1 conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认 heading_1 格式' : '[Notion Flow] Use default heading_1 style');
@@ -435,11 +454,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then(results => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「Heading_2」 转换' : '[Notion Flow] Enable custom heading_2 conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认 heading_2 格式' : '[Notion Flow] Use default heading_2 style');
@@ -456,11 +475,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then(results => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「Heading_3」 转换' : '[Notion Flow] Enable custom heading_3 conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认 heading_3 格式' : '[Notion Flow] Use default heading_3 style');
@@ -478,11 +497,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                     type,
                                     block,
                                     id,
-                                }).then(results => {
-                                    if (results?.[id]) {
+                                }).then(({result}) => {
+                                    if (result) {
                                         logToRenderer('info',
                                             cn ? '[Notion Flow] 启用自定义 「表格」 转换' : '[Notion Flow] Enable custom table conversion');
-                                        res(results[id] + '\n');
+                                        res(result + '\n');
                                     } else {
                                         logToRenderer('info',
                                             cn ? '[Notion Flow] 使用默认表格格式' : '[Notion Flow] Use default table style');
@@ -561,11 +580,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then((results) => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「blockquote」 转换' : '[Notion Flow] Enable custom quote conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认 blockquote 格式' : '[Notion Flow] Use default quote style');
@@ -598,11 +617,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then((results) => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「Callout」 转换' : '[Notion Flow] Enable custom callout conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认 Callout 格式' : '[Notion Flow] Use default callout style');
@@ -618,11 +637,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then((results) => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「分隔线」 转换' : '[Notion Flow] Enable custom divider conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认分隔线样式' : '[Notion Flow] Use default divider style');
@@ -654,11 +673,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                             type,
                                             block,
                                             id,
-                                        }).then((results) => {
-                                            if (results?.[id]) {
+                                        }).then(({result}) => {
+                                            if (result) {
                                                 logToRenderer('info',
                                                     cn ? '[Notion Flow] 启用自定义 「Video」 转换' : '[Notion Flow] Enable custom video conversion');
-                                                res(results[id] + '\n');
+                                                res(result + '\n');
                                             } else {
                                                 logToRenderer('info', 
                                                     cn ? '[Notion Flow] 使用默认 video 格式（链接）' : '[Notion Flow] Use default video style');
@@ -695,11 +714,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                         type,
                                         block,
                                         id,
-                                    }).then((results) => {
-                                        if (results?.[id]) {
+                                    }).then(({result}) => {
+                                        if (result) {
                                             logToRenderer('info',
                                                 cn ? '[Notion Flow] 自定义外部 「Video」 转换' : '[Notion Flow] Enable custom video conversion');
-                                            res(results[id] + '\n');
+                                            res(result + '\n');
                                         } else {
                                             logToRenderer('info',
                                                 cn ? '[Notion Flow] 使用默认外部视频格式（链接）' : '[Notion Flow] Use default external video style');
@@ -720,11 +739,11 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 type,
                                 block,
                                 id,
-                            }).then((results) => {
-                                if (results?.[id]) {
+                            }).then(({result}) => {
+                                if (result) {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 启用自定义 「blockcode」 转换' : '[Notion Flow] Enable custom blockcode conversion');
-                                    res(results[id] + '\n');
+                                    res(result + '\n');
                                 } else {
                                     logToRenderer('info',
                                         cn ? '[Notion Flow] 使用默认 blockcode 格式' : '[Notion Flow] Use default blockcode style');
@@ -860,4 +879,5 @@ export {
     _toSidePanel,
     _toContent,
     logTypeMap,
+    EventBus,
 }
