@@ -50,7 +50,7 @@ export default {
                     Label: '启用 Front Matter',
                     Desc: (
                         <>
-                            <Text type="secondary">如果你的博客系统支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress 等。这会在 Markdown 内容的顶部插入以三个短斜线 `---` 开始和结尾的内容，中间包裹着的就是 Front Matter。</Text>
+                            <Text type="secondary">如果你的博客系统支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress、Hugo 等。这会在 Markdown 内容的顶部插入以三个短斜线 `---` 开始和结尾的内容，中间包裹着的就是 Front Matter。</Text>
                             <br />
                             <Text strong type="secondary">注意，如果此处选项关闭，则本页面下方的「添加 lastUpdateTime」设置也将无效。</Text>
                         </>

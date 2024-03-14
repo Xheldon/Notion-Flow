@@ -18,6 +18,7 @@ window.addEventListener("message", async function (event) {
         source.window.postMessage({id, result}, event.origin);
     } catch (e) {
         logToRenderer('error', '[Notion Flow] Plugin code run error', e);
+        source.window.postMessage({id, result: null}, event.origin);
         // console.log('error', '[Notion Flow] Plugin code run error', e);
     }
 });
