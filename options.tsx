@@ -451,7 +451,7 @@ function OptionsIndex() {
                                             style={{ marginBottom: 20 }}
                                             labelAlign='right'
                                             // tooltip={tooltips(_tooltips)}
-                                            rules={[{ required: true, message }]}
+                                            // rules={[{ required: true, message }]}
                                             name={_name}
                                             label={label}>
                                             {secret ? <Input.Password /> : <Input />}
@@ -463,8 +463,9 @@ function OptionsIndex() {
                                 key={'oss.cdn'}
                                 style={{ marginBottom: 20 }}
                                 labelAlign='right'
-                                rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.CDN.Message }]}
+                                // rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.CDN.Message }]}
                                 name={['oss', 'cdn']}
+                                extra={LocaleConfig.Options.Publisher.Oss.CDN.Extra}
                                 label={LocaleConfig.Options.Publisher.Oss.CDN.Label}>
                                 <Input />
                             </Form.Item>
@@ -472,8 +473,9 @@ function OptionsIndex() {
                                 key={'oss.mediaPath'}
                                 style={{ marginBottom: 20 }}
                                 labelAlign='right'
-                                rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.MediaPath.Message }]}
+                                // rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.MediaPath.Message }]}
                                 name={['oss', 'mediaPath']}
+                                extra={LocaleConfig.Options.Publisher.Oss.MediaPath.Extra}
                                 label={LocaleConfig.Options.Publisher.Oss.MediaPath.Label}>
                                 <Input />
                             </Form.Item>
@@ -620,26 +622,22 @@ function OptionsIndex() {
                     <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>{LocaleConfig.Options.About.Label}</Divider>
                     <Paragraph>
                         <Text>
-                            作者说：<br />
-                            一开始我的<Link href='https://www.xheldon.com/tech/my-blog-ci.html' target='_blank'>博客自动化</Link>是<Link href="https://www.xheldon.com/tech/use-craft-extension-to-write-blog.html" target="_blank">基于 Craft 的插件系统</Link>构建的<Link href='https://www.xheldon.com/tech/my-blog-ci-in-2022.html' target='_blank'>个人博客发布流程</Link>，还有一些<Link href='https://www.xheldon.com/tech/optimize-of-my-blog-2.html' target='_blank'>其他细节</Link>，甚至还<Link href='https://www.xheldon.com/tech/workflow-of-blog-publish-base-of-craft.html' target="_blank">做了个视频</Link>。后来因为<Link href='https://twitter.com/_Xheldon/status/1637481908136468480' target='_blank'>一些原因</Link>，转战到 Notion，构建了<Link href='https://twitter.com/_Xheldon/status/1669279758616793090' target='_blank'>一个 Electron 应用</Link>（未发布）。
+                            Email: <Link href="mailto:c1006044256@gmail.com" target="_blank">c1006044256[at]gmail.com</Link>
                         </Text>
                         <br />
                         <Text>
-                            开发者邮箱: xheldoncao[at]gmail.com
+                            Blog:  <Link href="https://www.xheldon.com" target="_blank">https://www.xheldon.com</Link>
                         </Text>
                         <br />
                         <Text>
-                            开发者博客:  <Link href="https://www.xheldon.com" target="_blank">https://www.xheldon.com</Link>
+                            Donate: <Link href="https://notion-flow.xheldon.com/docs/preface#%E6%94%AF%E6%8C%81%E6%88%91%E7%9A%84%E5%BC%80%E5%8F%91%E5%B7%A5%E4%BD%9C" target="_blank">Support my work!</Link>
                         </Text>
                         <br />
                         <Text>
-                            
-                        </Text>
-                        <Text>
-                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">电报交流群</Link> &nbsp;&nbsp;&nbsp;
+                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">Telegrem</Link> &nbsp;&nbsp;&nbsp;
                             <Link href="https://twitter.com/_Xheldon" target="_blank">Twitter</Link> &nbsp;&nbsp;&nbsp;
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Bug 反馈</Link> &nbsp;&nbsp;&nbsp;
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">功能讨论</Link> 
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Issues</Link> &nbsp;&nbsp;&nbsp;
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">Discussions</Link> 
                         </Text>
 
                     </Paragraph>

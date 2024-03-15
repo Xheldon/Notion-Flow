@@ -502,12 +502,12 @@ export default class Req {
                             Key: key,
                         }, (err, data) => {
                             if (err) {
-                                logToRenderer('error',
+                                logToRenderer('info',
                                     cn ? `[OSS TX] 准备上传 ${key}:` : `[OSS TX] Ready to upload ${key}:`, err);
                                 rej(err);
                                 return;
                             }
-                            logToRenderer('error',
+                            logToRenderer('info',
                                 cn ? `[OSS TX] 文件已存在，直接返回 ${key}:` : `[OSS TX] File exist，return it directly ${key}:`, data);
                             res(data);
                         });
@@ -549,11 +549,11 @@ export default class Req {
                             /**
                              * data 格式为：{meta,res: {data,headers,requestUrls,rt,status,statusCode},status:200}
                              */
-                            logToRenderer('error',
+                            logToRenderer('info',
                                 cn ? `[OSS ALI] 文件已存在，直接返回 ${key}:` : `[OSS ALI] File exist，return it directly ${key}:`, data);
                             res(data);
                         }).catch(err => {
-                            logToRenderer('error',
+                            logToRenderer('info',
                                     cn ? `[OSS ALI] 准备上传 ${key}:` : `[OSS ALI] Ready to upload ${key}:`, err);
                             rej({statusCode: 404});
                         });
@@ -591,12 +591,12 @@ export default class Req {
                             Bucket: bucket,
                             Key: key,
                         })).then(data => {
-                            logToRenderer('error',
+                            logToRenderer('info',
                                 cn ? `[OSS AWS] 文件已存在，直接返回 ${key}:` : `[OSS AWS] File exist，return it directly ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             // Note: 这里提示我 UnknownError 奇了怪了，不应该是 NotFoundError 吗？
-                            logToRenderer('error',
+                            logToRenderer('info',
                                     cn ? `[OSS AWS] 准备上传 ${key}:` : `[OSS AWS] Ready to upload ${key}:`, err);
                             rej({statusCode: 404});
                         });

@@ -39,7 +39,7 @@ export default {
             Message: '请输入 Notion Token',
             Desc: (
                 <>
-                    <Text type="secondary">Notion Flow 需要使用 Notion API 来获取 Notion 内容。如何获取及更多信息详见<Link href='https://www.xheldon.com' target='_blank'>Notion Token</Link></Text>
+                    <Text type="secondary">Notion Flow 需要使用 Notion Integration Token 来获取 Notion 内容。如何获取及更多信息详见 <Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/notion' target='_blank'>Notion 配置</Link>。</Text>
                 </>
             ),
         },
@@ -50,7 +50,7 @@ export default {
                     Label: '启用 Front Matter',
                     Desc: (
                         <>
-                            <Text type="secondary">如果你的博客系统支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress、Hugo 等。这会在 Markdown 内容的顶部插入以三个短斜线 `---` 开始和结尾的内容，中间包裹着的就是 Front Matter。</Text>
+                            <Text type="secondary">如果你的博客系统支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress、Hugo 等。这会在 Markdown 内容的顶部插入以三个短斜线 `---` 开始和结尾的内容，中间包裹着的就是 Front Matter。详见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E5%90%AF%E7%94%A8-front-matter"> 启用 Front Matter </Link>。</Text>
                             <br />
                             <Text strong type="secondary">注意，如果此处选项关闭，则本页面下方的「添加 lastUpdateTime」设置也将无效。</Text>
                         </>
@@ -58,14 +58,14 @@ export default {
                 },
                 Desc: (
                 <>
-                    <Text type="secondary">发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages（需要配置如文件路径、CDN、图片等，可选是否包含 Front Matter）。</Text>
+                    <Text type="secondary">发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages，更多配置见下方。</Text>
                     <br />
-                    <Text type="secondary" strong>注意，这需要您熟悉 Github Person Token、Notion 集成、OSS Token 等相关概念。</Text>
+                    <Text type="secondary" strong>注意，这需要您熟悉 Github Personal Token、Notion Integration Token、OSS Token、CDN 等相关概念。</Text>
                 </>),
                 Alert: (
                     <>
                         <Text strong type="danger">重要！使用前必读：</Text>
-                        <Text strong><Link href='https://xheldon.notion.site/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4' target='_blank'>发布等高级功能使用说明及答疑</Link></Text>。
+                        <Text strong><Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/' target='_blank'>发布功能使用说明</Link></Text>
                     </>
                 ),
             },
@@ -95,7 +95,7 @@ export default {
                     Placeholder: '输入发布到 Github 仓库的文件路径',
                     Extra: (
                         <>
-                            <Text type="secondary">在这里设置发布到 Github 仓库的文件路径，支持使用 {"{{}}"} 引用 Notion Page Property 的字段以及 YYYY、YY、MM、DD 等变量，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何设置上传文件路径？</Link></Text>
+                            <Text type="secondary">在这里设置发布到 Github 仓库的文件路径，支持使用 {"{{}}"} 引用 Notion Page Properties 字段以及 YYYY、YY、MM、DD 等变量，详见：<Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E5%9B%BE%E7%89%87%E8%B7%AF%E5%BE%84' target='_blank'>上传文件路径/图片路径</Link></Text>
                         </>
                     ),
                     Tooltips: '如何设置上传文件路径',
@@ -105,7 +105,7 @@ export default {
                     Label: '添加「lastUpdateTime」',
                     Extra: (
                         <>
-                            <Text type="secondary"><Text strong>（需要启用 Front Matter）</Text>从 Notion Flow 发布博客的时候，自动添加一个固定的 lastUpdateTime 的字段到在 Front Matter 中，你可以在博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用 lastUpdateTime？</Link></Text>
+                            <Text type="secondary"><Text strong>（需要启用 Front Matter）</Text>从 Notion Flow 发布博客的时候，自动添加一个固定的 lastUpdateTime 的字段到在 Front Matter 中，你可以在博客中使用该字段，以告诉读者最后更新日期，详见：<Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E8%87%AA%E5%8A%A8%E6%B7%BB%E5%8A%A0-lastupdatetime' target='_blank'>自动添加 lastUpdateTime</Link></Text>
                         </>
                     ),
                 },
@@ -113,7 +113,7 @@ export default {
                     Label: '更新「lastUpdateTime」',
                     Extra: (
                         <>
-                            <Text type="secondary">从 Notion Flow 发布博客成功后，更新 Notion Page 的 lastUpdateTime Property，以方便你在 Notion 中查看该文章何时最后发布。需要提前添加好该字段。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何在 Notion 中查看页面最后更新时间？</Link></Text>
+                            <Text type="secondary">从 Notion Flow 发布博客成功后，更新 Notion Page 的 lastUpdateTime Property，以方便你在 Notion 中查看该文章何时最后发布。需要提前添加好该字段。详见：<Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0-lastupdatetime' target='_blank'>自动更新 lastUpdateTime</Link></Text>
                         </>
                     ),
                 },
@@ -121,7 +121,7 @@ export default {
                     Label: '其他 Front Matter 字段',
                     Extra: (
                         <>
-                            <Text type="secondary"><Text strong>（需要启用 Front Matter）</Text>一般情况你应该在 Pages 的 Property 中写与页面有关的 Front Matter，在这里写固定的 Front Matter，如我的使用 case 是给每个通过 Notion Flow 发布的博客文章设置一个 layout: post 属性。详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何设置固定的 Front Matter？</Link></Text>
+                            <Text type="secondary"><Text strong>（需要启用 Front Matter）</Text>一般情况你应该在 Pages 的 Property 中写与页面有关的 Front Matter，在这里写固定的 Front Matter，如我的使用 case 是给每个通过 Notion Flow 发布的博客文章设置一个 layout: post 属性。详见：<Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E5%85%B6%E4%BB%96-front-matter-%E5%AD%97%E6%AE%B5' target='_blank'>其他 Front Matter 字段</Link></Text>
                         </>
                     ),
                     Placeholder: '输入将要在博客中使用的其他固定 Front Matter 字段，英文半角逗号分隔'
@@ -130,12 +130,12 @@ export default {
                     Label: '头图字段名',
                     Extra: (
                         <>
-                            <Text type="secondary"><Text strong>（需要启用 Front Matter）</Text>Notion Page 的头图，可以作为博客的头图，需要在此设置将 Noiton 头图设置为 Front Matter 的哪个字段，然后在博客中使用该字段（图片会上传到 OSS）。<Text italic type="secondary">（不填表示不使用）</Text>详见：<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用头图字段？</Link></Text>
+                            <Text type="secondary"><Text strong>（需要启用 Front Matter）</Text>Notion Page 的头图，可以作为博客的头图，需要在此设置将 Noiton 头图设置为 Front Matter 的哪个字段，然后在博客中使用该字段（图片会上传到 OSS）。<Text italic type="secondary">（不填表示不使用）</Text>详见：<Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E5%A4%B4%E5%9B%BE%E7%9A%84-front-matter-%E5%AD%97%E6%AE%B5' target='_blank'>头图的 Front Matter 字段</Link></Text>
                         </>
                     ),
                     Placeholder: '留空表示不使用'
                 },
-                Transform: {
+                /* Transform: {
                     Label: '模块转换 :',
                     Desc: (
                         <>
@@ -147,15 +147,14 @@ export default {
                     Bookmark: 'Bookmark',
                     Callout: 'Callout',
                     Quoteblock: 'Quoteblock',
-                }
+                } */
             },
             Oss: {
                 Label: 'OSS 服务提供商',
                 Extra: (
                     <>
-                        <Text type="secondary">Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。视频教程见<Link href="www.xheldon.com">详细设置新手教程</Link>。</Text>
-                        <br />
-                        <Text strong type="secondary">更多 OSS 服务提供商开发中...</Text>
+                        <Text type="secondary">Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。配置说明见<Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/oss/">图片上传</Link>。</Text>
+                        <Text strong type="secondary">如果此处未填写或填写不完全、填写错误，Notion 模块转 Markdown 过程会忽略图片、视频等模块。</Text>
                     </>
                 ),
                 TX: {
@@ -218,11 +217,23 @@ export default {
                 },
                 CDN: {
                     Label: 'CDN 地址',
-                    Message: '请输入 CDN 地址'
+                    Message: '请输入 CDN 地址',
+                    Extra: (
+                        <>
+                            <Text type="secondary">详细使用说明见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/oss/cdn">为什么需要 CDN？</Link>。</Text>
+                            <Text strong type="secondary">如果此处未填写（Notion Flow 不校验是否可用），Notion 模块转 Markdown 过程会忽略图片、视频等模块。</Text>
+                        </>
+                    ),
                 },
                 MediaPath: {
                     Label: '图片路径',
-                    Message: '请输入 CDN 地址'
+                    Message: '请输入图片路径',
+                    Extra: (
+                        <>
+                            <Text type="secondary">支持通配符，详细使用说明见 <Link href="notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#上传文件路径图片路径">上传文件路径/图片路径</Link>。</Text>
+                            <Text strong type="secondary">如果此处未填写、填写错误（Notion Flow 不校验是否可用，但如果填写错误，图片将上传失败），Notion 模块转 Markdown 过程会忽略图片、视频等模块。</Text>
+                        </>
+                    ),
                 },
             },
         },

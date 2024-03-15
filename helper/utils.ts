@@ -806,12 +806,55 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                         });
                         // return `\`\`\`${block.language}\n${text}\n\`\`\`\n`;
                     }
-                    case 'embed': {
-                        // TODO: 使用 jekyll 支持一下也不是不行
-                        return 'No support embed\n';
+                    case 'equation': {
+                        const text = block.expression;
+                        return new Promise((res) => {
+                            block.text = text;
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then(({result}) => {
+                                if (result) {
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 启用自定义公式转换' : '[Notion Flow] Enable custom equation conversion');
+                                    res(result + '\n');
+                                } else {
+                                    if (result === null) {
+                                        logToRenderer('error',
+                                            cn ? `[Notion Flow] ${type} 模块转换函数出错` : `[Notion Flow] Block ${type} conversion function error`);
+                                    }
+                                    logToRenderer('info',
+                                        cn ? '[Notion Flow] 使用默认 equation 格式' : '[Notion Flow] Use default equation style');
+                                    res(`$$${text}$$\n`);
+                                }
+                            });
+                        });
+                        // return `$$${text}$$\n`;
                     }
                     default: {
-                        return `No support type: ${item.type}\n`;
+                        return new Promise((res) => {
+                            return this.postMessage({
+                                type,
+                                block,
+                                id,
+                            }).then(({result}) => {
+                                if (result) {
+                                    logToRenderer('info',
+                                        cn ? `[Notion Flow] 启用自定义「${type}」转换` : `[Notion Flow] Enable custom ${type} conversion`);
+                                    res(result + '\n');
+                                } else {
+                                    if (result === null) {
+                                        logToRenderer('error',
+                                            cn ? `[Notion Flow] ${type} 模块转换函数出错` : `[Notion Flow] Block ${type} conversion function error`);
+                                    }
+                                    logToRenderer('warn',
+                                    cn ? `不支持的模块类型，而且也未自定义模块类型转换，将返回空` : `No support type: ${type}, return empty`);
+                                    res('');
+                                }
+                            });
+                        });
+                        // return `No support type: ${item.type}\n`;
                     }
                 }
             })();
@@ -909,7 +952,7 @@ const getPropertyCompuValue = (obj: any) => {
 
 const logTypeMap = {
     'info': '✅',
-    'warn': '⚠️',
+    'warn': 'ℹ️',
     'error': '❌',
 };
 
