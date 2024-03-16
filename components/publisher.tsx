@@ -120,10 +120,10 @@ const Publisher = (props: any) => {
                                     });
                                 });
                             });
-                        }).catch(() => {
+                        }).catch((e) => {
                             setLoading(false);
                             logToRenderer('error',
-                                cn ? '[Notion] Notion 内容处理过程中出现错误，请检查日志' : '[Notion] Error occurred during Notion content processing, see log');
+                                cn ? '[Notion] Notion 内容处理过程中出现错误，请检查日志:' : '[Notion] Error occurred during Notion content processing, see log:', e);
                         });
                     } else {
                         setLoading(false);
@@ -174,7 +174,7 @@ const Publisher = (props: any) => {
                 iframeRef.current?.contentWindow?.postMessage(_config, '*');
             });
         };
-    }, [pluginCode]);
+    }, [pluginCode, req]);
 
     let timer = 0;
     const _setPluginCode = useCallback((code: string) => {

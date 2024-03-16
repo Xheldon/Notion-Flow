@@ -385,7 +385,7 @@ export default class Req {
                 return this.github.rest.repos.getContent(getContentConfig).then((res): any => {
                     const {content, ..._res} = res as any;
                     logToRenderer('info',
-                        cn ? '[Github] Github 指定文件已存在，即将更新:' : '[Github] File exist, update it now:', _res);
+                        cn ? '[Github] Github 指定文件已存在，即将更新，文件信息:' : '[Github] File exist, update it now, file info:', _res);
                     
                     const createOrUpdateConfig = {
                         ...this.githubCommon,
@@ -415,7 +415,7 @@ export default class Req {
                 }).catch((err): any => {
                     if (err?.status === 404) {
                         logToRenderer('info',
-                            cn ? '[Github] Github 文件不存在，即将新建' : '[Github] Github file not exist, create one now');
+                            cn ? '[Github] Github 文件不存在，即将新建，路径为:' : '[Github] Github file not exist, create one now, path is:', _path);
                         const createOrUpdateConfig = {
                             ...this.githubCommon,
                             path: _path,
