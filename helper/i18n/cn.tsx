@@ -50,7 +50,7 @@ export default {
                     Label: '启用 Front Matter',
                     Desc: (
                         <>
-                            <Text type="secondary">如果你的博客系统支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress、Hugo 等。这会在 Markdown 内容的顶部插入以三个短斜线 `---` 开始和结尾的内容，中间包裹着的就是 Front Matter。详见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E5%90%AF%E7%94%A8-front-matter"> 启用 Front Matter </Link>。</Text>
+                            <Text type="secondary">如果你的博客系统支持 Front Matter，则需要启用该选项，如 Jekyll、VitePress、Hugo 等。这会在 Markdown 内容的顶部插入以三个短斜线 `---` 开始和结尾的内容，中间包裹着的就是 Front Matter。详见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#%E5%90%AF%E7%94%A8-front-matter" target='_blank'> 启用 Front Matter </Link>。</Text>
                             <br />
                             <Text strong type="secondary">注意，如果此处选项关闭，则本页面下方的「添加 lastUpdateTime」设置也将无效。</Text>
                         </>
@@ -65,7 +65,7 @@ export default {
                 Alert: (
                     <>
                         <Text strong type="danger">重要！使用前必读：</Text>
-                        <Text strong><Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/' target='_blank'>发布功能使用说明</Link></Text>
+                        <Text strong><Link href='https://notion-flow.xheldon.com/docs/advanced/publishing/workflow' target='_blank'>发布功能使用说明</Link></Text>
                     </>
                 ),
             },
@@ -153,7 +153,7 @@ export default {
                 Label: 'OSS 服务提供商',
                 Extra: (
                     <>
-                        <Text type="secondary">Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。配置说明见<Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/oss/">图片上传</Link>。</Text>
+                        <Text type="secondary">Notion 图片地址有效期较短，因此获取 Notion 中的图片后需要及时转存到自己的 OSS 服务提供商中，必须配合 CDN 使用，否则裸连 OSS 费用高昂。配置说明见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/oss/" target='_blank'>图片上传</Link>。</Text>
                         <Text strong type="secondary">如果此处未填写或填写不完全、填写错误，Notion 模块转 Markdown 过程会忽略图片、视频等模块。</Text>
                     </>
                 ),
@@ -220,7 +220,7 @@ export default {
                     Message: '请输入 CDN 地址',
                     Extra: (
                         <>
-                            <Text type="secondary">详细使用说明见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/oss/cdn">为什么需要 CDN？</Link>。</Text>
+                            <Text type="secondary">详细使用说明见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/before-starting/oss/cdn" target='_blank'>为什么需要 CDN？</Link>。</Text>
                             <Text strong type="secondary">如果此处未填写（Notion Flow 不校验是否可用），Notion 模块转 Markdown 过程会忽略图片、视频等模块。</Text>
                         </>
                     ),
@@ -230,7 +230,7 @@ export default {
                     Message: '请输入图片路径',
                     Extra: (
                         <>
-                            <Text type="secondary">支持通配符，详细使用说明见 <Link href="notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#上传文件路径图片路径">上传文件路径/图片路径</Link>。</Text>
+                            <Text type="secondary">支持通配符，详细使用说明见 <Link href="https://notion-flow.xheldon.com/docs/advanced/publishing/plugin-configuration#上传文件路径图片路径" target='_blank'>上传文件路径/图片路径</Link>。</Text>
                             <Text strong type="secondary">如果此处未填写、填写错误（Notion Flow 不校验是否可用，但如果填写错误，图片将上传失败），Notion 模块转 Markdown 过程会忽略图片、视频等模块。</Text>
                         </>
                     ),
@@ -261,6 +261,7 @@ export default {
         },
         About: {
             Label: '关于',
+            Donate: 'https://notion-flow.xheldon.com/docs/preface#%E6%94%AF%E6%8C%81%E6%88%91%E7%9A%84%E5%BC%80%E5%8F%91%E5%B7%A5%E4%BD%9C'
         }
     }
 }

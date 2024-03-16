@@ -1,271 +1,267 @@
 import React from 'react';
-import {Typography} from 'antd';
+import { Typography } from 'antd';
 
-const {Text, Link} = Typography;
+const { Text, Link } = Typography;
+
 
 export default {
     Options: {
         Common: {
-            More: 'See',
-            Export: 'Export Setting',
-            Import: 'Import Setting',
-            ExportAndImport: 'Import & Export',
+            More: 'See more',
+            Export: 'Export configuration',
+            Import: 'Import configuration',
+            ExportAndImport: 'Import and export',
             Basic: 'Basic',
-            Advance: 'Advance',
+            Advance: 'Advanced',
             Message: {
-                OptionsSaveSucc: 'Setting saved successfully',
-                OptionsExportSucc: 'Export setting successfully',
-                OptionsExportFail: 'Export setting failed',
-                OptionsImportSucc: 'Import setting successfully',
-                OptionsImportFail: 'Import setting failed',
+                OptionsSaveSucc: 'Settings saved successfully',
+                OptionsSaveErr: 'Some required fields have errors, please check!',
+                OptionsExportSucc: 'Configuration exported successfully',
+                OptionsExportFail: 'Configuration export failed',
+                OptionsImportSucc: 'Configuration imported successfully',
+                OptionsImportFail: 'Configuration import failed',
             },
         },
         Basic: {
             Toc: {
-                Label: 'Heading Style',
-                Text: 'Text（H1 H2 H3）',
-                Number: 'Number（1. 2. 3.）',
-                None: 'None（Only Intent）'
+                Label: 'Heading style',
+                Text: 'Text (H1 H2 H3)',
+                Number: 'Number (1. 2. 3.)',
+                None: 'None (just indentation)'
             },
-            ScrollAnimation: 'Locate Heading Animation',
-            ReloadRxplain: 'Making changes here will refresh this page and the plugin interface.',
-            MoreFeature: 'More configurable options will be made available later on, such as whether to use animations when scrolling in Notion, scroll speed, types of notifications, theme colors, Markdown syntax styles, etc. Please stay tuned.',
+            ScrollAnimation: 'Heading positioning animation',
+            Language: 'Language',
+            ReloadRxplain: 'Modifying this will refresh this page and the plugin interface',
+            MoreFeature: 'More configurable options will be available in the future, such as animation scroll speed when scrolling Notion, notification types, theme colors, Markdown syntax styles, etc., so stay tuned.',
+        },
+        Notion: {
+            Label: 'Notion API Token',
+            Message: 'Please enter Notion Token',
+            Desc: (
+                <>
+                    <Text type="secondary">Notion Flow needs to use the Notion Integration Token to access Notion content. For more information on how to obtain it, please refer to <Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/before-starting/notion' target='_blank'>Notion Configuration</Link>.</Text>
+                </>
+            ),
         },
         Publisher: {
-            Common : {
+            Common: {
                 PublishToGithub: 'Publish to Github',
+                EnableFrontMatter: {
+                    Label: 'Enable Front Matter',
+                    Desc: (
+                        <>
+                            <Text type="secondary">If your blogging system supports Front Matter, you need to enable this option, such as Jekyll, VitePress, Hugo, etc. This will insert content at the top of the Markdown content wrapped in three backticks `---`, which is the Front Matter. For more details, see <Link href="https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#enable-front-matter" target='_blank'>Enable Front Matter</Link>.</Text>
+                            <br />
+                            <Text strong type="secondary">Note that if this option is turned off, the "add lastUpdateTime" setting at the bottom of this page will also be invalid.</Text>
+                        </>
+                    ),
+                },
                 Desc: (
-                <>
-                    <Text>The Publisher function allows you to publish content from Notion to GitHub Pages<Text strong mark type="danger">(Currently only supports Jekyll blogging system.).</Text></Text>
-                    <br />
-                    <Text>In the future, it will also support writing Ruby plugins directly in the plugin that are supported by the Jekyll blog system for Github Pages. This will allow the correct display of Notion's non-standard Markdown modules in the blog, with the Bookmark module being a typical example.</Text>
-                    <br />
-                    <Text strong>You are free to choose whether to enable the publishing function, but please be aware that this requires you to be familiar with concepts such as Github Personal Token, Notion integration, OSS Token, etc.</Text>
-                </>),
+                    <>
+                        <Text type="secondary">The publishing function allows you to publish Notion content in Markdown format to Github Pages, see below for more configuration.</Text>
+                        <br />
+                        <Text type="secondary" strong>Note that you need to be familiar with Github Personal Token, Notion Integration Token, OSS Token, CDN, and other related concepts.</Text>
+                    </>),
                 Alert: (
                     <>
-                        <Text mark>Important! Must Read Before Use!</Text>
-                        <Text strong><Link href='https://xheldon.notion.site/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4' target='_blank'>Issuance of Instructions and Q&A for Advanced Features Usage</Link></Text>.
+                        <Text strong type="danger">Important! Read before use:</Text>
+                        <Text strong><Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/workflow' target='_blank'>Publishing Function Instructions</Link></Text>
                     </>
-                )
-            },
-            Notion: {
-                Label: 'Notion Token',
-                Tooltips: 'How to get notion token',
-                Message: 'Notion token is required',
+                ),
             },
             Github: {
                 Token: {
                     Label: 'Github Personal Token',
-                    Tooltips: 'How to get github personal token',
-                    Message: 'Github personal token is required',
+                    Tooltips: 'How to get Github Token',
+                    Message: 'Enter Github Token',
                 },
                 Repo: {
-                    Label: 'Github repo',
-                    Tooltips: 'How to get github repo name',
-                    Message: 'Repo name is required',
+                    Label: 'Github Repository',
+                    Tooltips: 'How to get Github Repo Name',
+                    Message: 'Enter the name of the repository where the blog is located',
                 },
                 Branch: {
-                    Label: 'Github branch',
-                    Tooltips: 'How to get github branch name',
-                    Message: 'Branch name is required',
+                    Label: 'Github Branch',
+                    Tooltips: 'How to get the Github branch name',
+                    Message: 'Enter the blog repository branch name',
                 },
                 User: {
-                    Label: 'Github owner',
-                    Tooltips: 'How to get github username',
-                    Message: 'Owner is required',
+                    Label: 'Github Username',
+                    Tooltips: 'How to get Github Username',
+                    Message: 'How to get the Github Username',
                 },
                 FilePath: {
-                    Label: 'Upload file Path',
-                    Placeholder: 'Please enter the file path to publish to the Github repository',
+                    Label: 'Upload file path',
+                    Placeholder: 'Enter the file path to be uploaded to the Github repository',
                     Extra: (
                         <>
-                            <Text>Set the file path to publish to the Github repository here, with support for using {"{{}}"} to reference Notion Page Property fields, as well as variables such as YYYY, YY, MM, DD, etc. See details: <Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to set up the file upload path?</Link></Text>
+                            <Text type="secondary">Set the file path to be uploaded to the Github repository here, supporting the use of {"{{}}"} to reference Notion Page Properties fields as well as variables such as YYYY, YY, MM, DD, etc. For more details, see: <Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#file-upload-path--image-path' target='_blank'>Upload file path/image path</Link></Text>
                         </>
                     ),
-                    Tooltips: 'How to set github file path',
-                    Message: 'File path is required',
+                    Tooltips: 'How to set the upload file path',
+                    Message: 'Enter the upload file path',
                 },
                 AddLastUpdateTime: {
-                    Label: 'Auto Add \'lastUpdateTime\'',
+                    Label: 'Add "lastUpdateTime"',
                     Extra: (
                         <>
-                            <Text>When publishing a blog from Notion Flow, automatically add a fixed 'lastUpdateTime' field to the Front Matter, which you can use in your Jekyll blog to inform readers of the last update date, see details:<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to use lastUpdateTime?</Link></Text>
+                            <Text type="secondary"><Text strong> (Front Matter needs to be enabled) </Text> When publishing a blog from Notion Flow, automatically add a fixed "lastUpdateTime" field to the Front Matter. You can use this field in the blog to tell readers the last update date. For more details, see: <Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#automatically-add-lastupdatetime' target='_blank'> Automatically add lastUpdateTime</Link></Text>
                         </>
                     ),
                 },
                 UpdateNotionLastUpdateTime: {
-                    Label: 'Update the \'lastUpdateTime\' field',
+                    Label: 'Update "lastUpdateTime"',
                     Extra: (
                         <>
-                            <Text>After successfully publishing a blog from Notion Flow, update the lastUpdateTime Property on the Notion Page. This will allow you to easily see when the article was last posted in Notion. You will need to add this field to the Notion Page's Property in advance. See the detailed information for further instructions. See details:<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to check the last published time of a page in Notion?</Link></Text>
+                            <Text type="secondary">After successfully publishing a blog from Notion Flow, update the Notion Page's lastUpdateTime Property for you to view when the article was last published in Notion. This field needs to be added in advance. For more details, see: <Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#automatically-update-lastupdatetime' target='_blank'> Automatically update lastUpdateTime</Link></Text>
                         </>
                     ),
                 },
                 FrontMatter: {
-                    Label: 'Fixed Front Matter',
+                    Label: 'Other Front Matter fields',
                     Extra: (
                         <>
-                            <Text>Under normal circumstances, you should write the Front Matter related to the page within the Property section of Pages. Here, you can write fixed Front Matter. For example, in my use case, I set a 'layout: post' property for each blog post published through Notion Flow. See details: <Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to set up a fixed Front Matter?</Link></Text>
+                            <Text type="secondary"><Text strong> (Front Matter needs to be enabled) </Text> In general, you should write Front Matter related to the page in the Pages Property. Write fixed Front Matter here, such as my use case, to set a layout: post attribute for each blog article published through Notion Flow. For more details, see: <Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#other-front-matter-fields' target='_blank'> Other Front Matter fields</Link></Text>
                         </>
                     ),
-                    Placeholder: 'Enter the additional fixed Front Matter fields, separated by English commas.'
+                    Placeholder: 'Enter other fixed Front Matter fields to be used in the blog, separated by English commas'
                 },
                 HeaderImgName: {
-                    Label: 'Header image name',
+                    Label: 'Header image field name',
                     Extra: (
                         <>
-                            <Text>The header image of the Notion Page can be used as the header image for the blog. You need to set which field in the Front Matter to correspond to the Notion header image. Then, use this field in the Jekyll blog (the image will be uploaded to OSS). <Text italic>(Leave blank if not applicable)</Text>See details: <Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#f3b5e0d7e5b94f2a9f3f7f8c5a9a6e7b' target='_blank'>How to set up a header image?</Link></Text>
+                            <Text type="secondary"><Text strong> (Front Matter needs to be enabled) </Text> The header image of the Notion Page can be used as the header image of the blog. Set here which field of Noiton header image will be set as Front Matter, then use this field in the blog (the image will be uploaded to OSS). <Text italic type="secondary"> (Leave blank if not used) </Text> For more details, see: <Link href='https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#front-matter-fields-for-header-images' target='_blank'>Head image Front Matter fields</Link></Text>
                         </>
                     ),
-                    Placeholder: 'Leave blank if not applicable'
+                    Placeholder: 'Leave blank if not in use'
                 },
-                Transform: {
-                    Label: 'Conversion',
-                    Desc: (
-                        <Text strong>Notion contains non-standard Markdown formats, such as Bookmarks and Video. However, with some configuration and a bit of coding, you can also support the modules you want on your own blog, although this will require certain style settings. See details:<Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>如何使用内置处理插件？</Link></Text>
-                    ),
-                    Image: 'Image',
-                    Bookmark: 'Bookmark',
-                    Callout: 'Callout',
-                    Quoteblock: 'Quoteblock',
-
-                }
+                /* Transform: {
+                Label: 'Module Conversion:',
+                Desc: (
+                    <>
+                        <Text strong type="warning"> Currently only supports the Jekyll blogging system, and will consider user feedback to support more blogging systems in the future, so stay tuned! </Text>
+                        <Text type="secondary">Notion contains non-standard Markdown formats, such as Bookmark, Video. However, with certain configurations and a small amount of code writing, you can also support the modules you want on your own blog, which requires some style settings. For more details, see: <Link href='https://www.notion.so/xheldon/Notion-Flow-WiKi-5904baba92464f55ba03d8a8a68eae0b?pvs=4#82254baee3524131b6b36a777e72fc0a' target='_blank'>How to use built-in processing plug-ins?</Link></Text>
+                    </>
+                ),
+                Image: 'Image',
+                Bookmark: 'Bookmark',
+                Callout: 'Callout',
+                Quoteblock: 'Quoteblock',
+                } */
             },
             Oss: {
                 Label: 'OSS Service Provider',
                 Extra: (
                     <>
-                        <Text>Notion image URLs have a short validity period, so after retrieving images from Notion, it is necessary to promptly transfer them to your own OSS (Object Storage Service) provider. It is essential to use in conjunction with a CDN (Content Delivery Network); otherwise, the costs of directly connecting to the OSS are exorbitant.</Text>
-                        <br />
-                        <Text strong italic>More OSS service providers are in development...</Text>
+                        <Text type="secondary">The validity period of the Notion image address is short, so after obtaining the image in Notion, it needs to be promptly stored in your own OSS service provider and must be used with CDN, otherwise the cost of direct connection to the OSS is high. Configuration instructions can be found in <Link href="https://notion-flow.xheldon.com/en/docs/advanced/publishing/before-starting/oss/" target='_blank'>Image Upload</Link>.</Text>
+                        <Text strong type="secondary">If this field is not filled in, filled in incompletely, or filled in incorrectly, the Notion module to Markdown conversion process will ignore the module such as images and videos.</Text>
                     </>
                 ),
                 TX: {
                     Label: 'Tencent Cloud',
                     SecretId: {
                         Label: 'SecretId',
-                        Tooltips: 'How to get tecent cloud secretId',
-                        Message: 'SecretId is required'
+                        Message: 'Please enter Tencent Cloud SecretId'
                     },
                     SecretKey: {
                         Label: 'SecretKey',
-                        Tooltips: 'How to get tecent cloud SecretKey',
-                        Message: 'SecretKey is required'
+                        Message: 'Please enter Tencent Cloud SecretKey'
                     },
                     Bucket: {
                         Label: 'Bucket',
-                        Tooltips: 'How to get tecent cloud bucket',
-                        Message: 'Bucket is required'
+                        Message: 'Please enter Tencent Cloud Bucket'
                     },
                     Region: {
                         Label: 'Region',
-                        Tooltips: 'How to get tecent cloud region',
-                        Message: 'Region is required'
-                    },
-                    CDN: {
-                        Label: 'CDN address',
-                        Tooltips: 'How to set tecent cloud CDN address',
-                        Message: 'CDN address is required'
-                    },
-                    MediaPath: {
-                        Label: 'Media path',
-                        Tooltips: 'How to set tecent cloud media path',
-                        Message: 'Media path is required'
+                        Message: 'Please enter Tencent Cloud Region'
                     },
                 },
                 ALI: {
                     Label: 'Alibaba Cloud',
                     SecretId: {
                         Label: 'AccessKey Id',
-                        Tooltips: 'How to get alibaba cloud  accessKey id',
-                        Message: 'AccessKey id is required'
+                        Tooltips: 'How to get Alibaba Cloud AccessKey Id',
+                        Message: 'Please enter Alibaba Cloud AccessKey Id'
                     },
                     SecretKey: {
                         Label: 'AccessKey Secret',
-                        Tooltips: 'How to get alibaba cloud accessKey secret',
-                        Message: 'AccessKey secret is required'
+                        Message: 'Please enter Alibaba Cloud AccessKey Secret'
                     },
                     Bucket: {
                         Label: 'Bucket',
-                        Tooltips: 'How to get alibaba cloud bucket',
-                        Message: 'Bucket is required'
+                        Message: 'Please enter Alibaba Cloud Bucket'
                     },
                     Region: {
                         Label: 'Region',
-                        Tooltips: 'How to get alibaba cloud region',
-                        Message: 'Region is required'
-                    },
-                    CDN: {
-                        Label: 'CDN address',
-                        Tooltips: 'How to set alibaba cloud CDN address',
-                        Message: 'CDN address is required'
-                    },
-                    MediaPath: {
-                        Label: 'Media path',
-                        Tooltips: 'How to set alibaba cloud media path',
-                        Message: 'Media path is required'
+                        Message: 'Please enter Alibaba Cloud Region'
                     },
                 },
                 AWS: {
                     Label: 'AWS',
                     SecretId: {
                         Label: 'Access key',
-                        Tooltips: 'How to get AWS access key',
-                        Message: 'Access key is required'
+                        Message: 'Please enter AWS Access key'
                     },
                     SecretKey: {
                         Label: 'Secret Access Key',
-                        Tooltips: 'How to get AWS secret sccess key',
-                        Message: 'Secret access key is required'
+                        Message: 'Please enter AWS Secret Access Key'
                     },
                     Bucket: {
                         Label: 'Bucket',
-                        Tooltips: 'How to get AWS bucket',
-                        Message: 'Bucket is required'
+                        Message: 'Please enter AWS Bucket'
                     },
                     Region: {
                         Label: 'Region',
-                        Tooltips: 'How to get AWS region',
-                        Message: 'Region is required'
+                        Message: 'Please enter AWS Region'
                     },
-                    CDN: {
-                        Label: 'CDN address',
-                        Tooltips: 'How to set AWS CDN address',
-                        Message: 'CDN address is required'
-                    },
-                    MediaPath: {
-                        Label: 'Media path',
-                        Tooltips: 'How to set AWS media path',
-                        Message: 'Media path is required'
-                    },
+                },
+                CDN: {
+                    Label: 'CDN Address',
+                    Message: 'Please enter CDN Address',
+                    Extra: (
+                        <>
+                            <Text type="secondary">For detailed usage instructions, please refer to <Link href="https://notion-flow.xheldon.com/en/docs/advanced/publishing/before-starting/oss/cdn" target='_blank'>Why do we need CDN?</Link>.</Text>
+                            <Text strong type="secondary">If this field is not filled in (Notion Flow does not verify its usability), the Notion module to Markdown conversion process will ignore modules such as images and videos.</Text>
+                        </>
+                    ),
+                },
+                MediaPath: {
+                    Label: 'Image Path',
+                    Message: 'Please enter Image Path',
+                    Extra: (
+                        <>
+                            <Text type="secondary">Supports wildcards, for detailed usage instructions, please refer to <Link href="https://notion-flow.xheldon.com/en/docs/advanced/publishing/plugin-configuration#upload-file-path-image-path" target='_blank'>Upload File Path/Image Path</Link>.</Text>
+                            <Text strong type="secondary">If this field is not filled in or filled in incorrectly (Notion Flow does not verify its usability, but if filled in incorrectly, the image will fail to upload), the Notion module to Markdown conversion process will ignore modules such as images and videos.</Text>
+                        </>
+                    ),
                 },
             },
         },
         AIGC: {
-            Label: 'AI(coming soon)',
+            Label: 'AI (coming soon)',
             Extra: (
                 <>
-                    <Text>The AIGC functionality allows you to use AIGC features through the OpenAI API, which is not as convenient as Notion AI (for example, needing to select content, generate content then paste it; or selecting a block before clicking to insert), but it offers greater flexibility and is more cost-effective.</Text>
+                    <Text type="secondary">The AIGC function allows you to use the AIGC function in the form of the OpenAI API. Although it is not as convenient as Notion AI (such as needing to select content, then generate content and paste it, or select a block and click insert), it offers higher flexibility and lower cost.</Text>
                     <br />
-                    <Text strong>You are free to choose whether to enable the AIGC feature, please note that this requires you to provide the OpenAI API.</Text>
+                    <Text strong type="secondary">You can freely choose whether to enable the AIGC function, but please note that you will need to provide the OpenAI API.</Text>
                 </>
             ),
         },
         Plugin: {
-            Label: 'Plugin(coming soon)',
+            Label: 'Plugin (coming soon)',
             Extra: (
                 <>
-                    <Text>Plugin features allow you to participate in the construction of Notion blog content by writing code. For example, you can create custom Notion Block processing functions to generate content in specific formats, and then customize Jekyll plugins to handle that specific content to generate particular HTML. A typical use case is handling Bookmark elements in Notion that use non-standard Markdown syntax.</Text>
+                    <Text type="secondary">The plugin function allows you to participate in the construction of Notion blog content through coding, such as customizing Notion Block processing functions to generate specific format content, and then customizing blog plugins (such as Jekyll's ruby plugins) to process this specific content to generate specific HTML. A typical use case is handling Bookmark elements with non-standard Markdown syntax in Notion.</Text>
                     <br />
-                    <Text>Another typical use of a plugin is that it allows you to modify the content of a Notion page after a successful publication, such as updating the 'lastUpdateTime' field, etc.</Text>
+                    <Text type="secondary">Another typical use case for plugins is to allow you to modify Notion page content after successful publication, such as updating the lastUpdateTime field.</Text>
                     <br />
-                    <Text strong>You are free to choose whether or not to activate the "Plugin Love You" feature. Please note that this requires you to be familiar with JavaScript and Ruby as well as the Notion API, and to understand the principles behind the construction of this plugin.</Text>
+                    <Text strong type="secondary">You can freely choose whether to enable the Plugin function, but please note that you need to be familiar with JavaScript and Ruby as well as the Notion API, and understand the construction principles of this plugin.</Text>
                 </>
             ),
         },
         About: {
-            Labe: 'About',
+            Label: 'About',
+            Donate: 'https://notion-flow.xheldon.com/en/docs/preface#support-my-development-work'
         }
     }
 }

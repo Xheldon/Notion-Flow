@@ -622,21 +622,21 @@ function OptionsIndex() {
                     <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>{LocaleConfig.Options.About.Label}</Divider>
                     <Paragraph>
                         <Text>
-                            Email: <Link href="mailto:c1006044256@gmail.com" target="_blank">c1006044256[at]gmail.com</Link>
+                            Email:&nbsp;&nbsp;<Link href="mailto:c1006044256@gmail.com" target="_blank">c1006044256[at]gmail.com</Link>
                         </Text>
                         <br />
                         <Text>
-                            Blog:  <Link href="https://www.xheldon.com" target="_blank">https://www.xheldon.com</Link>
+                            Blog:&nbsp;&nbsp;<Link href="https://www.xheldon.com" target="_blank">https://www.xheldon.com</Link>
                         </Text>
                         <br />
                         <Text>
-                            Donate: <Link href="https://notion-flow.xheldon.com/docs/preface#%E6%94%AF%E6%8C%81%E6%88%91%E7%9A%84%E5%BC%80%E5%8F%91%E5%B7%A5%E4%BD%9C" target="_blank">Support my work!</Link>
+                            Donate:&nbsp;&nbsp;<Link href={LocaleConfig.Options.About.Donate} target="_blank">Support my work!</Link>
                         </Text>
                         <br />
                         <Text>
-                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">Telegrem</Link> &nbsp;&nbsp;&nbsp;
-                            <Link href="https://twitter.com/_Xheldon" target="_blank">Twitter</Link> &nbsp;&nbsp;&nbsp;
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Issues</Link> &nbsp;&nbsp;&nbsp;
+                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">Telegrem</Link>&nbsp; | &nbsp; 
+                            <Link href="https://twitter.com/_Xheldon" target="_blank">Author Twitter</Link>&nbsp; | &nbsp; 
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Issues</Link>&nbsp; | &nbsp; 
                             <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">Discussions</Link> 
                         </Text>
 
