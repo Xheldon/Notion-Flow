@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Row, Collapse, notification, message, Typography } from "antd";
+import { Button, Row, Collapse, Typography } from "antd";
 import { ClearOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import type { MouseEvent } from 'react';
@@ -30,8 +30,6 @@ const Publisher = (props: any) => {
     const [activeLog, setActiveLog] = useState(config.logFold);
     const [pluginCode, setPluginCode] = useState(config.pluginCode || '{}');
     const [loading, setLoading] = useState(false);
-    const [noti, contextHolder] = notification.useNotification();
-    const [messageApi, contextHolder2] = message.useMessage();
 
     const onItemClick = useCallback((itemName: 'Func' | 'Plugin' | 'Log') => {
         return () => {
@@ -192,8 +190,6 @@ const Publisher = (props: any) => {
 
     return (
         <>
-            {contextHolder}
-            {contextHolder2}
             <iframe src="sandbox.html" ref={iframeRef} style={{ display: "none" }} />
             <Panel {...restProps} isActive={activeFunc} onItemClick={onItemClick('Func')} header="功能" key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>

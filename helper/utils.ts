@@ -409,6 +409,9 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                         const url = block[block.type]?.url;
                         if (url) {
                             return this.uploadNotionImageToOSS({url, meta, id, debug}).then(ossUrl => {
+                                if (!ossUrl) {
+                                    return Promise.resolve('');
+                                }
                                 const caption = _inline(block.caption);
                                 return new Promise((res) => {
                                     block.url = ossUrl;
@@ -436,7 +439,7 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                             });
                             // return `{% render_caption caption="${caption}" img="${ossUrl}" %}\n![${caption}](${ossUrl})\n{% endrender_caption %}\n`
                         }
-                        return `[NO image url]\n`;
+                        return Promise.resolve('');
                     }
                     case 'heading_1': {
                         const text = _inline(block.rich_text);
@@ -700,6 +703,10 @@ const notion2markdown = async function (list: any, meta: Meta, indent: number, d
                                 // Note: 获取文件后缀
                                 try {
                                     const _ossUrl = await this.uploadNotionImageToOSS({url: _url, meta, id: item.id, debug});
+                                    if (!_ossUrl) {
+                                        // Note: 如果 ossUrl 不存在，可能是 oss 服务未配置，忽略上传该文件
+                                        return  Promise.resolve('');
+                                    }
                                     let suffix = '';
                                     const ossUrl = new URL(_ossUrl);
                                     const arr = ossUrl.pathname.split('.');

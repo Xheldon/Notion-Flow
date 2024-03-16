@@ -118,20 +118,20 @@ export default class Req {
         try {
             await updateConfigDeco.call(this);
             if (!this.oss) {
-                logToRenderer('error',
-                    cn ? '[OSS] OSS 服务未配置' : '[OSS] OSS service not config');
+                logToRenderer('warn',
+                    cn ? '[OSS] OSS 服务未配置，媒体文件将会被忽略' : '[OSS] OSS service not config, media will be ignored');
                 return Promise.resolve(null);
             }
             const cdn = oss?.cdn;
             if (!cdn) {
-                logToRenderer('error',
-                    cn ? '[OSS] CDN 地址未配置' : '[OSS] CDN address not config');
+                logToRenderer('warn',
+                    cn ? '[OSS] CDN 地址未配置，媒体文件将会被忽略' : '[OSS] CDN address not config, media will be ignored');
                 return Promise.resolve(null);
             }
             const mediaPath = oss.mediaPath;
             if (!mediaPath) {
-                logToRenderer('error',
-                    cn ? '[OSS] 媒体上传路径未配置' : '[OSS] Media path not config');
+                logToRenderer('warn',
+                    cn ? '[OSS] 媒体上传路径未配置，媒体文件将会被忽略' : '[OSS] Media path not config, media will be ignored');
                 return Promise.resolve(null);
             }
             const {url, meta, id, debug, uuid = ''} = props;
@@ -274,7 +274,13 @@ export default class Req {
                     if (cover && publisher?.['headerImgName']) {
                         const pathname = new URL(cover).pathname;
                         return this.uploadNotionImageToOSS({url: cover, meta, id: blockId, debug, uuid: pathname}).then(coverUrl => {
-                            meta[publisher['headerImgName']] = coverUrl;
+                            if (!coverUrl) {
+                                // Note: coverUrl 不存在，可能是 oss 服务未配置，忽略该属性
+                                logToRenderer('warn',
+                                    cn ? '[OSS] OSS 服务未配置，头图将会被忽略：' : '[OSS] OSS service not config, cover image will be ignored:');
+                            } else {
+                                meta[publisher['headerImgName']] = coverUrl;
+                            }
                             // Note: 过滤掉空属性
                             Object.keys(meta).forEach(key => {
                                 if (!meta[key]) {
@@ -467,6 +473,8 @@ export default class Req {
                 }
                 if (ossRegion && ossBucket && ossSecretId && ossSecretKey) {
                     this.oss = this.OSSPolyfill(ossName, props.oss, lang === 'cn');
+                } else {
+                    this.oss = null;
                 }
                 // Note: todo 通知 renderer 信息不完整，禁用发布等按钮
                 if (githubOwner && githubRepo && githubBranch && githubToken) {

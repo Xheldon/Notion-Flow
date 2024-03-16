@@ -141,7 +141,7 @@ function App() {
             enabledTabs = {
                 basic: true,
                 publisher: !!options?.publisher?.enable,
-                aigc: !!options?.aigc?.enable,
+                aigc: false,
                 plugin: false,
             };
             if (options) {
