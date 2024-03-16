@@ -128,7 +128,7 @@ export default class Req {
                     cn ? '[OSS] CDN 地址未配置，媒体文件将会被忽略' : '[OSS] CDN address not config, media will be ignored');
                 return Promise.resolve(null);
             }
-            const mediaPath = oss.mediaPath;
+            const mediaPath = oss?.mediaPath;
             if (!mediaPath) {
                 logToRenderer('warn',
                     cn ? '[OSS] 媒体上传路径未配置，媒体文件将会被忽略' : '[OSS] Media path not config, media will be ignored');
