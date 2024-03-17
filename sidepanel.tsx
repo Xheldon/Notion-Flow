@@ -75,7 +75,7 @@ const tabList = [
                 icon: <span>🧑🏻‍💻</span>,
                 children: (
                     <Collapse size="small">
-                        <Publisher {...props} />
+                        <Publisher {...props} cn={opt.cn} />
                     </Collapse>
                 ),
             };
@@ -97,10 +97,10 @@ const tabList = [
     },
     {
         key: "plugin",
-        content: (props) => {
+        content: (props, opt) => {
             return {
                 key: "plugin",
-                label: props.cn ? "插件" : 'Plugin',
+                label: opt.cn ? "插件" : 'Plugin',
                 children: <div>插件列表</div>
             };
         }
@@ -133,7 +133,8 @@ function App() {
     const [tabs, setTabs] = useState([]);
     const [tocstyle, setTocStyle] = useState("text");
     const req = useRef(null);
-    const cn = navigator.language === 'zh-CN';
+    const [cn, setCn] = useState(true);
+    // const cn = navigator.language === 'zh-CN';
 
     useEffect(() => {
         (async () => {
@@ -154,6 +155,7 @@ function App() {
                 };
                 req.current = new Req(_publisherOptions);
             }
+            setCn(options?.language === 'cn');
             setTabs(Object.keys(enabledTabs).filter((key) => enabledTabs[key]));
             setTocStyle(options?.['heading-style'] || 'text');
         })();
@@ -188,6 +190,7 @@ function App() {
                 if (language !== preLanguage) {
                     window.location.reload();
                 }
+                setCn(language === 'cn');
                 const enabledTabs = {
                     basic: true,
                     publisher: !!publisher?.enable,
@@ -233,14 +236,14 @@ function App() {
                         tabBarExtraContent={{
                             right: (
                                 <>
-                                    <Tooltip title={cn ? "Notion 返回顶部" : 'Notion Back To Top'}>
+                                    <Tooltip title={cn ? "Notion 返回顶部" : 'Notion Back to top'}>
                                         <Button type={"link"} size={"small"}>
                                             <VerticalAlignTopOutlined onClick={() => {
                                                 _toContent('notion-page-backtop');
                                             }} />
                                         </Button>
                                     </Tooltip>
-                                    <Tooltip title={"插件返回顶部"}>
+                                    <Tooltip title={cn ? "插件返回顶部" : 'Plugin Back to top'}>
                                         <Button type={"link"} size={"small"}>
                                             <ArrowUpOutlined onClick={() => {
                                                 window.document.scrollingElement.scrollTop = 0;
