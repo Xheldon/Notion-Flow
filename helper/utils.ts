@@ -314,7 +314,7 @@ const _inline = (list: any): string => {
         const content = curr[curr.type].content || curr[curr.type].expression;
         const isLink = curr[curr.type].link;
         if (isLink) {
-            return prev += `[${annotations}${content}${annotationsReverse}](${isLink})`;
+            return prev += `[${annotations}${content}${annotationsReverse}](${isLink.url})`;
         }
         return prev += `${annotations}${content}${annotationsReverse}`;
     }, '');
