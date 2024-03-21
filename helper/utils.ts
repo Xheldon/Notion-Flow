@@ -918,14 +918,14 @@ const notionMeta2string = (meta: Meta): Promise<string> => {
             _lastUpdateTime = `${_.getFullYear()}-${_.getMonth() + 1}-${_.getDate()} ${_.getHours()}:${_.getMinutes()}:00 +0800`
         }
         return `---
-    title: ${title}
-    date: ${dateString}${_lastUpdateTime ? '\nlastUpdateTime: ' + _lastUpdateTime : ''}
-    name: ${name}${fM ? '\n' + fM : ''}
-    ${Object.keys(rest).reduce((prev, curr) => {
-            return prev += `${curr}: ${Array.isArray(rest[curr]) ? `\n${(rest[curr] as string[]).map(item => `    - ${item}`).join('\n')}` : rest[curr]}\n`;
-        }, '')}---
+title: ${title}
+date: ${dateString}${_lastUpdateTime ? '\nlastUpdateTime: ' + _lastUpdateTime : ''}
+name: ${name}${fM ? '\n' + fM : ''}
+${Object.keys(rest).reduce((prev, curr) => {
+        return prev += `${curr}: ${Array.isArray(rest[curr]) ? `\n${(rest[curr] as string[]).map(item => `    - ${item}`).join('\n')}` : rest[curr]}\n`;
+}, '')}---
     
-    `;
+`;
     });
 };
 
