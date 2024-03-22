@@ -195,7 +195,7 @@ const Publisher = (props: any) => {
             <Panel {...restProps} isActive={activeFunc} onItemClick={onItemClick('Func')} header={cn ? '功能' : 'Function'} key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>
                     <Button key="log" disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>{cn ? '调试(不上传任何文件)' : 'Debug(No upload anthing)'}</Button>
-                    <Button key="publish" disabled={loading} type={'primary'} size={'small'} onClick={onPublish}>{cn ? '发布到 Github' : 'Publish to Github'}</Button>
+                    <Button key="publish" disabled={loading} loading={loading} type={'primary'} size={'small'} onClick={onPublish}>{cn ? '发布到 Github' : 'Publish to Github'}</Button>
                 </Row>
             </Panel>
             <Panel {...restProps} isActive={activePlugin} onItemClick={onItemClick('Plugin')} header={cn ? '模块处理插件' : 'Module Conversion'} key='plugin'>

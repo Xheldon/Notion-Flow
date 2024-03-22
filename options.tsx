@@ -305,6 +305,9 @@ function OptionsIndex() {
                     const jsonObj = JSON.parse(text);
                     console.log('导入配置文件:', jsonObj);
                     form.setFieldsValue(jsonObj);
+                    (async () => {
+                        await storage.set('options', jsonObj);
+                    })();
                     messageApi.open({
                         type: 'success',
                         content: LocaleConfig.Options.Common.Message.OptionsImportSucc,

@@ -264,6 +264,9 @@ export default class Req {
                             case 'formula':
                                 meta[key] = getPropertyCompuValue(obj);
                                 break;
+                            case 'checkbox':
+                                meta[key] = getPropertyValue(obj);
+                                break;
                             default:
                                 break;
                         }
