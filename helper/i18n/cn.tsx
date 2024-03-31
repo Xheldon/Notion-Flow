@@ -214,6 +214,15 @@ export default {
                         Label: 'Region',
                         Message: '请输入 AWS Region'
                     },
+                    Endpoint: {
+                        Label: 'Endpoint',
+                        Message: '请输入自建 OSS Endpoint (可选)',
+                        Extra: (
+                            <Text>
+                                （官方 AWS S3 请留空）支持兼容 AWS S3 API 的自建 OSS 服务，可以在这里填写 Endpoint，如 <Link href="https://developers.cloudflare.com/r2/examples/aws/aws-sdk-js-v3/">Clouldflare R2</Link> 等。
+                            </Text>
+                        )
+                    }
                 },
                 CDN: {
                     Label: 'CDN 地址',
@@ -261,7 +270,8 @@ export default {
         },
         About: {
             Label: '关于',
-            Donate: 'https://notion-flow.xheldon.com/docs/preface#%E6%94%AF%E6%8C%81%E6%88%91%E7%9A%84%E5%BC%80%E5%8F%91%E5%B7%A5%E4%BD%9C'
+            Donate: 'https://notion-flow.xheldon.com/support-me',
+            Version: 'https://notion-flow.xheldon.com/blog/2024/03/31/0.4.1'
         }
     }
 }

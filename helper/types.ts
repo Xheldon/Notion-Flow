@@ -25,6 +25,7 @@ export interface OssConfig {
     secretKey: string;
     bucket: string;
     region: string;
+    endpoint?: string;
 }
 
 export interface PublisherRequestConfig {
