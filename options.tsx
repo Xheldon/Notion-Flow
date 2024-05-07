@@ -158,6 +158,13 @@ const ossFormItems = (Locale) => {
             message: Locale.Options.Publisher.Oss.AWS.Region.Message,
             name: ['region'],
             secret: true,
+        },
+        {
+            label: Locale.Options.Publisher.Oss.AWS.Endpoint.Label,
+            message: Locale.Options.Publisher.Oss.AWS.Endpoint.Message,
+            extra: Locale.Options.Publisher.Oss.AWS.Endpoint.Extra,
+            name: ['endpoint'],
+            secret: true,
         }],
     };
 };
@@ -223,6 +230,7 @@ function OptionsIndex() {
                             secretKey: '',
                             bucket: '',
                             region: '',
+                            endpoint: '',
                         },
                         cdn: '',
                         mediaPath: '',
@@ -453,6 +461,7 @@ function OptionsIndex() {
                                             key={name.toString()}
                                             style={{ marginBottom: 20 }}
                                             labelAlign='right'
+                                            {...(item.extra ? { extra: item.extra } : {})}
                                             // tooltip={tooltips(_tooltips)}
                                             // rules={[{ required: true, message }]}
                                             name={_name}
@@ -625,6 +634,10 @@ function OptionsIndex() {
                     <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>{LocaleConfig.Options.About.Label}</Divider>
                     <Paragraph>
                         <Text>
+                            Version:&nbsp;&nbsp;<Link href={LocaleConfig.Options.About.Version} target="_blank">0.4.1</Link>
+                        </Text>
+                        <br />
+                        <Text>
                             Email:&nbsp;&nbsp;<Link href="mailto:c1006044256@gmail.com" target="_blank">c1006044256[at]gmail.com</Link>
                         </Text>
                         <br />
@@ -638,6 +651,7 @@ function OptionsIndex() {
                         <br />
                         <Text>
                             <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">Telegrem</Link>&nbsp; | &nbsp; 
+                            <Link href="https://twitter.com/real_notionflow" target="_blank">Twitter</Link>&nbsp; | &nbsp; 
                             <Link href="https://twitter.com/_Xheldon" target="_blank">Author Twitter</Link>&nbsp; | &nbsp; 
                             <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Issues</Link>&nbsp; | &nbsp; 
                             <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">Discussions</Link> 

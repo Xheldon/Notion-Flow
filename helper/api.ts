@@ -476,6 +476,7 @@ export default class Req {
                         bucket: ossBucket,
                         secretId: ossSecretId,
                         secretKey: ossSecretKey,
+                        endpoint: ossEndpoint,
                     },
                     ossName,
                 } = props || {};
@@ -504,7 +505,7 @@ export default class Req {
     // Note: 根据 oss 服务的名字，对外提供统一的接口
     //  因为先接入的腾讯云，就以他作为标准了
     OSSPolyfill(name, ossConfig, cn) {
-        const {region, bucket, secretId, secretKey} = ossConfig;
+        const {region, bucket, secretId, secretKey, endpoint} = ossConfig;
         switch (name) {
             case 'tx': {
                 const oss = new txOSS({
@@ -600,7 +601,8 @@ export default class Req {
                     credentials: {
                         accessKeyId: secretId,
                         secretAccessKey: secretKey,
-                    }
+                    },
+                    ...(endpoint ? {endpoint} : {}),
                 });
                 return {
                     headObject: (param, opt) => {
@@ -611,12 +613,12 @@ export default class Req {
                             Key: key,
                         })).then(data => {
                             logToRenderer('info',
-                                cn ? `[OSS AWS] 文件已存在，直接返回 ${key}:` : `[OSS AWS] File exist，return it directly ${key}:`, data);
+                                cn ? `[OSS ${endpoint ? '自建' : 'AWS'}] 文件已存在，直接返回 ${key}:` : `[OSS ${endpoint ? 'Self-Host' : 'AWS'}] File exist，return it directly ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             // Note: 这里提示我 UnknownError 奇了怪了，不应该是 NotFoundError 吗？
                             logToRenderer('info',
-                                    cn ? `[OSS AWS] 准备上传 ${key}:` : `[OSS AWS] Ready to upload ${key}:`, err);
+                                    cn ? `[OSS ${endpoint ? '自建' : 'AWS'}] 准备上传 ${key}:` : `[OSS ${endpoint ? 'Self-Host' : 'AWS'}] Ready to upload ${key}:`, err);
                             rej({statusCode: 404});
                         });
                     },
@@ -632,12 +634,12 @@ export default class Req {
                              * data 数据结构形如：{$metadata:{httpStatusCode}, Etag, ServerSideEncryption}
                              */
                             logToRenderer('info',
-                                cn ? `[OSS AWS] 上传文件成功 ${key}:` : `[OSS AWS] Upload success ${key}:`, data);
+                                cn ? `[OSS ${endpoint ? '自建' : 'AWS'}] 上传文件成功 ${key}:` : `[OSS ${endpoint ? 'Self-Host' : 'AWS'}] Upload success ${key}:`, data);
                             res(data);
                         }).catch(err => {
                             if (err) {
                                 logToRenderer('error',
-                                    cn ? `[OSS AWS] 上传文件失败 ${key}:` : `[OSS AWS] Upload faild ${key}:`, err);
+                                    cn ? `[OSS ${endpoint ? '自建' : 'AWS'}] 上传文件失败 ${key}:` : `[OSS ${endpoint ? 'Self-Host' : 'AWS'}] Upload faild ${key}:`, err);
                                 rej(err);
                                 return;
                             }

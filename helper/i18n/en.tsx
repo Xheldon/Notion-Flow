@@ -214,6 +214,15 @@ export default {
                         Label: 'Region',
                         Message: 'Please enter AWS Region'
                     },
+                    Endpoint: {
+                        Label: 'Endpoint',
+                        Message: 'Please enter self-host Endpoint (Optional)',
+                        Extra: (
+                            <Text>
+                                (Please leave blank for official AWS S3) Supports self-hosted OSS compatible with the AWS S3 API. You can enter the Endpoint here, such as <Link href="https://developers.cloudflare.com/r2/examples/aws/aws-sdk-js-v3/">Clouldflare R2</Link> and others.
+                            </Text>
+                        )
+                    }
                 },
                 CDN: {
                     Label: 'CDN Address',
@@ -261,7 +270,8 @@ export default {
         },
         About: {
             Label: 'About',
-            Donate: 'https://notion-flow.xheldon.com/en/docs/preface#support-my-development-work'
+            Donate: 'https://notion-flow.xheldon.com/support-me',
+            Version: 'https://notion-flow.xheldon.com/en/blog/2024/03/31/0.4.1'
         }
     }
 }
