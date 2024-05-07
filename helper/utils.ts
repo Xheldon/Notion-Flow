@@ -4,6 +4,7 @@
 import reduxStore, { setPublisher, setAigc, setLogs } from '$store';
 import type { PublisherConfig, TocItem, Meta, AigcData, PublisherOptions } from '$types';
 import { Storage, } from "@plasmohq/storage"
+import type Req from '$api';
 
 import * as Lang from '$lang';
 
@@ -322,7 +323,7 @@ const _inline = (list: any): string => {
 
 // TODO: 引入插件系统，支持用户自定义 notion block 转换函数处理 markdown；增强健壮性。
 // Note: indent 表示子元素缩进层级
-const notion2markdown = async function (list: any, meta: Meta, indent: number, debug: boolean,) {
+const notion2markdown = async function (this: Req, list: any, meta: Meta, indent: number, debug: boolean,) {
     const storage = new Storage();
     return storage.get<PublisherOptions>('options').then((props) => {
         const {language: lang} = props;

@@ -138,3 +138,14 @@ export interface Meta {
     // lastUpdateTime?: string;
     [key: string]: string | string[] | boolean | never;
 }
+
+export interface Req_PostMessageProps {
+    type: string;
+    block: any;
+    id: string;   
+}
+
+export interface Req_PostMessageResult {
+    id: string;
+    result: string;
+}

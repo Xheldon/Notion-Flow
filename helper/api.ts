@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import type { PublisherRequestConfig, PublisherOptions, Meta } from '$types';
+import type {
+    PublisherRequestConfig,
+    PublisherOptions,
+    Meta,
+    Req_PostMessageProps,
+    Req_PostMessageResult,
+} from '$types';
 import { Client, collectPaginatedAPI } from '@notionhq/client';
 import { Storage } from "@plasmohq/storage"
 import txOSS from 'cos-js-sdk-v5';
@@ -75,6 +81,8 @@ export default class Req {
         // console.log('ppprops:', props);
         this.updateConfig(props);
     }
+
+    postMessage(props: Req_PostMessageProps): Promise<Req_PostMessageResult> | any {};
 
     getNotionContent(block_id: string) {
         return storage.get<PublisherOptions>('options').then((props) => {
