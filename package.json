@@ -1,7 +1,7 @@
 {
   "name": "notion-flow",
   "displayName": "Notion Flow",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Show TOC of Notion Page、Publish your Notion pages to your Github Jekyll blog, and upload the blog images to an OSS service.",
   "author": "Xheldon",
   "scripts": {
@@ -16,6 +16,7 @@
     "@plasmohq/messaging": "^0.6.1",
     "@plasmohq/storage": "^1.9.0",
     "@reduxjs/toolkit": "^2.0.1",
+    "acorn": "^8.14.0",
     "ali-oss": "^6.20.0",
     "antd": "^5.12.7",
     "axios": "^1.6.4",

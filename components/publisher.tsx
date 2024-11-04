@@ -1,21 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Row, Collapse, Typography } from "antd";
-import { ClearOutlined } from '@ant-design/icons';
-import { useSelector } from 'react-redux';
-import type { MouseEvent } from 'react';
-import { Storage } from "@plasmohq/storage";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {Button, Row, Collapse, Typography, message} from "antd";
+import {ClearOutlined} from '@ant-design/icons';
+import {useSelector} from 'react-redux';
+import type {MouseEvent} from 'react';
+import {Storage} from "@plasmohq/storage";
+import * as acorn from 'acorn';
 
 import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
+import {highlight, languages} from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css'
 
-import reduxStore, { setPublisher, setLogs as reduxSetLogs } from '$store';
-import type { State, Meta, PublisherOptions } from '$types';
-import { notion2markdown, notionMeta2string, logToRenderer, _toContent, logTypeMap, EventBus } from '$utils';
+import reduxStore, {setPublisher, setLogs as reduxSetLogs} from '$store';
+import type {State, Meta, PublisherOptions} from '$types';
+import {notion2markdown, notionMeta2string, logToRenderer, _toContent, logTypeMap, EventBus} from '$utils';
 
-const { Panel } = Collapse;
+const {Panel} = Collapse;
 const {Link} = Typography;
 
 const storage = new Storage();
@@ -91,11 +92,11 @@ const Publisher = (props: any) => {
                                 return notionMeta2string(meta).then(metaString => {
                                     return notion2markdown.bind(req)(blocks, meta, 0, debug).then((markdown) => {
                                         logToRenderer('info',
-                                            cn ?'[Notion] 获取 Markdown 内容:' : '[Notion] Get Markdown Content:', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
+                                            cn ? '[Notion] 获取 Markdown 内容:' : '[Notion] Get Markdown Content:', metaString.split('\n').join('<br />') + '<br />' + markdown.join('<br /><br />'));
                                         logToRenderer('info',
                                             cn ? '[Github] 即将发送内容到 Github' : '[Github] Ready to send content to github');
                                         logToRenderer('info',
-                                            cn ?`[Github] FrontMatter 已${publisher?.enableFrontMatter ? '启用' : '禁用'}` : `[Github] FrontMatter is ${publisher?.enableFrontMatter ? 'enabled' : 'disabled'}`);
+                                            cn ? `[Github] FrontMatter 已${publisher?.enableFrontMatter ? '启用' : '禁用'}` : `[Github] FrontMatter is ${publisher?.enableFrontMatter ? 'enabled' : 'disabled'}`);
                                         return req?.send2Github({meta, content: (publisher?.enableFrontMatter ? metaString : '') + markdown.join('\n'), debug}).then(result => {
                                             const setNotionLastUpdateTime = publisher?.setNotionLastUpdateTime;
                                             logToRenderer('info',
@@ -182,16 +183,21 @@ const Publisher = (props: any) => {
         setPluginCode(code);
         clearTimeout(timer);
         timer = window.setTimeout(() => {
-            reduxStore.dispatch(setPublisher({
-                pluginCode: code,
-            }));
-            console.log('code:', code);
+            try {
+                acorn.parse(`(${code})`, {ecmaVersion: 'latest'});
+                reduxStore.dispatch(setPublisher({
+                    pluginCode: code,
+                }));
+            } catch (e) {
+                // logToRenderer('error', cn ? '[Notion Flow] 插件格式错误，请仔细检查' : '[Notion Flow] Plugin code format error, please check carefully', e);
+                message.error(cn ? '插件语法存在错误，请仔细检查' : 'Plugin code syntax error, please check carefully');
+            }
         }, 2000);
     }, []);
 
     return (
         <>
-            <iframe src="sandbox.html" ref={iframeRef} style={{ display: "none" }} />
+            <iframe src="sandbox.html" ref={iframeRef} style={{display: "none"}} />
             <Panel {...restProps} isActive={activeFunc} onItemClick={onItemClick('Func')} header={cn ? '功能' : 'Function'} key='func'>
                 <Row justify={'space-around'} gutter={[16, 16]}>
                     <Button key="log" disabled={loading} loading={loading} size={'small'} onClick={onDebug(true)}>{cn ? '调试(不上传任何文件)' : 'Debug(No upload anthing)'}</Button>
@@ -200,7 +206,7 @@ const Publisher = (props: any) => {
             </Panel>
             <Panel {...restProps} isActive={activePlugin} onItemClick={onItemClick('Plugin')} header={cn ? '模块处理插件' : 'Module Conversion'} key='plugin'>
                 <span style={{fontSize: 12, color: '#aaa', }} key='intro'>{cn ? '*内容被修改 2s 后将自动保存，无需手动操作。请按照固定格式书写模块处理函数，详情请见: ' : 'The content will be automatically saved 2 seconds after it is modified, no manual operation is required. Please write the module processing function in a fixed format, for details please see:'}
-                <Link href={cn ? 'https://notion-flow.xheldon.com/docs/advanced/publishing/module-conversion' : 'https://notion-flow.xheldon.com/en/docs/advanced/publishing/module-conversion'} target="_blank" style={{fontSize: 12}}>{cn ? '说明' : 'Guide'}</Link></span>
+                    <Link href={cn ? 'https://notion-flow.xheldon.com/docs/advanced/publishing/module-conversion' : 'https://notion-flow.xheldon.com/en/docs/advanced/publishing/module-conversion'} target="_blank" style={{fontSize: 12}}>{cn ? '说明' : 'Guide'}</Link></span>
                 <div className='editor-container' key="editor">
                     <Editor
                         value={pluginCode}
@@ -214,7 +220,7 @@ const Publisher = (props: any) => {
                     />
                 </div>
             </Panel>
-            <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog}/>} header={cn ? '实时日志' : 'Log'} key='log'>
+            <Panel {...restProps} isActive={activeLog} onItemClick={onItemClick('Log')} extra={<ClearOutlined onClick={onClearLog} />} header={cn ? '实时日志' : 'Log'} key='log'>
                 <Collapse ghost size='small' className='publisher-log'>
                     {logs.map((log, key) => {
                         return (<Panel key={key} header={`${logTypeMap[log.type]} ${log.header}`}>
