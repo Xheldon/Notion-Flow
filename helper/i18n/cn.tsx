@@ -57,11 +57,11 @@ export default {
                     ),
                 },
                 Desc: (
-                <>
-                    <Text type="secondary">发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages，更多配置见下方。</Text>
-                    <br />
-                    <Text type="secondary" strong>注意，这需要您熟悉 Github Personal Token、Notion Integration Token、OSS Token、CDN 等相关概念。</Text>
-                </>),
+                    <>
+                        <Text type="secondary">发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages，更多配置见下方。</Text>
+                        <br />
+                        <Text type="secondary" strong>注意，这需要您熟悉 Github Personal Token、Notion Integration Token、OSS Token、CDN 等相关概念。</Text>
+                    </>),
                 Alert: (
                     <>
                         <Text strong type="danger">重要！使用前必读：</Text>
@@ -264,14 +264,14 @@ export default {
                     <br />
                     <Text type="secondary">插件的另一个典型用法是可以让你在发布成功之后，修改 Notoin 页面内容，如更新 lastUpdateTime 字段等。</Text>
                     <br />
-                    <Text strong type="secondary">您可以自由的选择是否启用 插件爱你 功能，注意，这需要您熟悉 JavaScript 和 Ruby 以及 Notion API，同时理解本插件的构建原理。</Text>
+                    <Text strong type="secondary">您可以自由的选择是否启用「插件」功能，注意，这需要您熟悉 JavaScript 和 Ruby 以及 Notion API，同时理解本插件的构建原理。</Text>
                 </>
             ),
         },
         About: {
             Label: '关于',
             Donate: 'https://notion-flow.xheldon.com/support-me',
-            Version: 'https://notion-flow.xheldon.com/blog/2024/03/31/0.4.1'
+            Version: 'https://notion-flow.xheldon.com/blog/2024/03/31/0.4.2'
         }
     }
 }

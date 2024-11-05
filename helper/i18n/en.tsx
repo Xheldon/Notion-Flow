@@ -1,7 +1,7 @@
 import React from 'react';
-import { Typography } from 'antd';
+import {Typography} from 'antd';
 
-const { Text, Link } = Typography;
+const {Text, Link} = Typography;
 
 
 export default {
@@ -271,7 +271,7 @@ export default {
         About: {
             Label: 'About',
             Donate: 'https://notion-flow.xheldon.com/support-me',
-            Version: 'https://notion-flow.xheldon.com/en/blog/2024/03/31/0.4.1'
+            Version: 'https://notion-flow.xheldon.com/en/blog/2024/03/31/0.4.2'
         }
     }
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, {useCallback, useEffect, useRef} from "react";
 import {
     Typography,
     Row,
@@ -12,12 +12,12 @@ import {
     Button,
 } from "antd";
 
-import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
+import {UploadOutlined, DownloadOutlined} from '@ant-design/icons';
 
 import './styles.css';
 
-import { Storage } from "@plasmohq/storage"
-import { logToRenderer } from '$utils';
+import {Storage} from "@plasmohq/storage"
+import {logToRenderer} from '$utils';
 
 import * as Lang from '$lang';
 
@@ -170,8 +170,8 @@ const ossFormItems = (Locale) => {
 };
 
 const formItemLayout = {
-    labelCol: { span: 6 },
-    wrapperCol: { span: 14 },
+    labelCol: {span: 6},
+    wrapperCol: {span: 14},
 }
 
 let timer: any = 0;
@@ -280,7 +280,7 @@ function OptionsIndex() {
     const onDownloadConfig = useCallback(() => {
         try {
             const json = form.getFieldsValue();
-            const url = URL.createObjectURL(new Blob([JSON.stringify(json)], { type: 'application/json' }));
+            const url = URL.createObjectURL(new Blob([JSON.stringify(json)], {type: 'application/json'}));
             const a = document.createElement("a");
             const now = new Date();
             a.href = url;
@@ -326,7 +326,7 @@ function OptionsIndex() {
                         content: LocaleConfig.Options.Common.Message.OptionsImportFail,
                     });
                 }
-                
+
             };
             reader.readAsText(file);
         });
@@ -340,7 +340,7 @@ function OptionsIndex() {
             {contextHolder}
             <Row>
                 <Col span={18} offset={3}>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
+                    <Divider orientationMargin='0' orientation="left" style={{fontSize: 30}}>
                         {LocaleConfig.Options.Common.ExportAndImport}
                     </Divider>
                     <Paragraph>
@@ -348,7 +348,7 @@ function OptionsIndex() {
                         <Divider type="vertical" />
                         <Button onClick={onUploadConfig} icon={<DownloadOutlined />}>{LocaleConfig.Options.Common.Import}</Button>
                     </Paragraph>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
+                    <Divider orientationMargin='0' orientation="left" style={{fontSize: 30}}>
                         {LocaleConfig.Options.Common.Basic}
                     </Divider>
                     <Form
@@ -361,7 +361,7 @@ function OptionsIndex() {
                     >
                         <Form.Item
                             key={'language'}
-                            style={{ marginBottom: 20 }}
+                            style={{marginBottom: 20}}
                             label={LocaleConfig.Options.Basic.Language}
                             extra={
                                 <Paragraph>
@@ -376,7 +376,7 @@ function OptionsIndex() {
                         </Form.Item>
                         <Form.Item
                             key={'heading-style'}
-                            style={{ marginBottom: 20 }}
+                            style={{marginBottom: 20}}
                             label={LocaleConfig.Options.Basic.Toc.Label}
                             name='heading-style'>
                             <Radio.Group>
@@ -389,12 +389,12 @@ function OptionsIndex() {
                             <Switch />
                         </Form.Item>
                         <Paragraph><Text strong>{LocaleConfig.Options.Basic.MoreFeature}</Text></Paragraph>
-                        <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>
+                        <Divider orientationMargin='0' orientation="left" style={{fontSize: 30}}>
                             {LocaleConfig.Options.Common.Advance}
                         </Divider>
                         <Form.Item
                             key={'notion'}
-                            style={{ marginBottom: 20 }}
+                            style={{marginBottom: 20}}
                             rules={[{required: true, message: LocaleConfig.Options.Notion.Message}]}
                             name={['notion', 'token']}
                             label={LocaleConfig.Options.Notion.Label}
@@ -404,19 +404,19 @@ function OptionsIndex() {
                         <Divider />
                         <Form.Item
                             key={'publisher.enable'}
-                            style={{ marginBottom: 20 }}
+                            style={{marginBottom: 20}}
                             name={['publisher', 'enable']}
                             label={LocaleConfig.Options.Publisher.Common.PublishToGithub}
                             extra={LocaleConfig.Options.Publisher.Common.Desc}>
                             <Switch />
                         </Form.Item>
-                        <div style={{ display: enablePublisher ? 'block' : 'none' }}>
+                        <div style={{display: enablePublisher ? 'block' : 'none'}}>
                             <Paragraph>
                                 {LocaleConfig.Options.Publisher.Common.Alert}
                             </Paragraph>
                             <Form.Item
                                 key={'publisher.frontMatter'}
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 labelAlign='right'
                                 name={['publisher', 'enableFrontMatter']}
                                 label={LocaleConfig.Options.Publisher.Common.EnableFrontMatter.Label}
@@ -424,15 +424,15 @@ function OptionsIndex() {
                                 <Switch />
                             </Form.Item>
                             {publisherFormItems(LocaleConfig).map((item, key) => {
-                                const { label, message, name, secret } = item;
+                                const {label, message, name, secret} = item;
                                 const _name = name.slice();
                                 _name.unshift('publisher');
                                 return (
                                     <Form.Item
                                         key={name.toString()}
-                                        style={{ marginBottom: 20 }}
+                                        style={{marginBottom: 20}}
                                         labelAlign='right'
-                                        rules={[{ required: true, message }]}
+                                        rules={[{required: true, message}]}
                                         name={_name}
                                         label={label}>
                                         {secret ? <Input.Password /> : <Input />}
@@ -441,7 +441,7 @@ function OptionsIndex() {
                             })}
                             <Form.Item
                                 key={'oss.name'}
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 label={LocaleConfig.Options.Publisher.Oss.Label}
                                 name={['oss', 'name']}
                                 labelAlign='right'
@@ -450,18 +450,18 @@ function OptionsIndex() {
                                     {Object.keys(ossFormItems(LocaleConfig)).map(key => <Radio.Button key={key} value={key}>{ossNameMap(LocaleConfig)[key]}</Radio.Button>)}
                                 </Radio.Group>
                             </Form.Item>
-                            <div style={{ display: (ossName && ossFormItems(LocaleConfig)[ossName]) ? 'block' : 'none' }}>
+                            <div style={{display: (ossName && ossFormItems(LocaleConfig)[ossName]) ? 'block' : 'none'}}>
                                 {ossName && ossFormItems(LocaleConfig)[ossName].map((item, key) => {
-                                    const { label, tooltips: _tooltips, message, name, secret } = item;
+                                    const {label, tooltips: _tooltips, message, name, secret} = item;
                                     const _name = name.slice();
                                     _name.unshift(form.getFieldValue(['oss', 'name']));
                                     _name.unshift('oss');
                                     return (
                                         <Form.Item
                                             key={name.toString()}
-                                            style={{ marginBottom: 20 }}
+                                            style={{marginBottom: 20}}
                                             labelAlign='right'
-                                            {...(item.extra ? { extra: item.extra } : {})}
+                                            {...(item.extra ? {extra: item.extra} : {})}
                                             // tooltip={tooltips(_tooltips)}
                                             // rules={[{ required: true, message }]}
                                             name={_name}
@@ -473,7 +473,7 @@ function OptionsIndex() {
                             </div>
                             <Form.Item
                                 key={'oss.cdn'}
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 labelAlign='right'
                                 // rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.CDN.Message }]}
                                 name={['oss', 'cdn']}
@@ -483,7 +483,7 @@ function OptionsIndex() {
                             </Form.Item>
                             <Form.Item
                                 key={'oss.mediaPath'}
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 labelAlign='right'
                                 // rules={[{ required: true, message: LocaleConfig.Options.Publisher.Oss.MediaPath.Message }]}
                                 name={['oss', 'mediaPath']}
@@ -495,8 +495,8 @@ function OptionsIndex() {
                                 key="filePath"
                                 name={['publisher', 'filePath']}
                                 labelAlign='right'
-                                style={{ marginBottom: 20 }}
-                                rules={[{ required: true, message: LocaleConfig.Options.Publisher.Github.FilePath.Message }]}
+                                style={{marginBottom: 20}}
+                                rules={[{required: true, message: LocaleConfig.Options.Publisher.Github.FilePath.Message}]}
                                 /* tooltip={tooltips({
                                     link: 'https://www.xheldon.com',
                                     text: LocaleConfig.Options.Publisher.Github.FilePath.Tooltips,
@@ -509,7 +509,7 @@ function OptionsIndex() {
                                 key="autoAddLastUpdateTime"
                                 name={['publisher', 'autoAddLastUpdateTime']}
                                 labelAlign='right'
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 extra={LocaleConfig.Options.Publisher.Github.AddLastUpdateTime.Extra}
                                 label={LocaleConfig.Options.Publisher.Github.AddLastUpdateTime.Label}>
                                 <Switch />
@@ -518,7 +518,7 @@ function OptionsIndex() {
                                 key="setNotionLastUpdateTime"
                                 name={['publisher', 'setNotionLastUpdateTime']}
                                 labelAlign='right'
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 extra={LocaleConfig.Options.Publisher.Github.UpdateNotionLastUpdateTime.Extra}
                                 label={LocaleConfig.Options.Publisher.Github.UpdateNotionLastUpdateTime.Label}>
                                 <Switch />
@@ -527,7 +527,7 @@ function OptionsIndex() {
                                 key="frontMatter"
                                 name={['publisher', 'frontMatter']}
                                 labelAlign='right'
-                                style={{ marginBottom: 20}}
+                                style={{marginBottom: 20}}
                                 extra={LocaleConfig.Options.Publisher.Github.FrontMatter.Extra}
                                 label={LocaleConfig.Options.Publisher.Github.FrontMatter.Label}>
                                 <Input placeholder={LocaleConfig.Options.Publisher.Github.FrontMatter.Placeholder} />
@@ -536,7 +536,7 @@ function OptionsIndex() {
                                 key="headerImgName"
                                 name={['publisher', 'headerImgName']}
                                 labelAlign='right'
-                                style={{ marginBottom: 20 }}
+                                style={{marginBottom: 20}}
                                 extra={LocaleConfig.Options.Publisher.Github.HeaderImgName.Extra}
                                 label={LocaleConfig.Options.Publisher.Github.HeaderImgName.Label}>
                                 <Input placeholder={LocaleConfig.Options.Publisher.Github.HeaderImgName.Placeholder} />
@@ -631,10 +631,10 @@ function OptionsIndex() {
                             <Switch disabled />
                         </Form.Item>
                     </Form>
-                    <Divider orientationMargin='0' orientation="left" style={{ fontSize: 30 }}>{LocaleConfig.Options.About.Label}</Divider>
+                    <Divider orientationMargin='0' orientation="left" style={{fontSize: 30}}>{LocaleConfig.Options.About.Label}</Divider>
                     <Paragraph>
                         <Text>
-                            Version:&nbsp;&nbsp;<Link href={LocaleConfig.Options.About.Version} target="_blank">0.4.1</Link>
+                            Version:&nbsp;&nbsp;<Link href={LocaleConfig.Options.About.Version} target="_blank">0.4.2</Link>
                         </Text>
                         <br />
                         <Text>
@@ -650,11 +650,11 @@ function OptionsIndex() {
                         </Text>
                         <br />
                         <Text>
-                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">Telegrem</Link>&nbsp; | &nbsp; 
-                            <Link href="https://twitter.com/real_notionflow" target="_blank">Twitter</Link>&nbsp; | &nbsp; 
-                            <Link href="https://twitter.com/_Xheldon" target="_blank">Author Twitter</Link>&nbsp; | &nbsp; 
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Issues</Link>&nbsp; | &nbsp; 
-                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">Discussions</Link> 
+                            <Link href="https://t.me/+AN6Y9ngg8g9kNmVl" target="_blank">Telegrem</Link>&nbsp; | &nbsp;
+                            <Link href="https://twitter.com/real_notionflow" target="_blank">Twitter</Link>&nbsp; | &nbsp;
+                            <Link href="https://twitter.com/_Xheldon" target="_blank">Author Twitter</Link>&nbsp; | &nbsp;
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/issues" target="_blank">Issues</Link>&nbsp; | &nbsp;
+                            <Link href="https://github.com/Xheldon/Notion-Flow-Prod/discussions" target="_blank">Discussions</Link>
                         </Text>
 
                     </Paragraph>
