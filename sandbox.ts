@@ -13,10 +13,15 @@ window.addEventListener("message", async function (event) {
   const { block, func, type, id } = event.data || {}
   try {
     let result = null
-    result = new Function(`return ${func}`)()?.[type]?.(block) || ""
-    source.window.postMessage({ id, result }, event.origin)
+    const isExist = new Function(`return ${func}`)()?.[type]
+    if (isExist) {
+      result = new Function(`return ${func}`)()?.[type]?.(block) || ""
+      source.window.postMessage({ id, result, type }, event.origin)
+    } else {
+      source.window.postMessage({ id, result: undefined, type }, event.origin)
+    }
   } catch (e) {
     logToRenderer("error", "[Notion Flow] Plugin code run error", e)
-    source.window.postMessage({ id, result: null }, event.origin)
+    source.window.postMessage({ id, result: null, type }, event.origin)
   }
 })

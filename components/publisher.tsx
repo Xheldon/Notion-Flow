@@ -171,7 +171,20 @@ const Publisher = (props: any) => {
             const id = config.id;
             return new Promise((resolve) => {
                 EventBus.on(id, (data) => {
-                    resolve(data);
+                    const {result, type} = data;
+                    if (result === null || result === undefined) {
+                        if (result === undefined) {
+                            logToRenderer('info',
+                                cn ? `[Notion Flow] 使用默认 ${type} 格式` : `[Notion Flow] Use default ${type} style`);
+                        } else if (result === null) {
+                            logToRenderer('error',
+                                cn ? `[Notion Flow] ${type} 模块转换函数出错` : `[Notion Flow] Block ${type} conversion function error`);
+                        }
+                        return resolve({result: null});
+                    }
+                    logToRenderer('info',
+                        cn ? `[Notion Flow] 启用自定义 「${type}」 转换` : `[Notion Flow] Enable custom ${type} conversion`);
+                    return resolve({result});
                 });
                 iframeRef.current?.contentWindow?.postMessage(_config, '*');
             });
