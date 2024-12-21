@@ -634,7 +634,7 @@ function OptionsIndex() {
                     <Divider orientationMargin='0' orientation="left" style={{fontSize: 30}}>{LocaleConfig.Options.About.Label}</Divider>
                     <Paragraph>
                         <Text>
-                            Version:&nbsp;&nbsp;<Link href={LocaleConfig.Options.About.Version} target="_blank">0.4.2</Link>
+                            Version:&nbsp;&nbsp;<Link href={LocaleConfig.Options.About.Version} target="_blank">0.4.3</Link>
                         </Text>
                         <br />
                         <Text>
