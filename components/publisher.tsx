@@ -31,6 +31,7 @@ const Publisher = (props: any) => {
     const [activeLog, setActiveLog] = useState(config.logFold);
     const [pluginCode, setPluginCode] = useState(config.pluginCode || '{}');
     const [loading, setLoading] = useState(false);
+    const loged = useRef({});
     const cn = restProps.cn;
 
     const onItemClick = useCallback((itemName: 'Func' | 'Plugin' | 'Log') => {
@@ -172,24 +173,31 @@ const Publisher = (props: any) => {
             return new Promise((resolve) => {
                 EventBus.on(id, (data) => {
                     const {result, type} = data;
-                    if (result === null || result === undefined) {
+                    let shouldLog = true;
+                    if (loged.current[type]) {
+                        shouldLog = false;
+                    }
+                    loged.current[type] = true;
+                    if (result === null || result === undefined && shouldLog) {
                         if (result === undefined) {
                             logToRenderer('info',
                                 cn ? `[Notion Flow] 使用默认 ${type} 格式` : `[Notion Flow] Use default ${type} style`);
-                        } else if (result === null) {
+                        } else if (result === null && shouldLog) {
                             logToRenderer('error',
                                 cn ? `[Notion Flow] ${type} 模块转换函数出错` : `[Notion Flow] Block ${type} conversion function error`);
                         }
                         return resolve({result: null});
                     }
-                    logToRenderer('info',
-                        cn ? `[Notion Flow] 启用自定义 「${type}」 转换` : `[Notion Flow] Enable custom ${type} conversion`);
+                    if (shouldLog) {
+                        logToRenderer('info',
+                            cn ? `[Notion Flow] 启用自定义 「${type}」 转换` : `[Notion Flow] Enable custom ${type} conversion`);
+                    }
                     return resolve({result});
                 });
                 iframeRef.current?.contentWindow?.postMessage(_config, '*');
             });
         };
-    }, [pluginCode, req]);
+    }, [pluginCode, req, loading]);
 
     let timer = 0;
     const _setPluginCode = useCallback((code: string) => {
@@ -201,6 +209,7 @@ const Publisher = (props: any) => {
                 reduxStore.dispatch(setPublisher({
                     pluginCode: code,
                 }));
+                message.success(cn ? '插件转换配置成功' : 'Plugin code conversion configuration successful');
             } catch (e) {
                 // logToRenderer('error', cn ? '[Notion Flow] 插件格式错误，请仔细检查' : '[Notion Flow] Plugin code format error, please check carefully', e);
                 message.error(cn ? '插件语法存在错误，请仔细检查' : 'Plugin code syntax error, please check carefully');

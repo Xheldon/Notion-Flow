@@ -1,7 +1,7 @@
 {
   "name": "notion-flow",
   "displayName": "Notion Flow",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Show TOC of Notion Page、Publish your Notion pages to your Github Jekyll blog, and upload the blog images to an OSS service.",
   "author": "Xheldon",
   "scripts": {

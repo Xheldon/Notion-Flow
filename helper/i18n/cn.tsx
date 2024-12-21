@@ -57,11 +57,11 @@ export default {
                     ),
                 },
                 Desc: (
-                <>
-                    <Text type="secondary">发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages，更多配置见下方。</Text>
-                    <br />
-                    <Text type="secondary" strong>注意，这需要您熟悉 Github Personal Token、Notion Integration Token、OSS Token、CDN 等相关概念。</Text>
-                </>),
+                    <>
+                        <Text type="secondary">发布功能可以让你能够将 Notion 内容以 Markdown 格式发布到 Github Pages，更多配置见下方。</Text>
+                        <br />
+                        <Text type="secondary" strong>注意，这需要您熟悉 Github Personal Token、Notion Integration Token、OSS Token、CDN 等相关概念。</Text>
+                    </>),
                 Alert: (
                     <>
                         <Text strong type="danger">重要！使用前必读：</Text>
@@ -271,7 +271,7 @@ export default {
         About: {
             Label: '关于',
             Donate: 'https://notion-flow.xheldon.com/support-me',
-            Version: 'https://notion-flow.xheldon.com/blog/2024/03/31/0.4.1'
+            Version: 'https://notion-flow.xheldon.com/blog/2024/03/31/0.4.3'
         }
     }
 }
