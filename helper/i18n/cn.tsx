@@ -264,7 +264,7 @@ export default {
                     <br />
                     <Text type="secondary">插件的另一个典型用法是可以让你在发布成功之后，修改 Notoin 页面内容，如更新 lastUpdateTime 字段等。</Text>
                     <br />
-                    <Text strong type="secondary">您可以自由的选择是否启用 插件爱你 功能，注意，这需要您熟悉 JavaScript 和 Ruby 以及 Notion API，同时理解本插件的构建原理。</Text>
+                    <Text strong type="secondary">您可以自由的选择是否启用「插件」功能，注意，这需要您熟悉 JavaScript 和 Ruby 以及 Notion API，同时理解本插件的构建原理。</Text>
                 </>
             ),
         },
