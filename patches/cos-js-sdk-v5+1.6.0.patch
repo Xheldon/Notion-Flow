@@ -1,0 +1,36 @@
+diff --git a/node_modules/cos-js-sdk-v5/dist/cos-js-sdk-v5.js b/node_modules/cos-js-sdk-v5/dist/cos-js-sdk-v5.js
+index de82691..12bbff0 100644
+--- a/node_modules/cos-js-sdk-v5/dist/cos-js-sdk-v5.js
++++ b/node_modules/cos-js-sdk-v5/dist/cos-js-sdk-v5.js
+@@ -643,7 +643,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof =
+     }
+     return n ? -2 : r ? 11 : -1;
+   }
+-  function S(t, e) {
++	// Note: 这段代码被谷歌插件V3审核拒绝，说是远程加载了
++	//  此处是定义，全局搜索 S( 可以看到执行的地方，我也注释了
++  /* function S(t, e) {
+     var n, r;
+     return (n = "https://tun-cos-1258344701.file.myqcloud.com/fp.js", void 0 === r && (r = Date.now() + "-" + Math.random()), new Promise(function (t, e) {
+       if (document.getElementById(r)) t(void 0);else {
+@@ -660,7 +662,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof =
+     })).then(function () {
+       new Fingerprint().getQimei36(t, e);
+     }).catch(function (t) {}), "";
+-  }
++  } */
+   var _I = function I() {
+     return (_I = Object.assign || function (t) {
+       for (var e, n = 1, r = arguments.length; n < r; n++) for (var o in e = arguments[n]) Object.prototype.hasOwnProperty.call(e, o) && (t[o] = e[o]);
+@@ -1474,9 +1476,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof =
+       var r,
+         o,
+         i = b();
+-      return e.isUnderIE8 = i > 0 && i < 8, e.isUnderIE8 || (e.isUnderIE = i > 0, t.needInitQimei && S(t.appkey, function (t) {
++      return e.isUnderIE8 = i > 0 && i < 8, e.isUnderIE8 || (e.isUnderIE = i > 0, /* t.needInitQimei && S(t.appkey, function (t) {
+         e.qimei36 = t.q36;
+-      }), e.network = new F(t), e.storage = new G(t.appkey), e.initCommonInfo(t), e.store = new _(t.appkey, e.storage), e.errorReport = new g(e.config, e.commonInfo, "web", e.network), e.strategy = new y(null == t.needQueryConfig || t.needQueryConfig, e.config, e.commonInfo, e.storage, e.network), e.logidStartTime = e.storage.getItem(z), e.logidStartTime || (e.logidStartTime = Date.now().toString(), e.storage.setItem(z, e.logidStartTime)), r = e.logidStartTime, o = Date.now() - Number.parseFloat(r), Math.floor(o / 864e5) >= 365 && e.storage.clear(), e.initSession(t), e.onDirectUserAction("rqd_js_init", {}), setTimeout(function () {
++      }), */ e.network = new F(t), e.storage = new G(t.appkey), e.initCommonInfo(t), e.store = new _(t.appkey, e.storage), e.errorReport = new g(e.config, e.commonInfo, "web", e.network), e.strategy = new y(null == t.needQueryConfig || t.needQueryConfig, e.config, e.commonInfo, e.storage, e.network), e.logidStartTime = e.storage.getItem(z), e.logidStartTime || (e.logidStartTime = Date.now().toString(), e.storage.setItem(z, e.logidStartTime)), r = e.logidStartTime, o = Date.now() - Number.parseFloat(r), Math.floor(o / 864e5) >= 365 && e.storage.clear(), e.initSession(t), e.onDirectUserAction("rqd_js_init", {}), setTimeout(function () {
+         return e.lifeCycle.emit("init");
+       }, 0), e.initDelayTime = t.delay ? t.delay : 1e3, e.cycleTask(e.initDelayTime)), e;
+     }

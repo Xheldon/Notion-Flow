@@ -271,7 +271,7 @@ export default {
         About: {
             Label: '关于',
             Donate: 'https://notion-flow.xheldon.com/support-me',
-            Version: 'https://notion-flow.xheldon.com/blog/2024/03/31/0.4.3'
+            Version: 'https://notion-flow.xheldon.com/blog/2024/12/21/0.4.3'
         }
     }
 }
