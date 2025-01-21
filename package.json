@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
-    "test": "plasmo test",
-    "postinstall": "patch-package"
+    "test": "plasmo test"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
@@ -22,7 +21,7 @@
     "antd": "^5.12.7",
     "axios": "^1.6.4",
     "browser-image-compression": "^2.0.2",
-    "cos-js-sdk-v5": "^1.5.0",
+    "cos-js-sdk-v5": "^1.8.7",
     "octokit": "^3.1.2",
     "plasmo": "0.84.0",
     "prismjs": "^1.29.0",
@@ -59,6 +58,5 @@
         ]
       }
     ]
-  },
-  "postinstall": "patch-package"
+  }
 }

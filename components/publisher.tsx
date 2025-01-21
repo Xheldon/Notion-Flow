@@ -143,6 +143,8 @@ const Publisher = (props: any) => {
     const onClearLog = useCallback((e: MouseEvent) => {
         e.stopPropagation();
         reduxStore.dispatch(reduxSetLogs([]));
+        // Note: 清空插件日志后，重置 loged 对象
+        loged.current = {};
     }, []);
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -210,6 +212,8 @@ const Publisher = (props: any) => {
                     pluginCode: code,
                 }));
                 message.success(cn ? '插件转换配置成功' : 'Plugin code conversion configuration successful');
+                // Note: 重新配置插件转换后，重置 loged 对象
+                loged.current = {};
             } catch (e) {
                 // logToRenderer('error', cn ? '[Notion Flow] 插件格式错误，请仔细检查' : '[Notion Flow] Plugin code format error, please check carefully', e);
                 message.error(cn ? '插件语法存在错误，请仔细检查' : 'Plugin code syntax error, please check carefully');
