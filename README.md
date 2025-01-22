@@ -1,33 +1,21 @@
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+> A browser extension for publishing and viewing blogs, based on Notion + Github, implemented in a non-intrusive, pure frontend manner.
+> see more: https://notion-flow.xheldon.com/en/
 
-## Getting Started
+# Notion Flow Chrome Extension
 
-First, run the development server:
+Download Chrome WebStore: https://chromewebstore.google.com/detail/notion-flow/mcabmofnikepdpecekdlildkmffpmokh
 
-```bash
-pnpm dev
-# or
-npm run dev
-```
+Edge Adds-on: https://microsoftedge.microsoft.com/addons/detail/notion-flow/pppmbeffejpbfgdmhmgmlppefaeaimfh
 
-Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
+> Chrome's extension works better than Edge, Edge's sidepanel interface has [some bug](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/142)
 
-You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
+## Instructions
 
-For further guidance, [visit our Documentation](https://docs.plasmo.com/)
+Documentation(Chinese): https://notion-flow.xheldon.com/
 
-## Making production build
+Documentation(English): https://notion-flow.xheldon.com/en/
 
-Run the following:
+Youtube(Chinese, plz use subtitle translator): https://www.youtube.com/watch?v=aPitTcsruhM
 
-```bash
-pnpm build
-# or
-npm run build
-```
+## [Support My Work!](https://notion-flow.xheldon.com/en/support-me)
 
-This should create a production bundle for your extension, ready to be zipped and published to the stores.
-
-## Submit to the webstores
-
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
