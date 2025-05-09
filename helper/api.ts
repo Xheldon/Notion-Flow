@@ -582,7 +582,7 @@ export default class Req {
                       : "[Github] Update file faild:",
                     err
                   )
-                  return Promise.reject(null)
+                  return Promise.reject(err)
                 })
             }
           })
@@ -633,11 +633,11 @@ export default class Req {
                         : "[Github] Create file faild:",
                       err
                     )
-                    return Promise.reject(null)
+                    return Promise.reject(err)
                   })
               }
             } else {
-              return Promise.reject(null)
+              return Promise.reject(err)
             }
           })
       })
@@ -692,8 +692,6 @@ export default class Req {
   //  因为先接入的腾讯云，就以他作为标准了
   OSSPolyfill(name, ossConfig, cn) {
     const { region, bucket, secretId, secretKey, endpoint } = ossConfig
-    console.log("xxxx:", cn)
-    debugger
     switch (name) {
       case "tx": {
         const oss = new txOSS({
